@@ -1,0 +1,50 @@
+
+;; Function main (main, funcdef_no=13, decl_uid=3220, cgraph_uid=13, symbol_order=13)
+
+Released 0 names, 0.00%, removed 0 holes
+main ()
+{
+  int * cursor;
+  int val3;
+  int val2;
+  int val1;
+  int D.3227;
+  int val1.0_1;
+  int _2;
+  int _3;
+  int _4;
+  int val1.1_5;
+  int _6;
+  int _20;
+
+  <bb 2> :
+  val1 = 10;
+  val2 = 20;
+  val3 = 30;
+  printf ("\xeb\xa9\x94\xeb\xaa\xa8\xeb\xa6\xac\xec\x83\x81 val1 \xec\x9c\x84\xec\xb9\x98 : %d\n", &val1);
+  printf ("\xeb\xa9\x94\xeb\xaa\xa8\xeb\xa6\xac\xec\x83\x81 val2 \xec\x9c\x84\xec\xb9\x98 : %d\n", &val2);
+  printf ("\xeb\xa9\x94\xeb\xaa\xa8\xeb\xa6\xac\xec\x83\x81 val3 \xec\x9c\x84\xec\xb9\x98 : %d\n\n", &val3);
+  cursor_14 = &val1;
+  val1.0_1 = val1;
+  printf ("val1\xec\x9d\x98 \xec\xa3\xbc\xec\x86\x8c: %d, \xea\xb0\x92: %d\n", &val1, val1.0_1);
+  _2 = *cursor_14;
+  printf ("cursor\xec\x9d\x98 \xec\xa3\xbc\xec\x86\x8c: %d, \xea\xb0\x92: %d\n\n", cursor_14, _2);
+  _3 = *cursor_14;
+  _4 = _3 + 5;
+  *cursor_14 = _4;
+  val1.1_5 = val1;
+  printf ("val1\xec\x9d\x98 \xec\xa3\xbc\xec\x86\x8c: %d, \xea\xb0\x92: %d\n", &val1, val1.1_5);
+  _6 = *cursor_14;
+  printf ("cursor\xec\x9d\x98 \xec\xa3\xbc\xec\x86\x8c: %d, \xea\xb0\x92: %d\n", cursor_14, _6);
+  _20 = 0;
+  val1 ={v} {CLOBBER};
+  val2 ={v} {CLOBBER};
+  val3 ={v} {CLOBBER};
+
+  <bb 3> :
+<L1>:
+  return _20;
+
+}
+
+
