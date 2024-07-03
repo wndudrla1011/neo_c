@@ -1,2 +1,3 @@
-## Neo reflection 
-**sources for C intern program**
+## Neo reflection intern program
+- C study
+- Calculator with C
