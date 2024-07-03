@@ -1,2 +1,2 @@
 ## Neo reflection 
-sources for C presentation
+**sources for C intern program**
