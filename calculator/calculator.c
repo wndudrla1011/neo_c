@@ -1,138 +1,24 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include <ctype.h>
-#define MAX_SIZE 100
+#include <stdlib.h>
 
-int op[MAX_SIZE];      // 연산자 대기 공간
-int postfix[MAX_SIZE]; // 후위 표기식
-int stack[MAX_SIZE];   // 연산 스택
+int index;
+
+char *cstrtok(char *str);
 
 struct stack
 {
     int top;
     int size;
     int *arr;
-    bool (*isEmpty)(struct stack *);
     void (*push)(struct stack *, int);
     int (*pop)(struct stack *);
+    bool (*isEmpty)(struct stack *);
 };
 
-struct stack *init(int size)
+bool isEmpty(struct stack *s)
 {
-    struct stack *s = (struct stack *)calloc(0, sizeof(struct stack));
-}
-
-main(void)
-{
-    char exp[20];
-
-    printf("계산식을 입력한 후 Enter를 눌러주세요!\n");
-    scanf("%s", exp);
-
-    int idx = 0;
-
-    while (exp[idx] != '\0')
-    {
-        if (exp[idx] - 48 > 0) // digit
-        {
-            push_postfix(exp[idx] - 48);
-        }
-
-        else // !digit
-        {
-            if (exp[idx] - 48 == -6 || exp[idx] - 48 == -1) // 곱셈 또는 나눗셈
-            {
-                int add_sub_idx = -1; // 덧셈 또는 뺄셈이 존재 여부 체크
-
-                if (isEmpty_op()) // 대기 중인 연산자가 없으면
-                {
-                    push_op(exp[idx] - 48);
-                    continue;
-                }
-
-                // 덧셈 또는 뺄셈 검색
-                for (int i = 0; i <= top_op; i++)
-                {
-                    if (op[i] == -5 || op[i] == -3)
-                    {
-                        add_sub_idx = i;
-                        break;
-                    }
-                }
-
-                if (add_sub_idx == -1) // 덧셈 또는 뺄셈 존재x
-                    op[++top_op] = exp[idx] - 48;
-
-                else // 덧셈 또는 뺄셈 존재
-                {
-                    moveBack(add_sub_idx);
-                    op[add_sub_idx] = exp[idx] - 48;
-                }
-            }
-
-            else if (exp[idx] - 48 == -5 || exp[idx] - 48 == -3) // 덧셈 또는 뺄셈
-            {
-                push_op(exp[idx] - 48);
-            }
-
-            else if (exp[idx] - 48 == -8) // open bracket
-            {
-                push_op(exp[idx] - 48);
-            }
-
-            else if (exp[idx] - 48 == -7) // close bracket
-            {
-                // op -> postfix
-                while (op[top_op] != -8)
-                    push_postfix(pop_op());
-                pop_op();
-            }
-
-            else
-            {
-                printf("수식 입력이 잘못되었습니다.\n");
-            }
-        }
-
-        idx++;
-    }
-
-    if (!isEmpty_op())
-        push_postfix(pop_op());
-
-    for (int i = 0; postfix[i] != 0; i++)
-    {
-        printf("%d\n", postfix[i]);
-    }
-
-    for (int i = 0; i <= top_postfix; i++)
-    {
-        if (postfix[i] >= 0) // digit
-            push(postfix[i]);
-        else // op
-        {
-            int rv = pop();
-            int lv = pop();
-
-            if (postfix[i] == -5)
-                push(lv + rv);
-            else if (postfix[i] == -3)
-                push(lv - rv);
-            else if (postfix[i] == -6)
-                push(lv * rv);
-            else
-                push(lv / rv);
-        }
-    }
-
-    printf("계산결과 : \t%d\n", stack[top]);
-
-    return 0;
-}
-
-bool isEmpty()
-{
-    if (top_postfix < 0) // empty
+    if (s->top < 0)
         return true;
     else
         return false;
@@ -143,18 +29,72 @@ void push(struct stack *s, int value)
     s->arr[++(s->top)] = value;
 }
 
-int pop(int *stack)
+int pop(struct stack *s)
 {
-    if (!s->)
-    {
-        /* code */
-    }
+    if (!s->isEmpty(s))
+        return s->arr[(s->top)--];
+    return -1;
 }
 
-void moveBack(int start_idx)
+struct stack *init(int size)
 {
-    for (int i = top_op; i >= start_idx; i--)
+    struct stack *s = (struct stack *)calloc(1, sizeof(struct stack));
+    s->top = -1;
+    s->size = size;
+    s->arr = (int *)calloc(size, sizeof(int));
+    s->push = push;
+    s->pop = pop;
+    s->isEmpty = isEmpty;
+}
+
+int main(void)
+{
+    struct stack *my_stack = init(10); // 스택 초기화
+
+    char *exp = malloc(sizeof(char) * 10); // 수식 입력값
+    char *token = exp;                     // 문자열 조각
+
+    printf("계산식을 입력한 후 Enter를 눌러주세요!\n");
+    scanf("%s", exp);
+
+    if (exp == NULL)
+        return 0;
+
+    while (token != NULL)
     {
-        op[i + 1] = op[i];
+        puts(token);
+        token = &exp[index++];
     }
+
+    free(exp);
+    free(my_stack->arr);
+    free(my_stack);
+
+    return 0;
+}
+
+int cstrlen(char *str)
+{
+    int idx = 0;
+    while (str[idx] != '\0')
+        ++idx;
+    return idx;
+}
+
+char *cstrtok(char *str)
+{
+    char *start = 0;  // 문자열 시작 위치
+    static char *tmp; // 문자열 주소 저장
+
+    if (str != NULL) // 첫 토큰 받을 때
+        start = str;
+    else // 두 번째 이후 토큰 받을 때
+        start = tmp;
+
+    if (cstrlen(start) < 1) // 문자열 종료
+        return NULL;
+
+    tmp = &start[++index]; // 구분자 다음 위치
+
+    return start;
 }
