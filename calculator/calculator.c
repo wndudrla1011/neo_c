@@ -6,9 +6,6 @@
 int op[MAX_SIZE];      // 연산자 대기 공간
 int postfix[MAX_SIZE]; // 후위 표기식
 int stack[MAX_SIZE];   // 연산 스택
-int top = -1;
-int top_postfix = -1;
-int top_op = -1;
 
 struct stack
 {
