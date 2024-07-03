@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 #define MAX_SIZE 100
 
 int op[MAX_SIZE];      // 연산자 대기 공간
@@ -9,19 +9,23 @@ int stack[MAX_SIZE];   // 연산 스택
 int top = -1;
 int top_postfix = -1;
 int top_op = -1;
-int head = 0;
 
-bool isEmpty_postfix();
-bool isEmpty_op();
-void push(int value);
-int pop();
-void push_postfix(int value);
-int pop_postfix();
-void push_op(int value);
-int pop_op();
-void moveBack(int start_idx);
+struct stack
+{
+    int top;
+    int size;
+    int *arr;
+    bool (*isEmpty)(struct stack *);
+    void (*push)(struct stack *, int);
+    int (*pop)(struct stack *);
+};
 
-int main(void)
+struct stack *init(int size)
+{
+    struct stack *s = (struct stack *)calloc(0, sizeof(struct stack));
+}
+
+main(void)
 {
     char exp[20];
 
@@ -65,7 +69,7 @@ int main(void)
                 else // 덧셈 또는 뺄셈 존재
                 {
                     moveBack(add_sub_idx);
-                    op[add_sub_idx] = exp[idx];
+                    op[add_sub_idx] = exp[idx] - 48;
                 }
             }
 
@@ -99,7 +103,7 @@ int main(void)
     if (!isEmpty_op())
         push_postfix(pop_op());
 
-    for (int i = 0; i <= top_postfix; i++)
+    for (int i = 0; postfix[i] != 0; i++)
     {
         printf("%d\n", postfix[i]);
     }
@@ -129,7 +133,7 @@ int main(void)
     return 0;
 }
 
-bool isEmpty_postfix()
+bool isEmpty()
 {
     if (top_postfix < 0) // empty
         return true;
@@ -137,42 +141,17 @@ bool isEmpty_postfix()
         return false;
 }
 
-bool isEmpty_op()
+void push(struct stack *s, int value)
 {
-    if (top_op < 0) // empty
-        return true;
-    else
-        return false;
+    s->arr[++(s->top)] = value;
 }
 
-void push(int value)
+int pop(int *stack)
 {
-    stack[++top] = value;
-}
-
-int pop()
-{
-    return stack[top--];
-}
-
-void push_postfix(int value)
-{
-    postfix[++top_postfix] = value;
-}
-
-int pop_postfix()
-{
-    return postfix[top_postfix--];
-}
-
-void push_op(int value)
-{
-    op[++top_op] = value;
-}
-
-int pop_op()
-{
-    return op[top_op--];
+    if (!s->)
+    {
+        /* code */
+    }
 }
 
 void moveBack(int start_idx)
