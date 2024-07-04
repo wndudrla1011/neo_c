@@ -45,7 +45,7 @@ int pop(LinkedList *L)
     }
     else
     {
-    }
+        }
 }
 
 int priority(char op)
