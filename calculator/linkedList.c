@@ -45,6 +45,11 @@ int pop(LinkedList *L)
     }
     else
     {
+        Node *node = L->head;    // node: 가장 최근에 연결된 노드
+        int item = node->item;   // 반환할 값
+        L->head = L->head->link; // 바로 앞에 위치한 노드가 head가 됨
+        free(node);
+        return item;
     }
 }
 
