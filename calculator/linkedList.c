@@ -108,10 +108,12 @@ char *cstrtok(char *postfix, char *delim)
 
 void toPostfix(char exp[], char postfix[])
 {
-    int k, p; // k : 임시 배열 인덱스, p : postfix 배열 인덱스
+    int k = 0, p = 0; // k : 임시 배열 인덱스, p : postfix 배열 인덱스
     int len = cstrlen(exp);
     char ch;
-    char stack[MAX_SIZE];
+    Node *node = NULL;
+
+    init(node);
 
     for (int i = 0; i < len; i++)
     {
@@ -123,7 +125,7 @@ void toPostfix(char exp[], char postfix[])
         case '/':
         case '+':
         case '-':
-            while (isEmpty() == 0 && priority(ch) <= priority(stack[top]))
+            while (isEmpty(&node) && priority(ch) <= priority(stack[top]))
             {
                 postfix[p++] = ' ';
                 postfix[p++] = pop(stack);
@@ -134,7 +136,7 @@ void toPostfix(char exp[], char postfix[])
             push(stack, ch);
             break;
         case ')':
-            while (isEmpty() == 0 && stack[top] != '(') // find '('
+            while (isEmpty(&node) && stack[top] != '(') // find '('
             {
                 postfix[p++] = ' ';
                 postfix[p++] = pop(stack);
@@ -151,7 +153,7 @@ void toPostfix(char exp[], char postfix[])
         }
     }
 
-    while (!isEmpty())
+    while (!isEmpty(&node))
     {
         postfix[p++] = ' ';
         postfix[p++] = pop(stack);
