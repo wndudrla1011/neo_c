@@ -3,9 +3,6 @@
 #include <stdbool.h>
 #define MAX_SIZE 100
 
-void push(int value);
-int pop();
-
 int priority(char op);
 
 struct stack
@@ -17,6 +14,26 @@ struct stack
     int (*pop)(struct stack *);
     bool (*isEmpty)(struct stack *);
 };
+
+bool isEmpty(struct stack *s)
+{
+    if (s->top < 0)
+        return true;
+    else
+        return false;
+}
+
+void push(struct stack *s, int value)
+{
+    s->arr[++(s->top)] = value;
+}
+
+int pop(struct stack *s)
+{
+    if (!s->isEmpty(s))
+        return s->arr[(s->top)--];
+    return -1;
+}
 
 int priority(char op)
 {
