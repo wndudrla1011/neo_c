@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #define MAX_SIZE 100
 
-int top = -1;
+int top = -1; // stack (연산자 배열) top index
 
 int isEmpty()
 {
@@ -65,27 +65,21 @@ void toPostfix(char exp[], char postfix[])
         case '-':
             while (isEmpty() == 0 && priority(ch) <= priority(stack[top]))
             {
-                printf("postfix 추가 + pop() > %c\n", stack[top]);
                 postfix[p++] = pop(stack);
             }
-            printf("push() > %c\n", ch);
             push(stack, ch);
             break;
         case '(':
-            printf("push() > %c\n", ch);
             push(stack, ch);
             break;
         case ')':
             while (isEmpty() == 0 && stack[top] != '(') // find '('
             {
-                printf("postfix 추가 + pop() > %c\n", stack[top]);
                 postfix[p++] = pop(stack);
             }
-            printf("pop() > %c\n", stack[top]);
             pop(stack); //'(' 제거
             break;
         default: // digit
-            printf("postfix 추가 > %c\n", ch);
             postfix[p++] = ch;
             break;
         }
@@ -95,6 +89,52 @@ void toPostfix(char exp[], char postfix[])
     {
         postfix[p++] = pop(stack);
     }
+}
+
+int calculate(char postfix[])
+{
+    int len = cstrlen(postfix);
+    char ch;
+    int v1, v2;    // 계산할 값
+    char op1, op2; // 계산할 값 (숫자 변환 전)
+    char stack[MAX_SIZE];
+
+    for (int i = 0; i < len; i++)
+    {
+        ch = postfix[i];
+        if (ch != '*' && ch != '/' && ch != '+' && ch != '-')
+        {
+            push(stack, ch);
+        }
+
+        else
+        {
+            op2 = pop(stack);
+            op1 = pop(stack);
+
+            // char -> int
+            v1 = op1 - 48;
+            v2 = op2 - 48;
+
+            switch (ch)
+            {
+            case '+':
+                push(stack, (v1 + v2) + 48);
+                break;
+            case '-':
+                push(stack, (v1 - v2) + 48);
+                break;
+            case '*':
+                push(stack, (v1 * v2) + 48);
+                break;
+            case '/':
+                push(stack, (v1 / v2) + 48);
+                break;
+            }
+        }
+    }
+
+    return pop(stack) - 48;
 }
 
 int main(void)
@@ -108,7 +148,9 @@ int main(void)
     scanf("%s", exp);
 
     toPostfix(exp, postfix);
-    printf("%s\n", postfix);
+    printf("\nPostfix: %s\n", postfix);
+
+    printf("계산한 결과: \t%d\n", calculate(postfix));
 
     return 0;
 }
