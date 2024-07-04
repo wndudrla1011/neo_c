@@ -88,7 +88,7 @@ char *cstrtok(char *postfix, char *delim)
 
 void toPostfix(char exp[], char postfix[])
 {
-    int k, p; // k : 임시 배열 인덱스, p : postfix 배열 인덱스
+    int p = 0; // p : postfix 배열 인덱스
     int len = cstrlen(exp);
     char ch;
     char stack[MAX_SIZE];
@@ -199,7 +199,6 @@ int main(void)
 {
     char *exp; // 입력
     char postfix[MAX_SIZE] = {'\0'};
-    int result;
     exp = (char *)malloc(sizeof(char) * 100);
 
     printf("계산식을 입력한 후 Enter를 눌러주세요!\n");
