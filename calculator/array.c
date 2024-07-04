@@ -3,36 +3,16 @@
 #include <stdbool.h>
 #define MAX_SIZE 100
 
-int priority(char op);
-
-struct stack
+bool isEmpty()
 {
-    int top;
-    int size;
-    int *arr;
-    void (*push)(struct stack *, int);
-    int (*pop)(struct stack *);
-    bool (*isEmpty)(struct stack *);
-};
-
-bool isEmpty(struct stack *s)
-{
-    if (s->top < 0)
-        return true;
-    else
-        return false;
 }
 
-void push(struct stack *s, int value)
+void push()
 {
-    s->arr[++(s->top)] = value;
 }
 
-int pop(struct stack *s)
+int pop()
 {
-    if (!s->isEmpty(s))
-        return s->arr[(s->top)--];
-    return -1;
 }
 
 int priority(char op)
@@ -52,6 +32,20 @@ int priority(char op)
     return -1;
 }
 
+int cstrlen(char *str)
+{
+    int idx = 0;
+    while (str[idx] != '\0')
+        ++idx;
+    return idx;
+}
+
+void toPostfix(char exp[], char postfix[])
+{
+    int len = cstrlen(exp);
+    printf("%d\n", len);
+}
+
 int main(void)
 {
     char *exp; // 입력
@@ -61,6 +55,8 @@ int main(void)
 
     printf("계산식을 입력한 후 Enter를 눌러주세요!\n");
     scanf("%s", exp);
+
+    toPostfix(exp, postfix);
 
     return 0;
 }
