@@ -1,18 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #define MAX_SIZE 100
 
-bool isEmpty()
+int top = -1;
+
+int isEmpty()
 {
+    if (top < 0) // empty
+        return 1;
+    else
+        return 0;
 }
 
-void push()
+void push(char stack[], char op)
 {
+    stack[++top] = op;
 }
 
-int pop()
+char pop(char stack[])
 {
+    return stack[top--];
 }
 
 int priority(char op)
@@ -42,8 +49,52 @@ int cstrlen(char *str)
 
 void toPostfix(char exp[], char postfix[])
 {
+    int k, p; // k : stack 배열 인덱스, p : postfix 배열 인덱스
     int len = cstrlen(exp);
-    printf("%d\n", len);
+    char ch;
+    char stack[MAX_SIZE];
+
+    for (int i = 0; i < len; i++)
+    {
+        ch = exp[i];
+        switch (ch)
+        {
+        case '*':
+        case '/':
+        case '+':
+        case '-':
+            while (isEmpty() == 0 && priority(ch) <= priority(stack[top]))
+            {
+                printf("postfix 추가 + pop() > %c\n", stack[top]);
+                postfix[p++] = pop(stack);
+            }
+            printf("push() > %c\n", ch);
+            push(stack, ch);
+            break;
+        case '(':
+            printf("push() > %c\n", ch);
+            push(stack, ch);
+            break;
+        case ')':
+            while (isEmpty() == 0 && stack[top] != '(') // find '('
+            {
+                printf("postfix 추가 + pop() > %c\n", stack[top]);
+                postfix[p++] = pop(stack);
+            }
+            printf("pop() > %c\n", stack[top]);
+            pop(stack); //'(' 제거
+            break;
+        default: // digit
+            printf("postfix 추가 > %c\n", ch);
+            postfix[p++] = ch;
+            break;
+        }
+    }
+
+    while (!isEmpty())
+    {
+        postfix[p++] = pop(stack);
+    }
 }
 
 int main(void)
@@ -57,6 +108,7 @@ int main(void)
     scanf("%s", exp);
 
     toPostfix(exp, postfix);
+    printf("%s\n", postfix);
 
     return 0;
 }
