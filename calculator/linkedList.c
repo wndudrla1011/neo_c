@@ -135,9 +135,8 @@ void toPostfix(char exp[], char postfix[])
         case '/':
         case '+':
         case '-':
-            while (isEmpty(&node) && priority(ch) <= priority(peek(&node)))
+            while (!isEmpty(&node) && priority(ch) <= priority(peek(&node)))
             {
-                postfix[p++] = ' ';
                 postfix[p++] = pop(&node);
             }
             push(&node, ch);
@@ -146,18 +145,13 @@ void toPostfix(char exp[], char postfix[])
             push(&node, ch);
             break;
         case ')':
-            while (isEmpty(&node) && peek(&node) != '(') // find '('
+            while (!isEmpty(&node) && peek(&node) != '(') // find '('
             {
-                postfix[p++] = ' ';
                 postfix[p++] = pop(&node);
             }
             pop(&node); //'(' 제거
             break;
-        default:                              // digit
-            if (i > 0 && exp[i - 1] - 48 < 0) // 수식 숫자 앞 연산자 -> 공백
-            {
-                postfix[p++] = ' ';
-            }
+        default: // digit
             postfix[p++] = ch;
             break;
         }
@@ -165,7 +159,6 @@ void toPostfix(char exp[], char postfix[])
 
     while (!isEmpty(&node))
     {
-        postfix[p++] = ' ';
         postfix[p++] = pop(&node);
     }
 }
@@ -240,7 +233,7 @@ int main(void)
     toPostfix(exp, postfix);
     printf("\nPostfix: %s\n", postfix);
 
-    printf("계산한 결과: \t%d\n", calculate(postfix));
+    // printf("계산한 결과: \t%d\n", calculate(postfix));
 
     return 0;
 }
