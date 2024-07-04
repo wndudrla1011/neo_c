@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #define MAX_SIZE 100
 
-int top = -1; // stack (연산자 배열) top index
+int top = -1;     // top index of char stack
+int top_int = -1; // top index of int stack
 
 int isEmpty()
 {
@@ -20,6 +21,16 @@ void push(char stack[], char op)
 char pop(char stack[])
 {
     return stack[top--];
+}
+
+void push_int(int stack[], int val)
+{
+    stack[++top_int] = val;
+}
+
+int pop_int(int stack[])
+{
+    return stack[top_int--];
 }
 
 int priority(char op)
@@ -47,9 +58,37 @@ int cstrlen(char *str)
     return idx;
 }
 
+char *cstrtok(char *postfix, char *delim)
+{
+    char *start = 0; // 문자열 시작 위치
+    int i = 0;
+    static char *tmp; // 문자열 주소 저장
+
+    if (postfix != NULL) // 첫 토큰 받을 때
+        start = postfix;
+    else // 두 번째 이후 토큰 받을 때
+        start = tmp;
+
+    if (cstrlen(start) < 1) // 문자열 종료
+        return NULL;
+
+    for (i = 0; i < cstrlen(start); i++)
+    {
+        if (start[i] == (*delim) || start[i] == '\0')
+        {
+            start[i] = '\0';
+            break;
+        }
+    }
+
+    tmp = &start[i + 1]; // 다음 배열 시작 위치
+
+    return start;
+}
+
 void toPostfix(char exp[], char postfix[])
 {
-    int k, p; // k : stack 배열 인덱스, p : postfix 배열 인덱스
+    int k, p; // k : 임시 배열 인덱스, p : postfix 배열 인덱스
     int len = cstrlen(exp);
     char ch;
     char stack[MAX_SIZE];
@@ -57,6 +96,7 @@ void toPostfix(char exp[], char postfix[])
     for (int i = 0; i < len; i++)
     {
         ch = exp[i];
+
         switch (ch)
         {
         case '*':
@@ -65,6 +105,7 @@ void toPostfix(char exp[], char postfix[])
         case '-':
             while (isEmpty() == 0 && priority(ch) <= priority(stack[top]))
             {
+                postfix[p++] = ' ';
                 postfix[p++] = pop(stack);
             }
             push(stack, ch);
@@ -75,11 +116,16 @@ void toPostfix(char exp[], char postfix[])
         case ')':
             while (isEmpty() == 0 && stack[top] != '(') // find '('
             {
+                postfix[p++] = ' ';
                 postfix[p++] = pop(stack);
             }
             pop(stack); //'(' 제거
             break;
-        default: // digit
+        default:                              // digit
+            if (i > 0 && exp[i - 1] - 48 < 0) // 수식 숫자 앞 연산자 -> 공백
+            {
+                postfix[p++] = ' ';
+            }
             postfix[p++] = ch;
             break;
         }
@@ -87,6 +133,7 @@ void toPostfix(char exp[], char postfix[])
 
     while (!isEmpty())
     {
+        postfix[p++] = ' ';
         postfix[p++] = pop(stack);
     }
 }
@@ -94,47 +141,58 @@ void toPostfix(char exp[], char postfix[])
 int calculate(char postfix[])
 {
     int len = cstrlen(postfix);
-    char ch;
-    int v1, v2;    // 계산할 값
-    char op1, op2; // 계산할 값 (숫자 변환 전)
-    char stack[MAX_SIZE];
+    int op1, op2;
+    int stack[MAX_SIZE];
+    char *delim = " ";
+    char *token;
 
-    for (int i = 0; i < len; i++)
+    token = cstrtok(postfix, delim);
+    while (token != NULL)
     {
-        ch = postfix[i];
-        if (ch != '*' && ch != '/' && ch != '+' && ch != '-')
+        printf("token: %s\n", token);
+
+        if (token[0] != '*' && token[0] != '/' && token[0] != '+' && token[0] != '-')
         {
-            push(stack, ch);
+            int i = 0;
+            int val = 0; // 두자리 수 이상 결과
+
+            // 각 토큰 -> 스택 저장
+            while (token[i] != '\0')
+            {
+                val = val * 10 + (token[i] - 48);
+                i++;
+            }
+            push_int(stack, val);
         }
 
         else
         {
-            op2 = pop(stack);
-            op1 = pop(stack);
+            op2 = pop_int(stack);
+            op1 = pop_int(stack);
 
-            // char -> int
-            v1 = op1 - 48;
-            v2 = op2 - 48;
-
-            switch (ch)
+            switch (token[0])
             {
             case '+':
-                push(stack, (v1 + v2) + 48);
+                push_int(stack, op1 + op2);
                 break;
             case '-':
-                push(stack, (v1 - v2) + 48);
+                push_int(stack, op1 - op2);
                 break;
             case '*':
-                push(stack, (v1 * v2) + 48);
+                push_int(stack, op1 * op2);
                 break;
             case '/':
-                push(stack, (v1 / v2) + 48);
+                if (op2 == 0) // 나누기 0 예외 처리
+                    printf("DivideByZeroException\n");
+                push_int(stack, op1 / op2);
                 break;
             }
         }
+
+        token = cstrtok(NULL, delim);
     }
 
-    return pop(stack) - 48;
+    return pop_int(stack);
 }
 
 int main(void)
