@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #define MAX_SIZE 100
 
-int top = -1;     // top index of char stack
-int top_int = -1; // top index of int stack
-
 typedef struct
 {
     int item;
@@ -126,7 +123,7 @@ void toPostfix(char exp[], char postfix[])
     char ch;
     Node *node = NULL;
 
-    init(node);
+    init(&node);
 
     for (int i = 0; i < len; i++)
     {
