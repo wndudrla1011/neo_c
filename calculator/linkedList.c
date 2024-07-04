@@ -53,6 +53,19 @@ int pop(LinkedList *L)
     }
 }
 
+int peek(LinkedList *L)
+{
+    if (isEmpty(L))
+    {
+        printf("StackIsEmpty Error\n");
+        exit(1);
+    }
+    else
+    {
+        return L->head->item; // 가장 뒷 노드의 값 리턴
+    }
+}
+
 int priority(char op)
 {
     switch (op)
@@ -125,7 +138,7 @@ void toPostfix(char exp[], char postfix[])
         case '/':
         case '+':
         case '-':
-            while (isEmpty(&node) && priority(ch) <= priority(stack[top]))
+            while (isEmpty(&node) && priority(ch) <= priority(peek(&node)))
             {
                 postfix[p++] = ' ';
                 postfix[p++] = pop(&node);
@@ -136,7 +149,7 @@ void toPostfix(char exp[], char postfix[])
             push(&node, ch);
             break;
         case ')':
-            while (isEmpty(&node) && stack[top] != '(') // find '('
+            while (isEmpty(&node) && peek(&node) != '(') // find '('
             {
                 postfix[p++] = ' ';
                 postfix[p++] = pop(&node);
