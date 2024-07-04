@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #define MAX_SIZE 100
 
 typedef struct
@@ -213,6 +214,8 @@ double calculate(char postfix[])
 
 int main(void)
 {
+    int n = 3;
+    double result = 0.0;
     char *exp; // 입력
     char postfix[MAX_SIZE] = {'\0'};
     exp = (char *)malloc(sizeof(char) * 100);
@@ -223,7 +226,10 @@ int main(void)
     toPostfix(exp, postfix);
     printf("\nPostfix: %s\n", postfix);
 
-    printf("계산한 결과: \t%f\n", calculate(postfix));
+    result = calculate(postfix);
+    // result = result * pow(10, n + 1) + 5; // 소수점 3자리 반올림
+
+    printf("계산한 결과: \t%f\n", result);
 
     return 0;
 }
