@@ -8,28 +8,15 @@ int pop();
 
 int priority(char op);
 
-int main(void)
+struct stack
 {
-    char *exp; // 입력
-    char postfix[MAX_SIZE] = {'\0'};
-    int result;
-    exp = (char *)malloc(sizeof(char) * 100);
-
-    printf("계산식을 입력한 후 Enter를 눌러주세요!\n");
-    scanf("%s", exp);
-
-    return 0;
-}
-
-void push(int value)
-{
-    stack[++top] = value;
-}
-
-int pop()
-{
-    return stack[top--];
-}
+    int top;
+    int size;
+    int *arr;
+    void (*push)(struct stack *, int);
+    int (*pop)(struct stack *);
+    bool (*isEmpty)(struct stack *);
+};
 
 int priority(char op)
 {
@@ -46,4 +33,17 @@ int priority(char op)
         return 2;
     }
     return -1;
+}
+
+int main(void)
+{
+    char *exp; // 입력
+    char postfix[MAX_SIZE] = {'\0'};
+    int result;
+    exp = (char *)malloc(sizeof(char) * 100);
+
+    printf("계산식을 입력한 후 Enter를 눌러주세요!\n");
+    scanf("%s", exp);
+
+    return 0;
 }
