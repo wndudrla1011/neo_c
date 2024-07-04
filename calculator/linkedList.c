@@ -128,20 +128,20 @@ void toPostfix(char exp[], char postfix[])
             while (isEmpty(&node) && priority(ch) <= priority(stack[top]))
             {
                 postfix[p++] = ' ';
-                postfix[p++] = pop(stack);
+                postfix[p++] = pop(&node);
             }
-            push(stack, ch);
+            push(&node, ch);
             break;
         case '(':
-            push(stack, ch);
+            push(&node, ch);
             break;
         case ')':
             while (isEmpty(&node) && stack[top] != '(') // find '('
             {
                 postfix[p++] = ' ';
-                postfix[p++] = pop(stack);
+                postfix[p++] = pop(&node);
             }
-            pop(stack); //'(' 제거
+            pop(&node); //'(' 제거
             break;
         default:                              // digit
             if (i > 0 && exp[i - 1] - 48 < 0) // 수식 숫자 앞 연산자 -> 공백
@@ -156,7 +156,7 @@ void toPostfix(char exp[], char postfix[])
     while (!isEmpty(&node))
     {
         postfix[p++] = ' ';
-        postfix[p++] = pop(stack);
+        postfix[p++] = pop(&node);
     }
 }
 
