@@ -4,7 +4,7 @@
 
 typedef struct
 {
-    int item;
+    double item;
     struct Node *link;
 } Node;
 
@@ -23,7 +23,7 @@ int isEmpty(LinkedList *L)
     return (L->head == NULL);
 }
 
-void push(LinkedList *L, int item)
+void push(LinkedList *L, double item)
 {
     Node *node = (Node *)malloc(sizeof(Node)); // 새 노드 메모리 할당
 
@@ -33,7 +33,7 @@ void push(LinkedList *L, int item)
     (L->head) = node;       // 맨 앞 노드이므로 head로 변경
 }
 
-int pop(LinkedList *L)
+double pop(LinkedList *L)
 {
     if (isEmpty(L))
     {
@@ -50,7 +50,7 @@ int pop(LinkedList *L)
     }
 }
 
-int peek(LinkedList *L)
+double peek(LinkedList *L)
 {
     if (isEmpty(L))
     {
@@ -118,7 +118,7 @@ char *cstrtok(char *postfix, char *delim)
 
 void toPostfix(char exp[], char postfix[])
 {
-    int k = 0, p = 0; // k : 임시 배열 인덱스, p : postfix 배열 인덱스
+    int p = 0; // p : postfix 배열 인덱스
     int len = cstrlen(exp);
     char ch;
     Node *node = NULL;
@@ -163,68 +163,58 @@ void toPostfix(char exp[], char postfix[])
     }
 }
 
-int calculate(char postfix[])
+double calculate(char postfix[])
 {
     int len = cstrlen(postfix);
-    int op1, op2;
-    int stack[MAX_SIZE];
-    char *delim = " ";
-    char *token;
+    char ch = '0';
+    int val = 0; // 임시 저장: char -> int
+    double op1 = 0, op2 = 0;
+    Node *node = NULL;
 
-    token = cstrtok(postfix, delim);
-    while (token != NULL)
+    init(&node);
+
+    for (int i = 0; postfix[i] != '\0'; i++)
     {
-        printf("token: %s\n", token);
+        ch = postfix[i];
 
-        if (token[0] != '*' && token[0] != '/' && token[0] != '+' && token[0] != '-')
+        if (ch != '*' && ch != '/' && ch != '+' && ch != '-')
         {
-            int i = 0;
-            int val = 0; // 두자리 수 이상 결과
-
-            // 각 토큰 -> 스택 저장
-            while (token[i] != '\0')
-            {
-                val = val * 10 + (token[i] - 48);
-                i++;
-            }
-            push_int(stack, val);
+            val = ch - '0';
+            push(&node, val);
         }
 
         else
         {
-            op2 = pop_int(stack);
-            op1 = pop_int(stack);
+            op2 = pop(&node);
+            op1 = pop(&node);
 
-            switch (token[0])
+            switch (ch)
             {
             case '+':
-                push_int(stack, op1 + op2);
+                push(&node, op1 + op2);
                 break;
             case '-':
-                push_int(stack, op1 - op2);
+                push(&node, op1 - op2);
                 break;
             case '*':
-                push_int(stack, op1 * op2);
+                push(&node, op1 * op2);
                 break;
             case '/':
                 if (op2 == 0) // 나누기 0 예외 처리
                     printf("DivideByZeroException\n");
-                push_int(stack, op1 / op2);
+                push(&node, op1 / op2);
                 break;
             }
         }
-
-        token = cstrtok(NULL, delim);
     }
 
-    return pop_int(stack);
+    return pop(&node);
 }
 
 int main(void)
 {
     char *exp; // 입력
     char postfix[MAX_SIZE] = {'\0'};
-    int result;
     exp = (char *)malloc(sizeof(char) * 100);
 
     printf("계산식을 입력한 후 Enter를 눌러주세요!\n");
@@ -233,7 +223,7 @@ int main(void)
     toPostfix(exp, postfix);
     printf("\nPostfix: %s\n", postfix);
 
-    // printf("계산한 결과: \t%d\n", calculate(postfix));
+    printf("계산한 결과: \t%f\n", calculate(postfix));
 
     return 0;
 }
