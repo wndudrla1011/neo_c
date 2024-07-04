@@ -32,8 +32,8 @@ void push(LinkedList *L, int item)
 
     // 기존 노드와 연결
     node->item = item;      // 노드 값 셋팅
-    node->link = (L->head); // 기존 노드 -> 새 노드
-    (L->head) = node;       // 현재 node가 추가됨
+    node->link = (L->head); // 새 노드 -> 기존 노드
+    (L->head) = node;       // 맨 앞 노드이므로 head로 변경
 }
 
 int pop(LinkedList *L)
@@ -45,7 +45,7 @@ int pop(LinkedList *L)
     }
     else
     {
-        }
+    }
 }
 
 int priority(char op)
