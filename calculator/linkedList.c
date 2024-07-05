@@ -138,6 +138,7 @@ void toPostfix(char exp[], char postfix[])
         case '-':
             while (!isEmpty(&node) && priority(ch) <= priority(peek(&node)))
             {
+                postfix[p++] = ' ';
                 postfix[p++] = pop(&node);
             }
             push(&node, ch);
@@ -148,11 +149,16 @@ void toPostfix(char exp[], char postfix[])
         case ')':
             while (!isEmpty(&node) && peek(&node) != '(') // find '('
             {
+                postfix[p++] = ' ';
                 postfix[p++] = pop(&node);
             }
             pop(&node); //'(' 제거
             break;
-        default: // digit
+        default:                              // digit
+            if (i > 0 && exp[i - 1] - 48 < 0) // 수식 숫자 앞 연산자 -> 공백
+            {
+                postfix[p++] = ' ';
+            }
             postfix[p++] = ch;
             break;
         }
@@ -160,6 +166,7 @@ void toPostfix(char exp[], char postfix[])
 
     while (!isEmpty(&node))
     {
+        postfix[p++] = ' ';
         postfix[p++] = pop(&node);
     }
 }
@@ -167,12 +174,22 @@ void toPostfix(char exp[], char postfix[])
 double calculate(char postfix[])
 {
     int len = cstrlen(postfix);
-    char ch = '0';
-    int val = 0; // 임시 저장: char -> int
     double op1 = 0, op2 = 0;
     Node *node = NULL;
+    char *delim = " ";
+    char *token;
+    char ch = '0';
+    int val = 0; // 임시 저장: char -> int
 
     init(&node);
+
+    token = cstrtok(postfix, delim);
+
+    while (token != NULL)
+    {
+        printf("token: %s\n", token);
+        token = cstrtok(NULL, delim);
+    }
 
     for (int i = 0; postfix[i] != '\0'; i++)
     {
