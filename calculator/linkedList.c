@@ -43,9 +43,9 @@ double pop(LinkedList *L)
     }
     else
     {
-        Node *node = L->head;    // node: 가장 최근에 연결된 노드
-        int item = node->item;   // 반환할 값
-        L->head = L->head->link; // 바로 앞에 위치한 노드가 head가 됨
+        Node *node = L->head;     // node: 가장 최근에 연결된 노드
+        double item = node->item; // 반환할 값
+        L->head = L->head->link;  // 바로 앞에 위치한 노드가 head가 됨
         free(node);
         return item;
     }
@@ -198,7 +198,7 @@ double calculate(char postfix[])
         if (token[0] != '*' && token[0] != '/' && token[0] != '+' && token[0] != '-')
         {
             int i = 0;
-            int val = 0; // 두자리 수 이상 결과
+            double val = 0.0; // 두자리 수 이상 결과
 
             // 각 토큰 -> 스택 저장
             while (token[i] != '\0')
@@ -254,8 +254,8 @@ int main(void)
     toPostfix(exp, postfix);
     printf("\nPostfix: %s\n", postfix);
 
-    printf("몇 번째 자리에서 반올림하시겠습니까 >>> ");
-    scanf("%d", &n);
+    // printf("몇 번째 자리에서 반올림하시겠습니까 >>> ");
+    // scanf("%d", &n);
 
     result = calculate(postfix);
     // result = result + pow(10, -n) * 5; // 소수점 n자리 반올림
