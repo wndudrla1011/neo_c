@@ -117,6 +117,23 @@ char *cstrtok(char *postfix, char *delim)
     return start;
 }
 
+double cround(double num, int place)
+{
+    for (int i = 1; i < place; i++)
+    {
+        num *= 10;
+    }
+
+    num += 0.5;
+
+    for (int i = 1; i < place; i++)
+    {
+        num /= 10;
+    }
+
+    return num;
+}
+
 void toPostfix(char exp[], char postfix[])
 {
     int p = 0; // p : postfix 배열 인덱스
@@ -234,6 +251,7 @@ double calculate(char postfix[])
 
 int main(void)
 {
+    int n = 0;           // 반올림 자리
     double result = 0.0; // 계산 결과
     char *exp;           // 입력
     char postfix[MAX_SIZE] = {'\0'};
@@ -245,9 +263,12 @@ int main(void)
     toPostfix(exp, postfix);
     printf("\nPostfix: %s\n", postfix);
 
+    printf("몇 번째 자리에서 반올림하시겠습니까? >>>");
+    scanf("%d", &n);
+
     result = calculate(postfix);
 
-    printf("계산한 결과: \t%.3f\n", result);
+    printf("계산한 결과: \t%.3f\n", cround(result, n));
 
     return 0;
 }
