@@ -178,8 +178,6 @@ double calculate(char postfix[])
     Node *node = NULL;
     char *delim = " ";
     char *token;
-    char ch = '0';
-    int val = 0; // 임시 저장: char -> int
 
     init(&node);
 
@@ -188,16 +186,19 @@ double calculate(char postfix[])
     while (token != NULL)
     {
         printf("token: %s\n", token);
-        token = cstrtok(NULL, delim);
-    }
 
-    for (int i = 0; postfix[i] != '\0'; i++)
-    {
-        ch = postfix[i];
-
-        if (ch != '*' && ch != '/' && ch != '+' && ch != '-')
+        if (token[0] != '*' && token[0] != '/' && token[0] != '+' && token[0] != '-')
         {
-            val = ch - '0';
+            int i = 0;
+            int val = 0; // 두자리 수 이상 결과
+
+            // 각 토큰 -> 스택 저장
+            while (token[i] != '\0')
+            {
+                val = val * 10 + (token[i] - 48);
+                i++;
+            }
+
             push(&node, val);
         }
 
@@ -206,7 +207,7 @@ double calculate(char postfix[])
             op2 = pop(&node);
             op1 = pop(&node);
 
-            switch (ch)
+            switch (token[0])
             {
             case '+':
                 push(&node, op1 + op2);
@@ -224,6 +225,8 @@ double calculate(char postfix[])
                 break;
             }
         }
+
+        token = cstrtok(NULL, delim);
     }
 
     return pop(&node);
