@@ -28,6 +28,7 @@ int main(int argc, char **argv)
     struct sockaddr_in server_addr; // 서버 소켓 정보
     struct sockaddr_in client_addr; // 클라이언트 소켓 정보
     int client_addr_size;
+    // socklen_t client_addr_size; -> Linux
     pthread_t tid;
 
     if (argc != 2)
@@ -47,7 +48,7 @@ int main(int argc, char **argv)
     // 소켓 값 바인딩
     memset(&server_addr, 0, sizeof(server_addr)); // 서버 소켓 메모리 할당
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(atoi(argv[1])); // atoi (char -> integer)
 
     if (bind(server_sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) // 서버 소켓 바인딩

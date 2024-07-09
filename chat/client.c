@@ -43,8 +43,8 @@ int main(int argc, char **argv)
     // 소켓 값 생성
     memset(&server_addr, 0, sizeof(server_addr)); // 서버 소켓 메모리 할당
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.S_un.S_addr = inet_addr(argv[1]); // dotted decimal -> unsigned long
-    server_addr.sin_port = htons(atoi(argv[2]));           // atoi (char -> integer)
+    server_addr.sin_addr.s_addr = inet_addr(argv[1]); // dotted decimal -> unsigned long
+    server_addr.sin_port = htons(atoi(argv[2]));      // atoi (char -> integer)
 
     if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) // 서버에 연결 요청
     {
