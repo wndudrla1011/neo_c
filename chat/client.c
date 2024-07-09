@@ -6,6 +6,8 @@
 // #include <sys/socket.h>
 #include <pthread.h>
 
+#define BUF_SIZE 30
+
 typedef struct recieve_data
 {
     char *message;
@@ -17,9 +19,9 @@ void *send_function(void *serv_sock)
     int *cs = (int *)serv_sock;
     while (1)
     {
-        char message[30];
+        char message[BUF_SIZE];
         printf("\nclient -> : ");
-        scanf("%s", message);
+        fgets(message, BUF_SIZE, stdin);
         write(*cs, message, sizeof(message));
     }
 }
@@ -54,6 +56,7 @@ int main(int argc, char *argv[])
     }
 
     serv_sock = socket(PF_INET, SOCK_STREAM, 0);
+
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
