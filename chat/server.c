@@ -5,6 +5,9 @@
 // #include <arpa/inet.h>
 // #include <sys/socket.h>
 #include <pthread.h>
+
+#define BUF_SIZE 30
+
 void error_handling(char *message);
 
 typedef struct
@@ -18,9 +21,9 @@ void *send_function(void *clnt_sock)
     int *cs = (int *)clnt_sock;
     while (1)
     {
-        char message[30];
+        char message[BUF_SIZE];
         printf("\nserver -> : ");
-        scanf("%s", message);
+        fgets(message, BUF_SIZE, stdin);
         write(*cs, message, sizeof(message));
     }
 }
