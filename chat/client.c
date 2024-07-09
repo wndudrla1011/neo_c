@@ -11,6 +11,7 @@
 
 char msg[BUF_SIZE];
 char name[NAME_SIZE] = "[DEFAULT]";
+char name_msg[NAME_SIZE + BUF_SIZE];
 
 typedef struct recieve_data
 {
@@ -21,11 +22,20 @@ typedef struct recieve_data
 void *send_msg(void *serv_sock)
 {
     int *cs = (int *)serv_sock;
+
     while (1)
     {
-        printf("\n[%s] client -> : ", name);
+        printf("\n%s client -> : ", name);
         fgets(msg, BUF_SIZE, stdin);
-        write(*cs, msg, sizeof(msg));
+
+        if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
+        {
+            close(*cs);
+            exit(1);
+        }
+
+        sprintf(name_msg, "%s %s", name, msg);
+        write(*cs, name_msg, sizeof(name_msg));
     }
 }
 
@@ -41,7 +51,7 @@ void *recv_msg(void *rcvDt)
 
         if (str_len != -1)
         {
-            printf("\n <- server : %s\n", msg);
+            printf("\n%s", name_msg);
         }
     }
 }
@@ -61,7 +71,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    sprintf(name, "%s", argv[3]);
+    sprintf(name, "[%s]", argv[3]);
     serv_sock = socket(PF_INET, SOCK_STREAM, 0);
 
     memset(&serv_addr, 0, sizeof(serv_addr));

@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
         pthread_create(&tid, NULL, handle_clnt, (void *)&clnt_sock);
         pthread_detach(tid);
-        printf("Connected client IP : %s\n", inet_ntoa(clnt_addr.sin_addr));
+        printf("accepted host(IP: %s, Port: %d)\n", inet_ntoa(clnt_addr.sin_addr), ntohs(serv_addr.sin_port));
     }
 
     close(serv_sock);
