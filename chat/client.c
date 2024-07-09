@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     }
 
     sprintf(name, "[%s]", argv[3]);
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+    sock = socket(AF_INET, SOCK_STREAM, 0); // 소켓 생성
 
     if (sock == -1)
     {
