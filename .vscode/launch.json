@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/neo/Desktop/인턴_김주영/neo_c/calculator",
-      "program": "c:/Users/neo/Desktop/인턴_김주영/neo_c/calculator/build/Debug/outDebug",
+      "cwd": "c:/Users/neo/Desktop/인턴_김주영/neo_c/chat",
+      "program": "c:/Users/neo/Desktop/인턴_김주영/neo_c/chat/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
