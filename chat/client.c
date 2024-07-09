@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     int serv_sock;
     struct sockaddr_in serv_addr;
     int str_len;
+    pthread_t send_thread, recv_thread;
 
     if (argc != 4)
     {
@@ -69,23 +70,16 @@ int main(int argc, char *argv[])
 
     connect(serv_sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
-    pthread_t p_thread[2];
-    int t;
     int status;
     recieve_data rcvDt;
     rcvDt.message = msg;
     rcvDt.serv_sock = &serv_sock;
 
-    for (t = 0; t < 2; t++)
-    {
-        if (t == 0)
-            pthread_create(&p_thread[t], NULL, send_msg, (void *)&serv_sock);
-        else if (t == 1)
-            pthread_create(&p_thread[t], NULL, recv_msg, (void *)&rcvDt);
-    }
+    pthread_create(&send_thread, NULL, send_msg, (void *)&serv_sock);
+    pthread_create(&recv_thread, NULL, recv_msg, (void *)&rcvDt);
 
-    pthread_join(p_thread[0], (void **)&status);
-    pthread_join(p_thread[1], (void **)&status);
+    pthread_join(send_thread, (void **)&status);
+    pthread_join(recv_thread, (void **)&status);
 
     close(serv_sock);
     return 0;
