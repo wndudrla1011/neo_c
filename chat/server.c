@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     server_addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(atoi(argv[1])); // atoi (char -> integer)
 
-    if (bind(server_sock, (struct socketaddr *)&server_addr, sizeof(server_addr)) == -1) // 서버 소켓 바인딩
+    if (bind(server_sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) // 서버 소켓 바인딩
     {
         error_handling("bind() error");
     }
