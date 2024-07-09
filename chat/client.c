@@ -2,11 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-// #include <arpa/inet.h>
-// #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <pthread.h>
 
-#define BUF_SIZE 30
+#define BUF_SIZE 100
+#define NAME_SIZE 30
+
+char msg[BUF_SIZE];
+char name[NAME_SIZE] = "[DEFAULT]";
 
 typedef struct recieve_data
 {
@@ -14,19 +18,18 @@ typedef struct recieve_data
     int *serv_sock;
 } recieve_data;
 
-void *send_function(void *serv_sock)
+void *send_msg(void *serv_sock)
 {
     int *cs = (int *)serv_sock;
     while (1)
     {
-        char message[BUF_SIZE];
-        printf("\nclient -> : ");
-        fgets(message, BUF_SIZE, stdin);
-        write(*cs, message, sizeof(message));
+        printf("\n[%s] client -> : ", name);
+        fgets(msg, BUF_SIZE, stdin);
+        write(*cs, msg, sizeof(msg));
     }
 }
 
-void *recieve_function(void *rcvDt)
+void *recv_msg(void *rcvDt)
 {
 
     recieve_data *data = (recieve_data *)rcvDt;
@@ -46,15 +49,15 @@ int main(int argc, char *argv[])
 
     int serv_sock;
     struct sockaddr_in serv_addr;
-    char message[30];
     int str_len;
 
-    if (argc != 3)
+    if (argc != 4)
     {
-        printf("Usage : %s <IP> <port>\n", argv[0]);
+        printf("Usage : %s <IP> <port> <Name>\n", argv[0]);
         exit(1);
     }
 
+    sprintf(name, "%s", argv[3]);
     serv_sock = socket(PF_INET, SOCK_STREAM, 0);
 
     memset(&serv_addr, 0, sizeof(serv_addr));
@@ -68,15 +71,17 @@ int main(int argc, char *argv[])
     int t;
     int status;
     recieve_data rcvDt;
-    rcvDt.message = message;
+    rcvDt.message = msg;
     rcvDt.serv_sock = &serv_sock;
+
     for (t = 0; t < 2; t++)
     {
         if (t == 0)
-            pthread_create(&p_thread[t], NULL, send_function, (void *)&serv_sock);
+            pthread_create(&p_thread[t], NULL, send_msg, (void *)&serv_sock);
         else if (t == 1)
-            pthread_create(&p_thread[t], NULL, recieve_function, (void *)&rcvDt);
+            pthread_create(&p_thread[t], NULL, recv_msg, (void *)&rcvDt);
     }
+
     pthread_join(p_thread[0], (void **)&status);
     pthread_join(p_thread[1], (void **)&status);
 

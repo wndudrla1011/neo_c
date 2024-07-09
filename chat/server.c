@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-// #include <arpa/inet.h>
-// #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <pthread.h>
 
-#define BUF_SIZE 30
+#define BUF_SIZE 100
 
 void error_handling(char *message);
 
@@ -16,7 +16,7 @@ typedef struct
     char *message;
 } recieve_Data;
 
-void *send_function(void *clnt_sock)
+void *send_msg(void *clnt_sock)
 {
     int *cs = (int *)clnt_sock;
     while (1)
@@ -28,9 +28,10 @@ void *send_function(void *clnt_sock)
     }
 }
 
-void *recieve_function(void *rcvdt)
+void *recv_msg(void *rcvdt)
 {
     recieve_Data *data = (recieve_Data *)rcvdt;
+
     while (1)
     {
         int str_len = read(*(data->clnt_sock), data->message, sizeof(char) * 30);
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
 {
     int serv_sock;
     int clnt_sock;
-    char message[30];
+    char message[BUF_SIZE];
     struct sockaddr_in serv_addr;
     struct sockaddr_in clnt_addr;
     socklen_t clnt_addr_size;
@@ -80,6 +81,7 @@ int main(int argc, char *argv[])
     {
         error_handling("listen() error");
     }
+
     printf("waiting...\n");
 
     clnt_addr_size = sizeof(clnt_addr);
@@ -98,9 +100,9 @@ int main(int argc, char *argv[])
     for (t = 0; t < 2; t++)
     {
         if (t == 0)
-            pthread_create(&p_thread[t], NULL, send_function, (void *)&clnt_sock);
+            pthread_create(&p_thread[t], NULL, send_msg, (void *)&clnt_sock);
         else if (t == 1)
-            pthread_create(&p_thread[t], NULL, recieve_function, (void *)&rcvdt);
+            pthread_create(&p_thread[t], NULL, recv_msg, (void *)&rcvdt);
     }
 
     pthread_join(p_thread[0], (void **)&status);
