@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 {
 
     int serv_sock;
+    int status;
     struct sockaddr_in serv_addr;
     int str_len;
     pthread_t send_thread, recv_thread;
@@ -70,7 +71,6 @@ int main(int argc, char *argv[])
 
     connect(serv_sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
-    int status;
     recieve_data rcvDt;
     rcvDt.message = msg;
     rcvDt.serv_sock = &serv_sock;

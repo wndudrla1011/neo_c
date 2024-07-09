@@ -45,11 +45,11 @@ void *recv_msg(void *rcvdt)
 
 int main(int argc, char *argv[])
 {
-    int serv_sock;
-    int clnt_sock;
+    int serv_sock, clnt_sock;
+    int status;
     char message[BUF_SIZE];
     struct sockaddr_in serv_addr, clnt_addr;
-    pthread_t p_thread[2];
+    pthread_t send_thread, recv_thread;
     socklen_t clnt_addr_size;
 
     printf("read port....\n");
@@ -95,18 +95,11 @@ int main(int argc, char *argv[])
     rcvdt.clnt_sock = &clnt_sock;
     rcvdt.message = message;
 
-    int t;
-    int status;
-    for (t = 0; t < 2; t++)
-    {
-        if (t == 0)
-            pthread_create(&p_thread[t], NULL, send_msg, (void *)&clnt_sock);
-        else if (t == 1)
-            pthread_create(&p_thread[t], NULL, recv_msg, (void *)&rcvdt);
-    }
+    pthread_create(&send_thread, NULL, send_msg, (void *)&serv_sock);
+    pthread_create(&recv_thread, NULL, recv_msg, (void *)&rcvDt);
 
-    pthread_join(p_thread[0], (void **)&status);
-    pthread_join(p_thread[1], (void **)&status);
+    pthread_join(send_thread, (void **)&status);
+    pthread_join(recv_thread, (void **)&status);
 
     close(clnt_sock);
     close(serv_sock);
