@@ -1,6 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 #include <winsock2.h>
 #include <unistd.h>
+/* Linux
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/un.h>
+*/
 #include <pthread.h>
 #define BUF_SIZE 100
 #define MAX_CLNT 256

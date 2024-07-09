@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <sys/types.h>
 #include <winsock2.h>
 #include <unistd.h>
+/* Linux
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/un.h>
+*/
 #include <pthread.h>
 #define BUF_SIZE 100
 #define NAME_SIZE 20
