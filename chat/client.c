@@ -81,7 +81,7 @@ void *send_msg(void *arg)
             // exit(0)가 아닌 return NULL로 하면 아직 recv_msg 스레드가 살아있어서 바로 종료되지 않는다
             exit(0);
         }
-        sprint(name_msg, "%s %s", name, msg);
+        sprintf(name_msg, "%s %s", name, msg);
         write(sock, name_msg, strlen(name_msg));
     }
 
