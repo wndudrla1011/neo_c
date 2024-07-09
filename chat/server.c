@@ -36,7 +36,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    pthread_mutext_init(&mtx, NULL);
+    pthread_mutex_init(&mtx, NULL);
     server_sock = socket(AF_INET, SOCK_STREAM, 0); // 소켓 생성
 
     if (server_sock == -1)
@@ -103,7 +103,7 @@ void *handle_client(void *arg)
     }
 
     // 클라이언트
-    pthread_mutext_lock(&mtx);
+    pthread_mutex_lock(&mtx);
     for (int i = 0; i < client_cnt; i++)
     {
         if (client_sock == client_socks[i])
