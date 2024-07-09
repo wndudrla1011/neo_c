@@ -7,49 +7,61 @@
 #include <pthread.h>
 
 #define BUF_SIZE 100
+#define MAX_CLNT 256
 
 void error_handling(char *message);
 
-typedef struct
-{
-    int *clnt_sock;
-    char *message;
-} recieve_Data;
+int clnt_cnt = 0;
+int clnt_socks[MAX_CLNT];
+pthread_mutex_t mtx;
 
-void *send_msg(void *clnt_sock)
+void send_msg(char *msg, int len)
 {
-    int *cs = (int *)clnt_sock;
-    while (1)
+    pthread_mutex_lock(&mtx);
+    for (int i = 0; i < clnt_cnt; i++)
     {
-        char message[BUF_SIZE];
-        printf("\nserver -> : ");
-        fgets(message, BUF_SIZE, stdin);
-        write(*cs, message, sizeof(message));
+        write(clnt_socks[i], msg, len);
     }
+    pthread_mutex_unlock(&mtx);
 }
 
-void *recv_msg(void *rcvdt)
+void *handle_clnt(void *arg)
 {
-    recieve_Data *data = (recieve_Data *)rcvdt;
+    int clnt_sock = *((int *)arg);
+    int str_len = 0;
+    char msg[BUF_SIZE];
 
-    while (1)
+    // 클라이언트가 close를 날린다면 EOF가 도달해서 read 함수가 0을 반환한다
+    while (str_len = read(clnt_sock, msg, sizeof(msg)) != 0)
+        send_msg(msg, str_len);
+
+    // 클라이언트
+    pthread_mutex_lock(&mtx);
+    for (int i = 0; i < clnt_cnt; i++)
     {
-        int str_len = read(*(data->clnt_sock), data->message, sizeof(char) * BUF_SIZE);
-
-        if (str_len != -1)
+        if (clnt_sock == clnt_socks[i])
         {
-            printf("\n <- client : %s\n", data->message);
+            while (++i < clnt_cnt)
+            {
+                clnt_socks[i - 1] = clnt_socks[i];
+            }
+            break;
         }
     }
+    clnt_cnt--;
+    pthread_mutex_unlock(&mtx);
+
+    close(clnt_sock);
+
+    return NULL;
 }
 
 int main(int argc, char *argv[])
 {
     int serv_sock, clnt_sock;
-    int status;
     char message[BUF_SIZE];
     struct sockaddr_in serv_addr, clnt_addr;
-    pthread_t send_thread, recv_thread;
+    pthread_t tid;
     socklen_t clnt_addr_size;
 
     printf("read port....\n");
@@ -60,6 +72,7 @@ int main(int argc, char *argv[])
     }
 
     printf("set server socket\n");
+    pthread_mutex_init(&mtx, NULL);
     serv_sock = socket(PF_INET, SOCK_STREAM, 0);
     if (serv_sock == -1)
     {
@@ -85,23 +98,25 @@ int main(int argc, char *argv[])
 
     printf("waiting...\n");
 
-    clnt_addr_size = sizeof(clnt_addr);
-    clnt_sock = accept(serv_sock, (struct sockaddr *)&clnt_addr, &clnt_addr_size);
-    if (clnt_sock == -1)
-        error_handling("accept() error");
-    printf("accept!\n");
+    while (1)
+    {
+        clnt_addr_size = sizeof(clnt_addr);
+        clnt_sock = accept(serv_sock, (struct sockaddr *)&clnt_addr, &clnt_addr_size);
+        if (clnt_sock < 0)
+        {
+            perror("accept");
+            return -1;
+        }
 
-    recieve_Data rcvdt;
-    rcvdt.clnt_sock = &clnt_sock;
-    rcvdt.message = message;
+        pthread_mutex_lock(&mtx);
+        clnt_socks[clnt_cnt++] = clnt_sock;
+        pthread_mutex_unlock(&mtx);
 
-    pthread_create(&send_thread, NULL, send_msg, (void *)&serv_sock);
-    pthread_create(&recv_thread, NULL, recv_msg, (void *)&rcvDt);
+        pthread_create(&tid, NULL, handle_clnt, (void *)&clnt_sock);
+        pthread_detach(tid);
+        printf("Connected client IP : %s\n", inet_ntoa(clnt_addr.sin_addr));
+    }
 
-    pthread_join(send_thread, (void **)&status);
-    pthread_join(recv_thread, (void **)&status);
-
-    close(clnt_sock);
     close(serv_sock);
 
     return 0;
