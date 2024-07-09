@@ -34,7 +34,8 @@ void *recv_msg(void *rcvdt)
 
     while (1)
     {
-        int str_len = read(*(data->clnt_sock), data->message, sizeof(char) * 30);
+        int str_len = read(*(data->clnt_sock), data->message, sizeof(char) * BUF_SIZE);
+
         if (str_len != -1)
         {
             printf("\n <- client : %s\n", data->message);
@@ -47,8 +48,8 @@ int main(int argc, char *argv[])
     int serv_sock;
     int clnt_sock;
     char message[BUF_SIZE];
-    struct sockaddr_in serv_addr;
-    struct sockaddr_in clnt_addr;
+    struct sockaddr_in serv_addr, clnt_addr;
+    pthread_t p_thread[2];
     socklen_t clnt_addr_size;
 
     printf("read port....\n");
@@ -94,7 +95,6 @@ int main(int argc, char *argv[])
     rcvdt.clnt_sock = &clnt_sock;
     rcvdt.message = message;
 
-    pthread_t p_thread[2];
     int t;
     int status;
     for (t = 0; t < 2; t++)
@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
 
     close(clnt_sock);
     close(serv_sock);
+
     return 0;
 }
 

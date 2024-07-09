@@ -34,9 +34,11 @@ void *recv_msg(void *rcvDt)
 
     recieve_data *data = (recieve_data *)rcvDt;
     char *msg = data->message;
+
     while (1)
     {
-        int str_len = read(*(data->serv_sock), msg, sizeof(char) * 30);
+        int str_len = read(*(data->serv_sock), msg, sizeof(char) * BUF_SIZE);
+
         if (str_len != -1)
         {
             printf("\n <- server : %s\n", msg);
