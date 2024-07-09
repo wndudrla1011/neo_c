@@ -1,57 +1,57 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <winsock2.h>
 #include <unistd.h>
-#define BUFSIZE 1024
+#include <pthread.h>
+#define BUF_SIZE 100
+#define NAME_SIZE 20
 
 void error_handling(char *message);
+void *send_msg(void *arg);
+void *recv_msg(void *arg);
+
+char name[NAME_SIZE] = "[DEFAULT]";
+char msg[BUF_SIZE];
 
 int main(int argc, char **argv)
 {
-    int sock = 0;          // socket descriptor
-    char message[BUFSIZE]; // storage for messages
-    int str_len;
-    struct sockaddr_in server_addr; // server socket info
+    int sock = 0;                   // socket descriptor
+    struct sockaddr_in server_addr; // 서버 소켓 정보
+    pthread_t send_thread, recv_thread;
 
-    if (argc != 3)
+    if (argc != 4)
     {
-        printf("Usage : %s <IP>\n", argv[0]);
+        printf("Usage : %s <IP> <PORT> <NAME>\n", argv[0]);
         exit(1);
     }
 
-    sock = socket(PF_INET, SOCK_STREAM, 0);
+    sprintf(name, "[%s]", argv[3]);
+    sock = socket(AF_INET, SOCK_STREAM, 0);
 
     if (sock == -1)
     {
         error_handling("socket() error");
     }
 
-    // binding values to socket
-    memset(&server_addr, 0, sizeof(server_addr)); // allocating memory
+    // 소켓 값 생성
+    memset(&server_addr, 0, sizeof(server_addr)); // 서버 소켓 메모리 할당
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.S_un.S_addr = inet_addr(argv[1]); // dotted decimal -> unsigned long
     server_addr.sin_port = htons(atoi(argv[2]));           // atoi (char -> integer)
 
-    if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) // request connection to server
+    if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) // 서버에 연결 요청
     {
         error_handling("connect() error");
     }
 
-    while (1)
-    {
-        /* Transfer messages */
-        fputs("전송할 메시지를 입력하세요. (q to quit) : ", stdout);
-        fgets(message, BUFSIZE, stdin);
-        if (!strcmp(message, "q\n"))
-            break;
-        write(sock, message, strlen(message)); // store client's message to sock
+    pthread_create(&send_thread, NULL, send_msg, (void *)&sock);
+    pthread_create(&recv_thread, NULL, recv_msg, (void *)&sock);
+    pthread_join(send_thread, NULL);
+    pthread_join(recv_thread, NULL);
 
-        /* Receive messages */
-        str_len = read(sock, message, BUFSIZE - 1);
-        message[str_len] = 0;
-        printf("서버로부터 전송된 메시지 : %s\n", message);
-    }
-
-    close(sock); // closing client socket
+    close(sock); // 클라이언트 소켓 Close
 
     return 0;
 }
@@ -61,4 +61,43 @@ void error_handling(char *message)
     fputs(message, stderr);
     fputc('\n', stderr);
     exit(1);
+}
+
+void *send_msg(void *arg)
+{
+    int sock = *((int *)arg);
+    char name_msg[NAME_SIZE + BUF_SIZE];
+    while (1)
+    {
+        fgets(msg, BUF_SIZE, stdin);
+        if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
+        {
+            close(sock);
+            // exit(0)가 아닌 return NULL로 하면 아직 recv_msg 스레드가 살아있어서 바로 종료되지 않는다
+            exit(0);
+        }
+        sprint(name_msg, "%s %s", name, msg);
+        write(sock, name_msg, strlen(name_msg));
+    }
+
+    return NULL;
+}
+
+void *recv_msg(void *arg)
+{
+    int sock = *((int *)arg);
+    char name_msg[NAME_SIZE + BUF_SIZE];
+    int str_len;
+    while (1)
+    {
+        str_len = read(sock, name_msg, sizeof(name_msg) - 1);
+        if (str_len < 0)
+        {
+            return NULL;
+        }
+        name_msg[str_len] = 0;
+        fputs(name_msg, stdout);
+    }
+
+    return NULL;
 }
