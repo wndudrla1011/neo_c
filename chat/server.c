@@ -11,6 +11,7 @@
 
 void *handle_clnt(void *arg);
 void send_msg(char *msg, int len);
+void send_msg_me(int clnt_sock, char *msg, int len);
 void error_handling(char *message);
 
 int clnt_cnt = 0; // 접속한 클라이언트 수
@@ -21,6 +22,7 @@ int clnt_cnt = 0; // 접속한 클라이언트 수
 */
 int clnt_socks[MAX_CLNT];
 pthread_mutex_t mtx; // mutex 선언 (스레드끼리 전역변수 동시 사용 방지)
+char login[] = "로그인을 완료하였습니다.\n";
 
 int main(int argc, char *argv[])
 {
@@ -109,6 +111,8 @@ void *handle_clnt(void *arg)
     int str_len = 0;
     char msg[BUF_SIZE];
 
+    send_msg_me(clnt_sock, login, strlen(login));
+
     /*
     클라이언트에서 보낸 메시지 받음
     클라이언트에서 EOF를 보내 str_len 이 0이 될때까지 반복
@@ -148,6 +152,14 @@ void send_msg(char *msg, int len)
     for (int i = 0; i < clnt_cnt; i++)
         write(clnt_socks[i], msg, len); // 모든 클라이언트 소켓에 메시지 전달
 
+    pthread_mutex_unlock(&mtx); // mutex 언락
+}
+
+// 접속한 대상에만 메시지 보내기
+void send_msg_me(int clnt_sock, char *msg, int len)
+{
+    pthread_mutex_lock(&mtx);   // 전역 변수 사용을 위해 mutex 락
+    write(clnt_sock, msg, len); // 접속 클라이언트 소켓에 메시지 전달
     pthread_mutex_unlock(&mtx); // mutex 언락
 }
 

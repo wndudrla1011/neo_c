@@ -14,6 +14,7 @@ void *recv_msg(void *arg);
 
 char msg[BUF_SIZE];
 char name[NAME_SIZE] = "[DEFAULT]"; // 채팅창에 보여질 이름의 형태(20자 제한)
+char logout[] = "님이 로그아웃했습니다.\n";
 
 int main(int argc, char *argv[])
 {
@@ -64,13 +65,17 @@ void *send_msg(void *arg)
 {
     int sock = *((int *)arg);            // void descriptor -> int 변환
     char name_msg[NAME_SIZE + BUF_SIZE]; // 사용자 ID와 메시지를 합칠 것임
+    char logout_msg[NAME_SIZE + strlen(logout)];
 
     while (1)
     {
         fgets(msg, BUF_SIZE, stdin); // 사용자 입력을 msg에 저장
 
-        if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
+        if (!strcmp(msg, "exit\n"))
         {
+            sprintf(logout_msg, "%s %s", name, logout);
+            write(sock, logout_msg, sizeof(logout_msg));
+
             close(sock); // 서버에 EOF 보냄
             exit(1);
         }
