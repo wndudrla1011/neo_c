@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
 
 void *send_msg(void *arg)
 {
-    int sock = *((int *)arg);            // void descriptor -> int 변환
-    char name_msg[NAME_SIZE + BUF_SIZE]; // 사용자 ID와 메시지를 합칠 것임
-    char logout_msg[NAME_SIZE + strlen(logout)];
+    int sock = *((int *)arg);                    // void descriptor -> int 변환
+    char name_msg[NAME_SIZE + BUF_SIZE];         // 사용자 ID와 메시지를 합칠 것임
+    char logout_msg[NAME_SIZE + strlen(logout)]; // 사용자 ID와 로그아웃 메시지를 합칠 것임
 
     while (1)
     {
@@ -73,8 +73,8 @@ void *send_msg(void *arg)
 
         if (!strcmp(msg, "exit\n"))
         {
-            sprintf(logout_msg, "%s %s", name, logout);
-            write(sock, logout_msg, sizeof(logout_msg));
+            sprintf(logout_msg, "%s %s", name, logout);  // (사용자 ID + 로그아웃 메시지) 를 버퍼에 저장
+            write(sock, logout_msg, sizeof(logout_msg)); // 서버로 전송하여 모든 클라이언트에 뿌림
 
             close(sock); // 서버에 EOF 보냄
             exit(1);
