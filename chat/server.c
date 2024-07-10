@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <pthread.h>
 
-#define BUF_SIZE 100
+#define BUF_SIZE 1024
 #define MAX_CLNT 256
 
 void *handle_clnt(void *arg);

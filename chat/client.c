@@ -5,9 +5,11 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <pthread.h>
+#include <time.h>
 
 #define BUF_SIZE 100
-#define NAME_SIZE 20
+#define NAME_SIZE 30
+#define TIME_SIZE 100
 
 void *send_msg(void *arg);
 void *recv_msg(void *arg);
@@ -63,13 +65,18 @@ int main(int argc, char *argv[])
 
 void *send_msg(void *arg)
 {
-    int sock = *((int *)arg);                    // void descriptor -> int 변환
-    char name_msg[NAME_SIZE + BUF_SIZE];         // 사용자 ID와 메시지를 합칠 것임
-    char logout_msg[NAME_SIZE + strlen(logout)]; // 사용자 ID와 로그아웃 메시지를 합칠 것임
+    int sock = *((int *)arg);                        // void descriptor -> int 변환
+    char name_msg[TIME_SIZE + NAME_SIZE + BUF_SIZE]; // 사용자 ID와 메시지를 합칠 것임
+    char logout_msg[NAME_SIZE + strlen(logout)];     // 사용자 ID와 로그아웃 메시지를 합칠 것임
+    char local_date_time[TIME_SIZE];                 // 포맷팅한 시간 정보
+    time_t now = time(NULL);                         // 현재 시간
+    struct tm *t = localtime(&now);                  // 시간 포맷팅
 
     while (1)
     {
         fgets(msg, BUF_SIZE, stdin); // 사용자 입력을 msg에 저장
+
+        asctime_r(t, local_date_time); // 현재 시간 갱신
 
         if (!strcmp(msg, "exit\n"))
         {
@@ -81,7 +88,7 @@ void *send_msg(void *arg)
         }
 
         // 생성된 name_msg를 출력
-        sprintf(name_msg, "%s %s", name, msg); // ID가 joo이고 메시지가 "Hi" 라면, [joo] Hi
+        sprintf(name_msg, "%s > %s %s", local_date_time, name, msg); // ID가 joo이고 메시지가 "Hi" 라면, [joo] Hi
 
         write(sock, name_msg, sizeof(name_msg)); // 서버로 채팅을 보냄
     }
@@ -91,8 +98,8 @@ void *send_msg(void *arg)
 
 void *recv_msg(void *arg)
 {
-    int sock = *((int *)arg);            // void descriptor -> int 변환
-    char name_msg[NAME_SIZE + BUF_SIZE]; // 사용자 ID와 메시지를 합칠 것임
+    int sock = *((int *)arg);                        // void descriptor -> int 변환
+    char name_msg[TIME_SIZE + NAME_SIZE + BUF_SIZE]; // 사용자 ID와 메시지를 합칠 것임
     int str_len = 0;
 
     while (1)
