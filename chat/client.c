@@ -7,63 +7,21 @@
 #include <pthread.h>
 
 #define BUF_SIZE 100
-#define NAME_SIZE 30
+#define NAME_SIZE 20
+
+void *send_msg(void *arg);
+void *recv_msg(void *arg);
 
 char msg[BUF_SIZE];
-char name[NAME_SIZE] = "[DEFAULT]";
-char name_msg[NAME_SIZE + BUF_SIZE];
-
-typedef struct recieve_data
-{
-    char *message;
-    int *serv_sock;
-} recieve_data;
-
-void *send_msg(void *serv_sock)
-{
-    int *cs = (int *)serv_sock;
-
-    while (1)
-    {
-        printf("\n%s client -> : ", name);
-        fgets(msg, BUF_SIZE, stdin);
-
-        if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
-        {
-            close(*cs);
-            exit(1);
-        }
-
-        sprintf(name_msg, "%s %s", name, msg);
-        write(*cs, name_msg, sizeof(name_msg));
-    }
-}
-
-void *recv_msg(void *rcvDt)
-{
-
-    recieve_data *data = (recieve_data *)rcvDt;
-    char *msg = data->message;
-
-    while (1)
-    {
-        int str_len = read(*(data->serv_sock), msg, sizeof(char) * BUF_SIZE);
-
-        if (str_len != -1)
-        {
-            printf("\n%s", name_msg);
-        }
-    }
-}
+char name[NAME_SIZE] = "[DEFAULT]"; // 채팅창에 보여질 이름의 형태(20자 제한)
 
 int main(int argc, char *argv[])
 {
-
-    int serv_sock;
-    int status;
+    int sock;
     struct sockaddr_in serv_addr;
+    pthread_t send_thread, recv_thread; // 송신 스레드, 수신 스레드
+    void *thread_return;                // pthread_join에 사용
     int str_len;
-    pthread_t send_thread, recv_thread;
 
     if (argc != 4)
     {
@@ -71,26 +29,86 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    sprintf(name, "[%s]", argv[3]);
-    serv_sock = socket(PF_INET, SOCK_STREAM, 0);
+    sprintf(name, "[%s]", argv[3]); // ex) 입력 값이 joo라면, name = [joo]
 
+    sock = socket(PF_INET, SOCK_STREAM, 0); // 소켓 생성
+
+    // 연결할 서버 정보 할당
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
     serv_addr.sin_port = htons(atoi(argv[2]));
 
-    connect(serv_sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    // 서버에 연결 요청
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        perror("connect");
+        return -1;
+    }
 
-    recieve_data rcvDt;
-    rcvDt.message = msg;
-    rcvDt.serv_sock = &serv_sock;
+    // 송신과 수신을 수행할 두 스레드 생성
+    // 연결 요청 대상인 서버는 동일하므로 매개변수는 sock으로 동일
+    pthread_create(&send_thread, NULL, send_msg, (void *)&sock);
+    pthread_create(&recv_thread, NULL, recv_msg, (void *)&sock);
 
-    pthread_create(&send_thread, NULL, send_msg, (void *)&serv_sock);
-    pthread_create(&recv_thread, NULL, recv_msg, (void *)&rcvDt);
+    // 스레드 종료 대기
+    pthread_join(send_thread, NULL);
+    pthread_join(recv_thread, NULL);
 
-    pthread_join(send_thread, (void **)&status);
-    pthread_join(recv_thread, (void **)&status);
+    close(sock); // 클라이언트 연결 종료
 
-    close(serv_sock);
     return 0;
+}
+
+void *send_msg(void *arg)
+{
+    int sock = *((int *)arg);            // void descriptor -> int 변환
+    char name_msg[NAME_SIZE + BUF_SIZE]; // 사용자 ID와 메시지를 합칠 것임
+
+    while (1)
+    {
+        fgets(msg, BUF_SIZE, stdin); // 사용자 입력을 msg에 저장
+
+        if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
+        {
+            close(sock); // 서버에 EOF 보냄
+            exit(1);
+        }
+
+        // 생성된 name_msg를 출력
+        sprintf(name_msg, "%s %s", name, msg); // ID가 joo이고 메시지가 "Hi" 라면, [joo] Hi
+
+        write(sock, name_msg, sizeof(name_msg)); // 서버로 채팅을 보냄
+    }
+
+    return NULL;
+}
+
+void *recv_msg(void *arg)
+{
+    int sock = *((int *)arg);            // void descriptor -> int 변환
+    char name_msg[NAME_SIZE + BUF_SIZE]; // 사용자 ID와 메시지를 합칠 것임
+    int str_len = 0;
+
+    while (1)
+    {
+        str_len = read(sock, name_msg, sizeof(name_msg) - 1); // 서버에서 들어온 메시지 수신
+
+        /*
+        str_len 이 -1이라는 것은 서버 소켓과 연결이 끊어졌다는 것
+        send_msg close(sock) -> EOF -> server close(clnt_sock)
+        그러면 read 결과가 -1이 나옴
+        */
+        if (str_len == -1)
+        {
+            // 종료를 위한 리턴값, thread_return으로 갈 것
+            return (void *)-1; // pthread_join을 실행시키기 위함
+        }
+
+        name_msg[str_len] = 0; // 버퍼 맨 마지막 값 NULL
+
+        fputs(name_msg, stdout); // 받은 메시지 출력 (서버에서 write 한 메시지)
+    }
+
+    return NULL;
 }

@@ -9,60 +9,29 @@
 #define BUF_SIZE 100
 #define MAX_CLNT 256
 
+void *handle_clnt(void *arg);
+void send_msg(char *msg, int len);
 void error_handling(char *message);
 
-int clnt_cnt = 0;
+int clnt_cnt = 0; // 접속한 클라이언트 수
+/*
+여러 명의 클라이언트가 접속하므로 클라이언트 소켓은 배열
+멀티스레드 시, clnt_cnt와 clnt_socks 에 여러 스레드가 접속할 수 있기 때문에
+두 변수를 사용하는 영역은 임계 영역
+*/
 int clnt_socks[MAX_CLNT];
-pthread_mutex_t mtx;
-
-void send_msg(char *msg, int len)
-{
-    pthread_mutex_lock(&mtx);
-    for (int i = 0; i < clnt_cnt; i++)
-    {
-        write(clnt_socks[i], msg, len);
-    }
-    pthread_mutex_unlock(&mtx);
-}
-
-void *handle_clnt(void *arg)
-{
-    int clnt_sock = *((int *)arg);
-    int str_len = 0;
-    char msg[BUF_SIZE];
-
-    // 클라이언트가 close를 날린다면 EOF가 도달해서 read 함수가 0을 반환한다
-    while (str_len = read(clnt_sock, msg, sizeof(msg)) != 0)
-        send_msg(msg, str_len);
-
-    // 클라이언트
-    pthread_mutex_lock(&mtx);
-    for (int i = 0; i < clnt_cnt; i++)
-    {
-        if (clnt_sock == clnt_socks[i])
-        {
-            while (++i < clnt_cnt)
-            {
-                clnt_socks[i - 1] = clnt_socks[i];
-            }
-            break;
-        }
-    }
-    clnt_cnt--;
-    pthread_mutex_unlock(&mtx);
-
-    close(clnt_sock);
-
-    return NULL;
-}
+pthread_mutex_t mtx; // mutex 선언 (스레드끼리 전역변수 동시 사용 방지)
 
 int main(int argc, char *argv[])
 {
-    int serv_sock, clnt_sock;
-    char message[BUF_SIZE];
+    int serv_sock, clnt_sock; // serv_sock(듣기 소켓), clnt_sock(연결 소켓)
     struct sockaddr_in serv_addr, clnt_addr;
-    pthread_t tid;
+    pthread_t tid; // thread 선언
     socklen_t clnt_addr_size;
+
+    // 소켓 옵션 설정을 위한 변수들
+    int option = 0;
+    socklen_t optlen;
 
     printf("read port....\n");
     if (argc != 2)
@@ -72,13 +41,21 @@ int main(int argc, char *argv[])
     }
 
     printf("set server socket\n");
-    pthread_mutex_init(&mtx, NULL);
-    serv_sock = socket(PF_INET, SOCK_STREAM, 0);
-    if (serv_sock == -1)
+
+    pthread_mutex_init(&mtx, NULL); // mutex 생성
+
+    if ((serv_sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) // 듣기 소켓 생성
     {
         error_handling("socket() error");
     }
 
+    // Time-wait 해제
+    // SO_REUSEADDR을 0에서 1로 변경
+    optlen = sizeof(option);
+    option = 1;
+    setsockopt(serv_sock, SOL_SOCKET, SO_REUSEADDR, (void *)&option, optlen);
+
+    // 주소 정보 바인딩
     printf("set server addr...\n");
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -86,11 +63,14 @@ int main(int argc, char *argv[])
     serv_addr.sin_port = htons(atoi(argv[1]));
 
     printf("binding...\n");
-    if (bind(serv_sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
+    if (bind(serv_sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1) // 소켓과 주소 정보 결합
     {
         error_handling("bind() error");
     }
 
+    // 5는 큐의 크기일 뿐이다. 운영체제가 여유가 된다면 알아서 accept 할 것
+    // 즉, 총 256명까지 접속 가능한 것.
+    // 웹 서버같이 수 천명의 클라이언트로 바쁠 경우, 15로 잡는 경우가 보통
     if (listen(serv_sock, 5) == -1)
     {
         error_handling("listen() error");
@@ -101,25 +81,74 @@ int main(int argc, char *argv[])
     while (1)
     {
         clnt_addr_size = sizeof(clnt_addr);
-        clnt_sock = accept(serv_sock, (struct sockaddr *)&clnt_addr, &clnt_addr_size);
-        if (clnt_sock < 0)
+        // clnt_addr -> 연결된 클라이언트의 주소 정보
+        if ((clnt_sock = accept(serv_sock, (struct sockaddr *)&clnt_addr, &clnt_addr_size)) < 0)
         {
-            perror("accept");
-            return -1;
+            error_handling("accept() error");
         }
 
-        pthread_mutex_lock(&mtx);
-        clnt_socks[clnt_cnt++] = clnt_sock;
-        pthread_mutex_unlock(&mtx);
+        printf("[NOW] accept\n");
 
-        pthread_create(&tid, NULL, handle_clnt, (void *)&clnt_sock);
-        pthread_detach(tid);
+        pthread_mutex_lock(&mtx);           // 전역 변수 사용을 위해 mutex 락
+        clnt_socks[clnt_cnt++] = clnt_sock; // 소켓 배정
+        pthread_mutex_unlock(&mtx);         // mutex 언락
+
+        pthread_create(&tid, NULL, handle_clnt, (void *)&clnt_sock); // handle_clnt를 작업하는 스레드 생성
+        pthread_detach(tid);                                         // 해당 스레드 분리
         printf("accepted host(IP: %s, Port: %d)\n", inet_ntoa(clnt_addr.sin_addr), ntohs(serv_addr.sin_port));
     }
 
     close(serv_sock);
 
     return 0;
+}
+
+void *handle_clnt(void *arg)
+{
+    int clnt_sock = *((int *)arg); // void descriptor -> int 변환
+    int str_len = 0;
+    char msg[BUF_SIZE];
+
+    /*
+    클라이언트에서 보낸 메시지 받음
+    클라이언트에서 EOF를 보내 str_len 이 0이 될때까지 반복
+    EOF는 클라이언트에서 소켓을 close 했을 때 보냄
+    즉, 클라이언트가 접속을 하고 있는 동안에는 while 문을 벗어나지 않는다.
+    */
+    while ((str_len = read(clnt_sock, msg, sizeof(msg))) != 0)
+        send_msg(msg, str_len); // 접속한 모두에게 메시지 보내기
+
+    // while 문을 탈출 -> 현재 담당하는 소켓의 연결이 끊김
+
+    pthread_mutex_lock(&mtx); // 전역 변수 사용을 위해 mutex 락
+    // 현재 스레드에서 담당하는 소켓(disconnected) 삭제
+    for (int i = 0; i < clnt_cnt; i++)
+    {
+        if (clnt_sock == clnt_socks[i]) // 현재 담당하는 클라이언트 소켓의 descriptor를 찾으면
+        {
+            while (i++ < clnt_cnt - 1) // 해당 위치부터 클라이언트 소켓 1칸씩 당기기
+                clnt_socks[i] = clnt_socks[i + 1];
+
+            break;
+        }
+    }
+
+    clnt_cnt--;                 // 클라이언트 수 감소
+    pthread_mutex_unlock(&mtx); // mutex 언락
+
+    close(clnt_sock); // 서버의 스레드에서 담당하는 클라이언트 소켓 종료
+
+    return NULL;
+}
+
+// 접속한 모두에게 메시지 보내기
+void send_msg(char *msg, int len)
+{
+    pthread_mutex_lock(&mtx); // 전역 변수 사용을 위해 mutex 락
+    for (int i = 0; i < clnt_cnt; i++)
+        write(clnt_socks[i], msg, len); // 모든 클라이언트 소켓에 메시지 전달
+
+    pthread_mutex_unlock(&mtx); // mutex 언락
 }
 
 void error_handling(char *message)
