@@ -5,14 +5,17 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <pthread.h>
+#include <mysql/mysql.h>
 
 #define BUF_SIZE 1024
 #define MAX_CLNT 256
+#define QUERY_SIZE 100
 
 void *handle_clnt(void *arg);
 void send_msg(char *msg, int len);
 void send_msg_me(int clnt_sock, char *msg, int len);
 void error_handling(char *message);
+void finish_with_error(MYSQL *con);
 
 int clnt_cnt = 0; // 접속한 클라이언트 수
 /*
@@ -23,6 +26,10 @@ int clnt_cnt = 0; // 접속한 클라이언트 수
 int clnt_socks[MAX_CLNT];
 pthread_mutex_t mtx; // mutex 선언 (스레드끼리 전역변수 동시 사용 방지)
 char login[] = "로그인을 완료하였습니다. 로그아웃 명령은 'exit' 입니다.\n";
+MYSQL *con;                   // SQL connection
+MYSQL_RES *sql_result = NULL; // SQL 응답
+MYSQL_ROW sql_row;            // SQL 결과 배열
+int id = 0;                   // MYSQL id
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +37,20 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_addr, clnt_addr;
     pthread_t tid; // thread 선언
     socklen_t clnt_addr_size;
+
+    // MYSQL
+    con = mysql_init(NULL);
+
+    if (con == NULL)
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        exit(1);
+    }
+
+    if (mysql_real_connect(con, "localhost", "user1", "0000", "chatdb", 3306, NULL, 0) == NULL)
+    {
+        finish_with_error(con);
+    }
 
     // 소켓 옵션 설정을 위한 변수들
     int option = 0;
@@ -98,9 +119,21 @@ int main(int argc, char *argv[])
         pthread_create(&tid, NULL, handle_clnt, (void *)&clnt_sock); // handle_clnt를 작업하는 스레드 생성
         pthread_detach(tid);                                         // 해당 스레드 분리
         printf("accepted host(IP: %s, Port: %d)\n", inet_ntoa(clnt_addr.sin_addr), ntohs(serv_addr.sin_port));
+
+        if (mysql_query(con, "SELECT * FROM CHAT ORDER BY id DESC LIMIT 10"))
+            finish_with_error(con);
+
+        sql_result = mysql_store_result(con);
+        while ((sql_row = mysql_fetch_row(sql_result)) != NULL)
+        {
+            printf("%s : %s\n", sql_row[0], sql_row[1]);
+        }
+
+        mysql_free_result(sql_result); // SQL 응답 포인터 해제
     }
 
     close(serv_sock);
+    mysql_close(con);
 
     return 0;
 }
@@ -110,6 +143,7 @@ void *handle_clnt(void *arg)
     int clnt_sock = *((int *)arg); // void descriptor -> int 변환
     int str_len = 0;
     char msg[BUF_SIZE];
+    char query[QUERY_SIZE + BUF_SIZE];
 
     send_msg_me(clnt_sock, login, strlen(login));
 
@@ -120,7 +154,13 @@ void *handle_clnt(void *arg)
     즉, 클라이언트가 접속을 하고 있는 동안에는 while 문을 벗어나지 않는다.
     */
     while ((str_len = read(clnt_sock, msg, sizeof(msg))) != 0)
+    {
+        sprintf(query, "INSERT INTO CHAT VALUES('%d', '%s')", ++id, msg); // 채팅 쿼리 생성
+        if (mysql_query(con, query))                                      // 채팅 저장
+            finish_with_error(con);
+
         send_msg(msg, str_len); // 접속한 모두에게 메시지 보내기
+    }
 
     // while 문을 탈출 -> 현재 담당하는 소켓의 연결이 끊김
 
@@ -167,5 +207,12 @@ void error_handling(char *message)
 {
     fputs(message, stderr);
     fputc('\n', stderr);
+    exit(1);
+}
+
+void finish_with_error(MYSQL *con)
+{
+    fprintf(stderr, "%s \n", mysql_error(con));
+    mysql_close(con);
     exit(1);
 }
