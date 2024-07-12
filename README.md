@@ -1,5 +1,11 @@
 ## Neo reflection intern program
-- C study
-- Calculator with C
-  - input integer (negative or positive)
-  - ouput integer or decimal 3 places
+
+-   C study
+-   Calculator with C
+    -   input integer (negative or positive)
+    -   ouput integer or decimal 3 places
+-   Chat program using a socket
+    -   show chat to all users
+    -   If you connect to server, you'll see the last 10 chats
+    -   Chat is saved in MySQL
+    -   MAX client is 256
