@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <pthread.h>
 #include <time.h>
+#include <mysql/mysql.h>
 
 #define BUF_SIZE 100
 #define NAME_SIZE 30
@@ -13,10 +14,14 @@
 
 void *send_msg(void *arg);
 void *recv_msg(void *arg);
+void finish_with_error(MYSQL *con);
 
 char msg[BUF_SIZE];
 char name[NAME_SIZE] = "[DEFAULT]"; // 채팅창에 보여질 이름의 형태(20자 제한)
 char logout[] = "님이 로그아웃했습니다.\n";
+MYSQL *con;                   // SQL connection
+MYSQL_RES *sql_result = NULL; // SQL 응답
+MYSQL_ROW sql_row;            // SQL 결과 배열
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +30,20 @@ int main(int argc, char *argv[])
     pthread_t send_thread, recv_thread; // 송신 스레드, 수신 스레드
     void *thread_return;                // pthread_join에 사용
     int str_len;
+
+    // MYSQL
+    con = mysql_init(NULL);
+
+    if (con == NULL)
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        exit(1);
+    }
+
+    if (mysql_real_connect(con, "localhost", "user1", "0000", "chatdb", 3306, NULL, 0) == NULL)
+    {
+        finish_with_error(con);
+    }
 
     if (argc != 4)
     {
@@ -49,6 +68,16 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    if (mysql_query(con, "SELECT * FROM CHAT ORDER BY date DESC LIMIT 10") != 0) // 최근 10개 레코드 조회
+        finish_with_error(con);
+
+    sql_result = mysql_store_result(con); // 쿼리 결과 호출
+
+    while ((sql_row = mysql_fetch_row(sql_result)) != NULL)
+    {
+        printf("%s : %s\n", sql_row[0], sql_row[1]);
+    }
+
     // 송신과 수신을 수행할 두 스레드 생성
     // 연결 요청 대상인 서버는 동일하므로 매개변수는 sock으로 동일
     pthread_create(&send_thread, NULL, send_msg, (void *)&sock);
@@ -59,6 +88,8 @@ int main(int argc, char *argv[])
     pthread_join(recv_thread, NULL);
 
     close(sock); // 클라이언트 연결 종료
+
+    mysql_free_result(sql_result); // SQL 응답 포인터 해제
 
     return 0;
 }
@@ -123,4 +154,11 @@ void *recv_msg(void *arg)
     }
 
     return NULL;
+}
+
+void finish_with_error(MYSQL *con)
+{
+    fprintf(stderr, "%s \n", mysql_error(con));
+    mysql_close(con);
+    exit(1);
 }

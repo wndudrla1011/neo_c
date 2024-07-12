@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <pthread.h>
 #include <mysql/mysql.h>
+#include <time.h>
 
 #define BUF_SIZE 1024
 #define MAX_CLNT 256
@@ -30,7 +31,8 @@ char login[] = "로그인을 완료하였습니다. 로그아웃 명령은 'exit
 MYSQL *con;                   // SQL connection
 MYSQL_RES *sql_result = NULL; // SQL 응답
 MYSQL_ROW sql_row;            // SQL 결과 배열
-int id = 0;                   // MYSQL id
+time_t now;                   // MYSQL PK
+struct tm *t;                 // 시간 구조체
 
 int main(int argc, char *argv[])
 {
@@ -121,15 +123,6 @@ int main(int argc, char *argv[])
         pthread_detach(tid);                                         // 해당 스레드 분리
         printf("accepted host(IP: %s, Port: %d)\n", inet_ntoa(clnt_addr.sin_addr), ntohs(serv_addr.sin_port));
 
-        if (mysql_query(con, "SELECT * FROM CHAT ORDER BY id DESC LIMIT 10"))
-            finish_with_error(con);
-
-        sql_result = mysql_store_result(con);
-        while ((sql_row = mysql_fetch_row(sql_result)) != NULL)
-        {
-            printf("%s : %s\n", sql_row[0], sql_row[1]);
-        }
-
         mysql_free_result(sql_result); // SQL 응답 포인터 해제
     }
 
@@ -145,6 +138,7 @@ void *handle_clnt(void *arg)
     int str_len = 0;
     char msg[BUF_SIZE];
     char query[QUERY_SIZE + BUF_SIZE];
+    char pk[QUERY_SIZE];
 
     send_msg_me(clnt_sock, login, strlen(login));
 
@@ -156,6 +150,9 @@ void *handle_clnt(void *arg)
     */
     while ((str_len = read(clnt_sock, msg, sizeof(msg))) != 0)
     {
+        send_msg(msg, str_len); // 접속한 모두에게 메시지 보내기
+
+        // escape single quote
         for (int i = 0; i < str_len; i++)
         {
             if (msg[i] == 39)
@@ -168,11 +165,12 @@ void *handle_clnt(void *arg)
             }
         }
 
-        sprintf(query, "INSERT INTO CHAT VALUES('%d', '%s')", ++id, msg); // 채팅 쿼리 생성
-        if (mysql_query(con, query))                                      // 채팅 저장
-            finish_with_error(con);
+        now = time(NULL); // 현재 시간
 
-        send_msg(msg, str_len); // 접속한 모두에게 메시지 보내기
+        sprintf(pk, "%ld", now);
+        sprintf(query, "INSERT INTO CHAT VALUES('%s', '%s')", pk, msg); // 채팅 쿼리 생성
+        if (mysql_query(con, query))                                    // 채팅 저장
+            finish_with_error(con);
     }
 
     // while 문을 탈출 -> 현재 담당하는 소켓의 연결이 끊김
