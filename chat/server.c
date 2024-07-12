@@ -13,6 +13,7 @@
 
 void *handle_clnt(void *arg);
 void send_msg(char *msg, int len);
+
 void send_msg_me(int clnt_sock, char *msg, int len);
 void error_handling(char *message);
 void finish_with_error(MYSQL *con);
@@ -155,6 +156,18 @@ void *handle_clnt(void *arg)
     */
     while ((str_len = read(clnt_sock, msg, sizeof(msg))) != 0)
     {
+        for (int i = 0; i < str_len; i++)
+        {
+            if (msg[i] == 39)
+            {
+                for (int j = str_len; j > i; j--)
+                {
+                    msg[j] = msg[j - 1];
+                }
+                i += 2;
+            }
+        }
+
         sprintf(query, "INSERT INTO CHAT VALUES('%d', '%s')", ++id, msg); // 채팅 쿼리 생성
         if (mysql_query(con, query))                                      // 채팅 저장
             finish_with_error(con);
