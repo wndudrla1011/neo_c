@@ -137,17 +137,6 @@ void *recv_msg(void *arg)
     {
         str_len = read(sock, name_msg, sizeof(name_msg) - 1); // 서버에서 들어온 메시지 수신
 
-        /*
-        str_len 이 -1이라는 것은 서버 소켓과 연결이 끊어졌다는 것
-        send_msg close(sock) -> EOF -> server close(clnt_sock)
-        그러면 read 결과가 -1이 나옴
-        */
-        if (str_len == -1)
-        {
-            // 종료를 위한 리턴값, thread_return으로 갈 것
-            return (void *)-1; // pthread_join을 실행시키기 위함
-        }
-
         name_msg[str_len] = 0; // 버퍼 맨 마지막 값 NULL
 
         fputs(name_msg, stdout); // 받은 메시지 출력 (서버에서 write 한 메시지)
