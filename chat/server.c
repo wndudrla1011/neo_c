@@ -209,9 +209,7 @@ void send_msg(char *msg, int len)
 // 접속한 대상에만 메시지 보내기
 void send_msg_me(int clnt_sock, char *msg, int len)
 {
-    pthread_mutex_lock(&mtx);   // 전역 변수 사용을 위해 mutex 락
     write(clnt_sock, msg, len); // 접속 클라이언트 소켓에 메시지 전달
-    pthread_mutex_unlock(&mtx); // mutex 언락
 }
 
 void error_handling(char *message)
