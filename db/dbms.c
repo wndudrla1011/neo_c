@@ -6,15 +6,15 @@
 #define MAX_INPUT 100      // 최대 입력 값 길이
 #define MAX_CADINALITY 200 // 최대 튜플 개수
 
-typedef struct
+typedef struct DB
 {
-    char *dname;         // DB명
-    int tcnt;            // 테이블 개수
-    struct DB *next;     // 다음 DB 포인터
-    struct Table *thead; // 테이블 목록 (Table 순차 검색)
+    char dname[MAX_INPUT]; // DB명
+    int tcnt;              // 테이블 개수
+    struct DB *next;       // 다음 DB 포인터
+    struct Table *thead;   // 테이블 목록 (Table 순차 검색)
 } DB;
 
-typedef struct
+typedef struct Table
 {
     char tname[MAX_INPUT];                  // 테이블명
     int cadinality;                         // 튜블 개수 == tuple 스택의 top
@@ -63,9 +63,32 @@ void add_db(DB *db, char *name) // 마지막 노드에 새 DB 추가
     end = find_end_db(db); // Leaf Node
     DB *new_db;
     new_db = (DB *)malloc(sizeof(DB)); // 새 DB 생성
-    new_db->dname = name;              // DB 이름 설정
-    end->next = new_db;                // last db -> new db
+    strcpy(new_db->dname, name);
+    end->next = new_db; // last db -> new db
     new_db->next = NULL;
+}
+
+void print_all_db(DB *db) // 모든 DB 출력
+{
+    DB *cur;
+    cur = db->next;
+
+    if (cur != NULL)
+    {
+        printf("======================================");
+        while (1)
+        {
+            printf("\n%s", cur->dname);
+            if (cur->next == NULL)
+            {
+                printf("\n");
+                break;
+            }
+
+            cur = cur->next;
+        }
+        printf("======================================\n");
+    }
 }
 
 char *getData(char *str, char *delim)
@@ -100,30 +123,44 @@ int main(void)
 {
     DB *db = NULL;
     Table table;
-    char input[MAX_INPUT];
-    char *ptr_input;
-    char *command; // 명령어
+    char input[MAX_INPUT]; // 입력 값
+    char *command;         // 명령어
 
-    command = strtok(input, " ");
+    while (1)
+    {
+        fgets(input, MAX_INPUT, stdin);
 
-    if (strcmpi(command, "show"))
-    {
-        command = strtok(NULL, " ");
-        if (strcmp(command, "databases;")) // Query > show databases
+        command = strtok(input, " ");
+
+        if (!strcmp(command, "show") || !strcmp(command, "SHOW"))
         {
-        }
-    }
-    else if (strcmpi(command, "create"))
-    {
-        command = strtok(NULL, " ");
-        if (strcmpi(command, "database")) // Query > create database
-        {
-            if (get_cnt_db(db) == 0)
+            command = strtok(NULL, ";");
+
+            if (!strcmp(command, "databases") || !strcmp(command, "DATABASES")) // Query > show databases
             {
-                db = init_db(); // DB 초기화
+                if (get_cnt_db(db) == 0) // 생성한 DB가 없을 때
+                {
+                    printf("No database exist\n");
+                    exit(1);
+                }
+                else
+                {
+                    print_all_db(db); // 생성된 DB 출력
+                }
+            }
+        }
+        else if (!strcmp(command, "create") || !strcmp(command, "CREATE"))
+        {
+            command = strtok(NULL, " ");
+            if (!strcmp(command, "database") || !strcmp(command, "DATABASE")) // Query > create database
+            {
+                if (get_cnt_db(db) == 0)
+                {
+                    db = init_db(); // DB 초기화
+                }
+                add_db(db, strtok(NULL, ";")); // 연결 리스트 -> New DB
                 printf("Query Success!\n");
             }
-            add_db(db, strtok(NULL, ";")); // 연결 리스트 -> New DB
         }
     }
 
