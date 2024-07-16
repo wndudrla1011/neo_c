@@ -21,7 +21,21 @@ typedef struct
     char *tuple[MAX_CADINALITY][MAX_INPUT]; // 튜플 선언
 } Table;
 
-DB *init_db()
+int get_cnt_db(DB *db) // 생성된 DB 개수
+{
+    int cnt = 0;
+    DB *cur = db;
+
+    while (cur != NULL)
+    {
+        cur = cur->next;
+        cnt++;
+    }
+
+    return cnt;
+}
+
+DB *init_db() // DB 목록의 head 생성
 {
     DB *head;
     head = (DB *)malloc(sizeof(DB));
@@ -84,7 +98,7 @@ char *getData(char *str, char *delim)
 
 int main(void)
 {
-    DB *db;
+    DB *db = NULL;
     Table table;
     char input[MAX_INPUT];
     char *ptr_input;
@@ -92,19 +106,23 @@ int main(void)
 
     command = strtok(input, " ");
 
-    if (strcmp(command, "show"))
+    if (strcmpi(command, "show"))
     {
         command = strtok(NULL, " ");
-        if (strcmp(command, "databases;")) // DB 목록 출력
+        if (strcmp(command, "databases;")) // Query > show databases
         {
         }
     }
-    else if (strcmp(command, "create"))
+    else if (strcmpi(command, "create"))
     {
         command = strtok(NULL, " ");
-        if (strcmp(command, "database")) // DB 생성
+        if (strcmpi(command, "database")) // Query > create database
         {
-            db = init_db();                // DB 초기화
+            if (get_cnt_db(db) == 0)
+            {
+                db = init_db(); // DB 초기화
+                printf("Query Success!\n");
+            }
             add_db(db, strtok(NULL, ";")); // 연결 리스트 -> New DB
         }
     }
