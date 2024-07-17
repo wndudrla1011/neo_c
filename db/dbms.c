@@ -44,6 +44,7 @@ int get_cnt_db(DB *db) // 생성된 DB 개수
         cnt++;
     }
 
+    printf("%d\n", cnt);
     return cnt;
 }
 
@@ -111,6 +112,25 @@ DB *read_db(DB *db, char *dname) // DB 이름으로 DB 찾기
     }
 
     return (cur);
+}
+
+void delete_db(DB *db, char *name) // DB 삭제
+{
+    DB *prev;
+    DB *cur; // 삭제할 DB
+    cur = db;
+
+    while (strcmp(cur->dname, name) && cur->next != NULL)
+    {
+        if (!strcmp(cur->next->dname, name))
+            prev = cur;
+        cur = cur->next;
+    }
+
+    prev->next = cur->next;
+    cur->next = NULL;
+
+    free(cur);
 }
 
 //>>>>>>>>>>>>>>>>>>>>>>>Table 관련 메서드>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -229,11 +249,12 @@ int main(void)
 
             if (!strcmp(command, "databases") || !strcmp(command, "DATABASES")) // Query > show databases
             {
-                if (get_cnt_db(head) == 0) // 생성한 DB가 없을 때
+                if (db == NULL)
                 {
                     printf("No database exist\n");
                     continue;
                 }
+
                 else
                 {
                     print_all_db(head); // 생성된 DB 출력
@@ -295,12 +316,30 @@ int main(void)
             printf("Database changed\n");
         }
 
-        else if (!strcmp(command, "drop") || !strcmp(command, "DROP")) // Query > drop table
+        else if (!strcmp(command, "drop") || !strcmp(command, "DROP"))
         {
             command = strtok(NULL, " "); // table
-            command = strtok(NULL, ";"); // Table name
 
-            delete_table(db, command);
+            if (!strcmp(command, "database") || !strcmp(command, "DATABASE")) // Query > drop database
+            {
+                command = strtok(NULL, ";");
+
+                if (read_db(head, command) == NULL)
+                {
+                    printf("Now current DB is NULL\nPlease use another DB\n");
+                    continue;
+                }
+
+                delete_db(db, command);
+                printf("Query Success!\n");
+            }
+
+            else if (!strcmp(command, "table") || !strcmp(command, "TABLE")) // Query > drop table
+            {
+                command = strtok(NULL, ";");
+
+                delete_table(db, command);
+            }
         }
     }
 
