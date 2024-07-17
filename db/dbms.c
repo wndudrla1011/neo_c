@@ -10,6 +10,7 @@ typedef struct DB
 {
     char dname[MAX_INPUT]; // DB명
     int tcnt;              // 테이블 개수
+    struct DB *head;       // DB head
     struct DB *next;       // 다음 DB 포인터
     struct Table *thead;   // 테이블 목록 (Table 순차 검색)
 } DB;
@@ -94,6 +95,25 @@ void print_all_db(DB *db) // 모든 DB 출력
     }
 }
 
+DB *read_db(DB *db, char *dname) // DB 이름으로 DB 찾기
+{
+    DB *cur;
+    cur = db;
+
+    while (strcmp(cur->dname, dname) && cur->next != NULL)
+    {
+        cur = cur->next;
+    }
+
+    if (cur == NULL) // Not found DB
+    {
+        printf("Unknown database '%s'\n", dname);
+        return (db);
+    }
+
+    return (cur);
+}
+
 //>>>>>>>>>>>>>>>>>>>>>>>Table 관련 메서드>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 Table *init_table(DB *db) // Table 목록의 head 생성
@@ -171,6 +191,7 @@ void print_all_table(DB *db) // 모든 Table 출력
 int main(void)
 {
     DB *db = NULL;
+    DB *head = NULL; // DB head
     Table *table = NULL;
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
@@ -187,14 +208,14 @@ int main(void)
 
             if (!strcmp(command, "databases") || !strcmp(command, "DATABASES")) // Query > show databases
             {
-                if (get_cnt_db(db) == 0) // 생성한 DB가 없을 때
+                if (get_cnt_db(head) == 0) // 생성한 DB가 없을 때
                 {
                     printf("No database exist\n");
                     continue;
                 }
                 else
                 {
-                    print_all_db(db); // 생성된 DB 출력
+                    print_all_db(head); // 생성된 DB 출력
                 }
             }
 
@@ -217,9 +238,10 @@ int main(void)
 
             if (!strcmp(command, "database") || !strcmp(command, "DATABASE")) // Query > create database
             {
-                if (get_cnt_db(db) == 0) // 첫 DB 생성
+                if (get_cnt_db(head) == 0) // 첫 DB 생성
                 {
                     db = init_db(); // DB 초기화
+                    head = db;
                 }
                 add_db(db, strtok(NULL, ";")); // 연결 리스트 -> New DB
                 printf("Query Success!\n");
@@ -239,6 +261,15 @@ int main(void)
                 add_table(db, table, strtok(NULL, ";")); // 연결 리스트 -> New Table
                 printf("Query Success!\n");
             }
+        }
+
+        else if (!strcmp(command, "use") || !strcmp(command, "USE")) // Query > use database
+        {
+            command = strtok(NULL, ";"); // DB name
+
+            db = read_db(head, command); // 찾은 DB로 이동
+            printf("use %s\n", db->dname);
+            printf("Database changed\n");
         }
     }
 
