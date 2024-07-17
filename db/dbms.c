@@ -188,6 +188,22 @@ void print_all_table(DB *db) // 모든 Table 출력
     }
 }
 
+void delete_all_table(DB *db) // 모든 테이블 삭제
+{
+    Table *cur;
+    cur = db->thead;
+
+    Table *next;
+    while (cur != NULL)
+    {
+        next = cur->next;
+
+        free(cur);
+        cur = next;
+    }
+    free(db->thead);
+}
+
 int main(void)
 {
     DB *db = NULL;
@@ -232,6 +248,7 @@ int main(void)
                 }
             }
         }
+
         else if (!strcmp(command, "create") || !strcmp(command, "CREATE"))
         {
             command = strtok(NULL, " ");
