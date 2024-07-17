@@ -10,7 +10,6 @@ typedef struct DB
 {
     char dname[MAX_INPUT]; // DB명
     int tcnt;              // 테이블 개수
-    struct DB *head;       // DB head
     struct DB *next;       // 다음 DB 포인터
     struct Table *thead;   // 테이블 목록 (Table 순차 검색)
 } DB;
@@ -126,20 +125,6 @@ Table *init_table(DB *db) // Table 목록의 head 생성
     return (head);
 }
 
-int get_cnt_table(Table *T) // 생성된 Table 개수
-{
-    int cnt = 0;
-    Table *cur = T;
-
-    while (cur != NULL)
-    {
-        cur = cur->next;
-        cnt++;
-    }
-
-    return cnt;
-}
-
 Table *find_end_table(Table *T) // DB의 Table 목록에서 가장 마지막 Table 찾기
 {
     Table *cur;
@@ -167,22 +152,22 @@ void add_table(DB *db, Table *table, char *name) // DB의 Table 목록 마지막
 
 void print_all_table(DB *db) // 모든 Table 출력
 {
-    Table *table;
-    table = db->thead->next;
+    Table *cur;
+    cur = db->thead->next;
 
-    if (table != NULL)
+    if (cur != NULL)
     {
         printf("======================================");
         while (1)
         {
-            printf("\n%s", table->tname);
-            if (table->next == NULL)
+            printf("\n%s", cur->tname);
+            if (cur->next == NULL)
             {
                 printf("\n");
                 break;
             }
 
-            table = table->next;
+            cur = cur->next;
         }
         printf("======================================\n\n");
     }
@@ -202,6 +187,26 @@ void delete_all_table(DB *db) // 모든 테이블 삭제
         cur = next;
     }
     free(db->thead);
+}
+
+void delete_table(DB *db, char *name) // 테이블 삭제
+{
+    Table *prev;
+    Table *cur; // 삭제할 테이블
+    cur = db->thead;
+
+    while (strcmp(cur->tname, name) && cur->next != NULL)
+    {
+        if (!strcmp(cur->next->tname, name))
+            prev = cur;
+        cur = cur->next;
+    }
+
+    prev->next = cur->next;
+    cur->next = NULL;
+
+    free(cur);
+    db->tcnt--; // DB의 Table 개수 감소
 }
 
 int main(void)
@@ -235,9 +240,9 @@ int main(void)
                 }
             }
 
-            else if (!strcmp(command, "tables") || !strcmp(command, "TABLES")) // Query > show table
+            else if (!strcmp(command, "tables") || !strcmp(command, "TABLES")) // Query > show tables
             {
-                if (get_cnt_table(table) == 0) // 생성한 Table이 없을 때
+                if (db->tcnt == 0) // 생성한 Table이 없을 때
                 {
                     printf("Entry empty\n");
                     continue;
@@ -266,15 +271,17 @@ int main(void)
 
             else if (!strcmp(command, "table") || !strcmp(command, "TABLE")) // Query > create table
             {
-                if (get_cnt_table(table) == 0) // 첫 Table 생성
+                if (db == NULL)
                 {
-                    if (db == NULL)
-                    {
-                        printf("No database selected\n");
-                        continue;
-                    }
+                    printf("No database selected\n");
+                    continue;
+                }
+
+                if (db->tcnt == 0) // 첫 Table 생성
+                {
                     table = init_table(db); // Table 초기화
                 }
+
                 add_table(db, table, strtok(NULL, ";")); // 연결 리스트 -> New Table
                 printf("Query Success!\n");
             }
@@ -285,8 +292,15 @@ int main(void)
             command = strtok(NULL, ";"); // DB name
 
             db = read_db(head, command); // 찾은 DB로 이동
-            printf("use %s\n", db->dname);
             printf("Database changed\n");
+        }
+
+        else if (!strcmp(command, "drop") || !strcmp(command, "DROP")) // Query > drop table
+        {
+            command = strtok(NULL, " "); // table
+            command = strtok(NULL, ";"); // Table name
+
+            delete_table(db, command);
         }
     }
 
