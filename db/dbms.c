@@ -35,7 +35,10 @@ DB *init_db() // DB 목록의 head 생성
 
 int get_cnt_db(DB *db) // 생성된 DB 개수
 {
-    int cnt = 0;
+    if (db == NULL) // DB를 생성하기 전 상황
+        return 0;
+
+    int cnt = -1;
     DB *cur = db;
 
     while (cur != NULL)
@@ -44,7 +47,6 @@ int get_cnt_db(DB *db) // 생성된 DB 개수
         cnt++;
     }
 
-    printf("%d\n", cnt);
     return cnt;
 }
 
@@ -249,7 +251,7 @@ int main(void)
 
             if (!strcmp(command, "databases") || !strcmp(command, "DATABASES")) // Query > show databases
             {
-                if (db == NULL)
+                if (get_cnt_db(db) == 0)
                 {
                     printf("No database exist\n");
                     continue;
