@@ -33,13 +33,13 @@ DB *init_db() // DB 목록의 head 생성
     return (head);
 }
 
-int get_cnt_db(DB *db) // 생성된 DB 개수
+int get_cnt_db(DB *h) // 생성된 DB 개수
 {
-    if (db == NULL) // DB를 생성하기 전 상황
+    if (h == NULL) // DB를 생성하기 전 상황
         return 0;
 
     int cnt = -1;
-    DB *cur = db;
+    DB *cur = h;
 
     while (cur != NULL)
     {
@@ -74,10 +74,10 @@ void add_db(DB *db, char *name) // 마지막 노드에 새 DB 추가
     new_db->next = NULL;
 }
 
-void print_all_db(DB *db) // 모든 DB 출력
+void print_all_db(DB *h) // 모든 DB 출력
 {
     DB *cur;
-    cur = db->next;
+    cur = h->next;
 
     if (cur != NULL)
     {
@@ -97,13 +97,13 @@ void print_all_db(DB *db) // 모든 DB 출력
     }
 }
 
-DB *read_db(DB *db, char *dname) // DB 이름으로 DB 찾기
+DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
 {
-    if (db == NULL) // DB를 생성하기 전 상황
-        return (db);
+    if (h == NULL) // DB를 생성하기 전 상황
+        return (h);
 
     DB *cur;
-    cur = db;
+    cur = h;
 
     while (strcmp(cur->dname, dname) && cur->next != NULL)
     {
@@ -113,17 +113,17 @@ DB *read_db(DB *db, char *dname) // DB 이름으로 DB 찾기
     if (cur == NULL) // Not found DB
     {
         printf("Unknown database '%s'\n", dname);
-        return (db);
+        return (h);
     }
 
     return (cur);
 }
 
-void delete_db(DB *db, char *name) // DB 삭제
+void delete_db(DB *h, char *name) // DB 삭제
 {
     DB *prev;
     DB *cur; // 삭제할 DB
-    cur = db;
+    cur = h;
 
     while (strcmp(cur->dname, name) && cur->next != NULL)
     {
@@ -254,7 +254,7 @@ int main(void)
 
             if (!strcmp(command, "databases") || !strcmp(command, "DATABASES")) // Query > show databases
             {
-                if (get_cnt_db(db) == 0)
+                if (get_cnt_db(head) == 0)
                 {
                     printf("No database exist\n");
                     continue;
@@ -327,7 +327,7 @@ int main(void)
 
         else if (!strcmp(command, "drop") || !strcmp(command, "DROP"))
         {
-            command = strtok(NULL, " "); // table
+            command = strtok(NULL, " ");
 
             if (!strcmp(command, "database") || !strcmp(command, "DATABASE")) // Query > drop database
             {
@@ -339,7 +339,7 @@ int main(void)
                     continue;
                 }
 
-                delete_db(db, command);
+                delete_db(head, command);
                 printf("Query Success!\n");
             }
 
