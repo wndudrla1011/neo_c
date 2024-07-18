@@ -99,6 +99,9 @@ void print_all_db(DB *db) // 모든 DB 출력
 
 DB *read_db(DB *db, char *dname) // DB 이름으로 DB 찾기
 {
+    if (db == NULL) // DB를 생성하기 전 상황
+        return (db);
+
     DB *cur;
     cur = db;
 
@@ -315,7 +318,11 @@ int main(void)
             command = strtok(NULL, ";"); // DB name
 
             db = read_db(head, command); // 찾은 DB로 이동
-            printf("Database changed\n");
+
+            if (db == NULL)
+                printf("Unknown database '%s'\n", command);
+            else
+                printf("Database changed\n");
         }
 
         else if (!strcmp(command, "drop") || !strcmp(command, "DROP"))
