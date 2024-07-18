@@ -297,7 +297,9 @@ int main(void)
 
             else if (!strcmp(command, "table") || !strcmp(command, "TABLE")) // Query > create table
             {
-                if (db == NULL)
+                command = strtok(NULL, "(");
+
+                if (db == head)
                 {
                     printf("No database selected\n");
                     continue;
@@ -308,7 +310,7 @@ int main(void)
                     table = init_table(db); // Table 초기화
                 }
 
-                add_table(db, table, strtok(NULL, ";")); // 연결 리스트 -> New Table
+                add_table(db, table, command); // 연결 리스트 -> New Table
                 printf("Query Success!\n");
             }
         }
