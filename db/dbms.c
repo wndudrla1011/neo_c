@@ -16,11 +16,27 @@ typedef struct DB
 
 typedef struct Table
 {
-    char tname[MAX_INPUT];                  // 테이블명
-    int cadinality;                         // 튜블 개수 == tuple 스택의 top
-    struct Table *next;                     // 다음 테이블 포인터
-    char *tuple[MAX_CADINALITY][MAX_INPUT]; // 튜플 선언
+    char tname[MAX_INPUT]; // 테이블명
+    int cadinality;        // 튜블 개수 == tuple 스택의 top
+    struct Table *next;    // 다음 테이블 포인터
+    char *Domain;          // 튜플 선언
 } Table;
+
+typedef struct Domain // DCL용
+{
+    char *column; // 컬령명
+    char *type;   // 데이터 타입
+    char *len;    // 데이터 길이
+    int nullable; // 널 가능 여부
+    char *Data;   // 데이터
+} Domain;
+
+typedef struct Data
+{
+    char *data;
+} Data;
+
+char *types[] = {"int", "bigint", "varchar", "text"};
 
 //>>>>>>>>>>>>>>>>>>>>>>>DB 관련 메서드>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -234,6 +250,8 @@ void delete_table(DB *db, char *name) // 테이블 삭제
     db->tcnt--; // DB의 Table 개수 감소
 }
 
+//>>>>>>>>>>>>>>>>>>>>>>>Domain 관련 메서드>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 int main(void)
 {
     DB *db = NULL;
@@ -297,7 +315,7 @@ int main(void)
 
             else if (!strcmp(command, "table") || !strcmp(command, "TABLE")) // Query > create table
             {
-                command = strtok(NULL, "(");
+                command = strtok(NULL, "("); // table name
 
                 if (db == head)
                 {
@@ -311,6 +329,55 @@ int main(void)
                 }
 
                 add_table(db, table, command); // 연결 리스트 -> New Table
+
+                char *attr_info[MAX_INPUT];
+                char *column = NULL, *type = NULL, *nullable = NULL;
+
+                int cnt = 0;       // create token 개수
+                int flag = 1;      // NOT NULL, NULL 구분용
+                int type_flag = 0; // 현재 데이터가 type인지 여부
+                int data_len = 0;  // 데이터 길이
+                char *tmp;
+                while ((tmp = strtok(NULL, ", ()")) != NULL)
+                {
+                    attr_info[cnt++] = tmp;
+                }
+
+                for (int i = 0; i < cnt; i++)
+                {
+                    for (int j = 0; j < sizeof(types) / sizeof(types[0]); j++)
+                    {
+                        if (!strcasecmp(attr_info[i], types[j]))
+                        {
+                            type = attr_info[i];
+                            type_flag = 1;
+                            break;
+                        }
+                    }
+
+                    if (!strcasecmp(attr_info[i], "NOT"))
+                    {
+                        flag = 0;
+                        continue;
+                    }
+
+                    if (!strcasecmp(attr_info[i], "NULL"))
+                    {
+                        if (flag == 0) // NOT NULL
+                            nullable = "NOT NULL";
+                        else
+                            nullable = "NULL";
+
+                        flag = 1, type_flag = 0;
+
+                        printf("%s %s %s\n", column, type, nullable);
+                        continue;
+                    }
+
+                    if (type_flag == 0)
+                        column = attr_info[i];
+                }
+
                 printf("Query Success!\n");
             }
         }
