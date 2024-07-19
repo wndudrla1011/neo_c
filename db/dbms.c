@@ -90,7 +90,7 @@ int main(void)
                 {
                     table = init_table(db);      // Table 초기화
                     domain = init_domain(table); // Domain 초기화
-                    data = init_tuple(domain);   // tuple 초기화
+                    data = init_data(domain);    // tuple 초기화
                 }
 
                 add_table(db, table, command); // 연결 리스트 -> New Table
@@ -141,7 +141,7 @@ int main(void)
 
                         flag = 1, type_flag = 0;
 
-                        build_domain(domain, column, type, len, nullable);
+                        add_domain(domain, column, type, len, nullable);
 
                         continue;
                     }
@@ -151,7 +151,6 @@ int main(void)
                 }
 
                 printf("Query Success!\n");
-                print_domain(table);
             }
         }
 
@@ -191,6 +190,13 @@ int main(void)
 
                 delete_table(db, command);
             }
+        }
+
+        else if (!strcmp(command, "desc") || !strcmp(command, "DESC"))
+        {
+            command = strtok(NULL, ";"); // Table name
+
+            print_all_domain(table);
         }
     }
 
