@@ -5,15 +5,14 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/db",
-                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\db"
+                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\db",
+                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\db\\util"
             ],
             "compilerPath": "C:/mingw64/bin/gcc.exe",
             "cStandard": "${default}",
             "cppStandard": "${default}",
             "intelliSenseMode": "windows-gcc-x64",
-            "compilerArgs": [
-                ""
-            ]
+            "compilerArgs": [""]
         }
     ],
     "version": 4

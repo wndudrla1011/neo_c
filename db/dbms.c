@@ -4,6 +4,7 @@
 
 #include "db.h"
 #include "table.h"
+#include "./util/getLen.h"
 
 #define MAX_COLUMN 20      // 최대 속성 값 개수
 #define MAX_INPUT 100      // 최대 입력 값 길이
@@ -24,7 +25,7 @@ typedef struct Tuple
     struct Tuple *next; // 다음 튜플
 } Tuple;
 
-char *types[] = {"int", "bigint", "varchar", "text"};
+char *types[] = {"int", "INT", "bigint", "BIGINT", "varchar", "VARCHAR", "text", "TEXT"};
 
 //>>>>>>>>>>>>>>>>>>>>>>>Domain 관련 메서드>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -112,32 +113,38 @@ int main(void)
                 int cnt = 0;       // create token 개수
                 int flag = 1;      // NOT NULL, NULL 구분용
                 int type_flag = 0; // 현재 데이터가 type인지 여부
-                int data_len = 0;  // 데이터 길이
-                char *tmp;
-                while ((tmp = strtok(NULL, ", ()")) != NULL)
+                int len = 0;       // 데이터 길이
+                char *token;       // 데이터 도메인 및 값
+                char *type_token;  // 타입 + 길이
+
+                while ((token = strtok(NULL, ", ")) != NULL)
                 {
-                    attr_info[cnt++] = tmp;
+                    attr_info[cnt++] = token;
                 }
 
                 for (int i = 0; i < cnt; i++)
                 {
                     for (int j = 0; j < sizeof(types) / sizeof(types[0]); j++)
                     {
-                        if (!strcasecmp(attr_info[i], types[j]))
+                        if (strstr(attr_info[i], types[j]) != NULL)
                         {
-                            type = attr_info[i];
+                            type_token = strtok(attr_info[i], "(");
+                            type = type_token;
+
+                            len = getLen(type_token, types[j]);
+
                             type_flag = 1;
                             break;
                         }
                     }
 
-                    if (!strcasecmp(attr_info[i], "NOT"))
+                    if (!strcasecmp(attr_info[i], "NOT") || !strcasecmp(attr_info[i], "not"))
                     {
                         flag = 0;
                         continue;
                     }
 
-                    if (!strcasecmp(attr_info[i], "NULL"))
+                    if (!strcasecmp(attr_info[i], "NULL") || !strcasecmp(attr_info[i], "null"))
                     {
                         if (flag == 0) // NOT NULL
                             nullable = "NOT NULL";
@@ -146,7 +153,7 @@ int main(void)
 
                         flag = 1, type_flag = 0;
 
-                        printf("%s %s %s\n", column, type, nullable);
+                        printf("%s %s %d %s\n", column, type, len, nullable);
                         continue;
                     }
 
