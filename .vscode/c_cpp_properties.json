@@ -3,7 +3,9 @@
         {
             "name": "windows-gcc-x64",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/db",
+                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\db"
             ],
             "compilerPath": "C:/mingw64/bin/gcc.exe",
             "cStandard": "${default}",
