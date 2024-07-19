@@ -5,35 +5,21 @@
 #include "db.h"
 #include "table.h"
 #include "./util/getLen.h"
+#include "data.h"
 
 #define MAX_COLUMN 20      // 최대 속성 값 개수
 #define MAX_INPUT 100      // 최대 입력 값 길이
 #define MAX_CADINALITY 200 // 최대 튜플 개수
 
-typedef struct Domain // DCL용
-{
-    char *column;        // 컬령명
-    char *type;          // 데이터 타입
-    char *len;           // 데이터 길이
-    int nullable;        // 널 가능 여부
-    struct Tuple *tuple; // 데이터
-} Domain;
-
-typedef struct Tuple
-{
-    char *data;         // id text text일 때, "1 title1 test" 식으로 저장
-    struct Tuple *next; // 다음 튜플
-} Tuple;
-
 char *types[] = {"int", "INT", "bigint", "BIGINT", "varchar", "VARCHAR", "text", "TEXT"};
-
-//>>>>>>>>>>>>>>>>>>>>>>>Domain 관련 메서드>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 int main(void)
 {
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
+    Domain *domain = NULL;
+    Tuple *tuple = NULL;
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
 
@@ -102,7 +88,9 @@ int main(void)
 
                 if (db->tcnt == 0) // 첫 Table 생성
                 {
-                    table = init_table(db); // Table 초기화
+                    table = init_table(db);      // Table 초기화
+                    domain = init_domain(table); // Domain 초기화
+                    tuple = init_tuple(domain);  // tuple 초기화
                 }
 
                 add_table(db, table, command); // 연결 리스트 -> New Table
@@ -153,7 +141,6 @@ int main(void)
 
                         flag = 1, type_flag = 0;
 
-                        printf("%s %s %d %s\n", column, type, len, nullable);
                         continue;
                     }
 
