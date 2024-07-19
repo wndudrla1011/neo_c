@@ -16,7 +16,7 @@ int getLen(char *type_token, char *type)
 
     else
     {
-        type_token = strtok(NULL, ")"); // 지정한 길이
+        type_token = strtok(NULL, " "); // 지정한 길이
 
         if (type_token == NULL) // Case: 데이터 길이를 지정x
         {

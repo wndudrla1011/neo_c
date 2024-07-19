@@ -117,7 +117,7 @@ int main(void)
                 char *token;       // 데이터 도메인 및 값
                 char *type_token;  // 타입 + 길이
 
-                while ((token = strtok(NULL, ", ")) != NULL)
+                while ((token = strtok(NULL, ", );")) != NULL)
                 {
                     attr_info[cnt++] = token;
                 }
@@ -131,7 +131,7 @@ int main(void)
                             type_token = strtok(attr_info[i], "(");
                             type = type_token;
 
-                            len = getLen(type_token, types[j]);
+                            len = getLen(type_token, types[j]); // 입력 타입에 맞는 데이터 길이를 구함
 
                             type_flag = 1;
                             break;
