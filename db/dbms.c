@@ -19,7 +19,7 @@ int main(void)
     DB *head = NULL; // DB head
     Table *table = NULL;
     Domain *domain = NULL;
-    Tuple *tuple = NULL;
+    Data *data = NULL;
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
 
@@ -90,7 +90,7 @@ int main(void)
                 {
                     table = init_table(db);      // Table 초기화
                     domain = init_domain(table); // Domain 초기화
-                    tuple = init_tuple(domain);  // tuple 초기화
+                    data = init_tuple(domain);   // tuple 초기화
                 }
 
                 add_table(db, table, command); // 연결 리스트 -> New Table
@@ -141,6 +141,8 @@ int main(void)
 
                         flag = 1, type_flag = 0;
 
+                        build_domain(domain, column, type, len, nullable);
+
                         continue;
                     }
 
@@ -149,6 +151,7 @@ int main(void)
                 }
 
                 printf("Query Success!\n");
+                print_domain(table);
             }
         }
 

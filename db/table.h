@@ -11,7 +11,7 @@ typedef struct Table
     char tname[MAX_INPUT]; // 테이블명
     int cadinality;        // 튜블 개수 == tuple 스택의 top
     struct Table *next;    // 다음 테이블 포인터
-    struct Domain *domain; // 도메인 정보
+    struct Domain *dhead;  // 도메인 목록
 } Table;
 
 Table *init_table(DB *db) // Table 목록의 head 생성

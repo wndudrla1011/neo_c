@@ -9,33 +9,39 @@ typedef struct Domain // DCL용
 {
     char *column;        // 컬령명
     char *type;          // 데이터 타입
-    char *len;           // 데이터 길이
-    int nullable;        // 널 가능 여부
-    struct Tuple *tuple; // 데이터
+    int len;             // 데이터 길이
+    char *nullable;      // 널 가능 여부
+    struct Domain *next; // 다음 Domain 포인터
+    struct Data *head;   // 도메인의 데이터 목록
 } Domain;
 
-typedef struct Tuple
+typedef struct Data
 {
-    char *data;         // id text text일 때, "1 title1 test" 식으로 저장
-    struct Tuple *next; // 다음 튜플
-} Tuple;
+    char *value;       // 해당 Domain에 해당하는 데이터
+    struct Data *next; // 다음 데이터 포인터
+} Data;
 
-Domain *init_domain(Table *T) // Domain 생성 후 테이블 연결
+Domain *init_domain(Table *table) // Domain 생성 후 테이블 연결
 {
-    Domain *domain;
-    domain = (Domain *)malloc(sizeof(Domain));
-    T->domain = domain;
-
-    return (domain);
-}
-
-Tuple *init_tuple(Domain *D) // Tuple 목록의 head 생성
-{
-    Tuple *head;
-    head = (Tuple *)malloc(sizeof(Tuple));
-    head->next = NULL;
+    Domain *head;
+    head = (Domain *)malloc(sizeof(Domain));
+    table->dhead = head;
 
     return (head);
+}
+
+Data *init_data(Domain *domain) // Data 목록의 head 생성
+{
+    Data *head;
+    head = (Data *)malloc(sizeof(Data));
+    head->next = NULL;
+    domain->head = head;
+
+    return (head);
+}
+
+void add_domain(Domain *D, char *column, char *type, int len, char *nullable) // Domain의 각 멤버에 값 입력
+{
 }
 
 #endif
