@@ -11,17 +11,18 @@
 
 typedef struct Domain // DCL용
 {
-    char *column; // 컬령명
-    char *type;   // 데이터 타입
-    char *len;    // 데이터 길이
-    int nullable; // 널 가능 여부
-    char *Data;   // 데이터
+    char *column;        // 컬령명
+    char *type;          // 데이터 타입
+    char *len;           // 데이터 길이
+    int nullable;        // 널 가능 여부
+    struct Tuple *tuple; // 데이터
 } Domain;
 
-typedef struct Data
+typedef struct Tuple
 {
-    char *data;
-} Data;
+    char *data;         // id text text일 때, "1 title1 test" 식으로 저장
+    struct Tuple *next; // 다음 튜플
+} Tuple;
 
 char *types[] = {"int", "bigint", "varchar", "text"};
 
