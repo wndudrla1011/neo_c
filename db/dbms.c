@@ -28,11 +28,11 @@ int main(void)
 
         command = strtok(input, " ");
 
-        if (!strcmp(command, "show") || !strcmp(command, "SHOW"))
+        if (!strcasecmp(command, "show"))
         {
             command = strtok(NULL, ";");
 
-            if (!strcmp(command, "databases") || !strcmp(command, "DATABASES")) // Query > show databases
+            if (!strcasecmp(command, "databases")) // Query > show databases
             {
                 if (get_cnt_db(head) == 0)
                 {
@@ -46,7 +46,7 @@ int main(void)
                 }
             }
 
-            else if (!strcmp(command, "tables") || !strcmp(command, "TABLES")) // Query > show tables
+            else if (!strcasecmp(command, "tables")) // Query > show tables
             {
                 if (db->tcnt == 0) // 생성한 Table이 없을 때
                 {
@@ -60,11 +60,11 @@ int main(void)
             }
         }
 
-        else if (!strcmp(command, "create") || !strcmp(command, "CREATE"))
+        else if (!strcasecmp(command, "create"))
         {
             command = strtok(NULL, " ");
 
-            if (!strcmp(command, "database") || !strcmp(command, "DATABASE")) // Query > create database
+            if (!strcasecmp(command, "database")) // Query > create database
             {
                 if (get_cnt_db(head) == 0) // 첫 DB 생성
                 {
@@ -75,7 +75,7 @@ int main(void)
                 printf("Query Success!\n");
             }
 
-            else if (!strcmp(command, "table") || !strcmp(command, "TABLE")) // Query > create table
+            else if (!strcasecmp(command, "table")) // Query > create table
             {
                 command = strtok(NULL, "("); // table name
 
@@ -98,7 +98,7 @@ int main(void)
             }
         }
 
-        else if (!strcmp(command, "use") || !strcmp(command, "USE")) // Query > use database
+        else if (!strcasecmp(command, "use")) // Query > use database
         {
             command = strtok(NULL, ";"); // DB name
 
@@ -110,11 +110,11 @@ int main(void)
                 printf("Database changed\n");
         }
 
-        else if (!strcmp(command, "drop") || !strcmp(command, "DROP"))
+        else if (!strcasecmp(command, "drop"))
         {
             command = strtok(NULL, " ");
 
-            if (!strcmp(command, "database") || !strcmp(command, "DATABASE")) // Query > drop database
+            if (!strcasecmp(command, "database")) // Query > drop database
             {
                 command = strtok(NULL, ";");
 
@@ -128,7 +128,7 @@ int main(void)
                 printf("Query Success!\n");
             }
 
-            else if (!strcmp(command, "table") || !strcmp(command, "TABLE")) // Query > drop table
+            else if (!strcasecmp(command, "table")) // Query > drop table
             {
                 command = strtok(NULL, ";");
 
@@ -136,13 +136,21 @@ int main(void)
             }
         }
 
-        else if (!strcmp(command, "desc") || !strcmp(command, "DESC"))
+        else if (!strcasecmp(command, "desc")) // Query > desc table
         {
             command = strtok(NULL, ";"); // Table name
 
             print_all_domain(table);
         }
-    }
+
+        else if (!strcasecmp(command, "insert")) // Query > insert table
+        {
+            command = strtok(NULL, " "); // into
+
+            command = strtok(NULL, "(");
+        }
+
+    } // while(1)
 
     return 0;
 }

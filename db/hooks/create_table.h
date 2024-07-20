@@ -45,13 +45,13 @@ void create_table(char *name, DB *db, Table *table, Domain *domain, Data *data)
             }
         }
 
-        if (!strcasecmp(attr_info[i], "NOT") || !strcasecmp(attr_info[i], "not"))
+        if (!strcasecmp(attr_info[i], "NOT"))
         {
             flag = 0;
             continue;
         }
 
-        if (!strcasecmp(attr_info[i], "NULL") || !strcasecmp(attr_info[i], "null"))
+        if (!strcasecmp(attr_info[i], "NULL"))
         {
             if (flag == 0) // NOT NULL
                 nullable = "NOT NULL";
