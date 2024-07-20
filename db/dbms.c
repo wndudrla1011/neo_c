@@ -90,38 +90,38 @@ int main(void)
                 {
                     table = init_table(db);      // Table 초기화
                     domain = init_domain(table); // Domain 초기화
-                    data = init_data(domain);    // tuple 초기화
+                    data = init_data(domain);    // Data 초기화
                 }
 
                 add_table(db, table, command); // 연결 리스트 -> New Table
 
-                char *attr_info[MAX_INPUT];
+                char *attr_info[MAX_INPUT]; // create table 을 Tokenizer 한 결과 저장
                 char *column = NULL, *type = NULL, *nullable = NULL;
 
                 int cnt = 0;       // create token 개수
                 int flag = 1;      // NOT NULL, NULL 구분용
                 int type_flag = 0; // 현재 데이터가 type인지 여부
                 int len = 0;       // 데이터 길이
-                char *token;       // 데이터 도메인 및 값
+                char *token;       // 데이터 도메인 토큰
                 char *type_token;  // 타입 + 길이
 
-                while ((token = strtok(NULL, ", );")) != NULL)
+                while ((token = strtok(NULL, ", );")) != NULL) // 토큰 저장
                 {
                     attr_info[cnt++] = token;
                 }
 
-                for (int i = 0; i < cnt; i++)
+                for (int i = 0; i < cnt; i++) // 저장된 토큰 읽기
                 {
                     for (int j = 0; j < sizeof(types) / sizeof(types[0]); j++)
                     {
-                        if (strstr(attr_info[i], types[j]) != NULL)
+                        if (strstr(attr_info[i], types[j]) != NULL) // 데이터 타입 목록과 일치
                         {
-                            type_token = strtok(attr_info[i], "(");
+                            type_token = strtok(attr_info[i], "("); // 데이터 타입
                             type = type_token;
 
-                            len = getLen(type_token, types[j]); // 입력 타입에 맞는 데이터 길이를 구함
+                            len = getLen(type_token, types[j]); // 타입에 맞는 데이터 길이를 구함
 
-                            type_flag = 1;
+                            type_flag = 1; // 현재 토큰은 타입
                             break;
                         }
                     }
@@ -136,17 +136,19 @@ int main(void)
                     {
                         if (flag == 0) // NOT NULL
                             nullable = "NOT NULL";
-                        else
+                        else // NULL
                             nullable = "NULL";
 
-                        flag = 1, type_flag = 0;
+                        // Domain 1개 종료
 
-                        add_domain(domain, column, type, len, nullable);
+                        flag = 1, type_flag = 0; // flag 초기화
+
+                        add_domain(domain, column, type, len, nullable); // Domain 추가
 
                         continue;
                     }
 
-                    if (type_flag == 0)
+                    if (type_flag == 0) // 현재 토큰이 타입이 아님
                         column = attr_info[i];
                 }
 
