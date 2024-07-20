@@ -147,7 +147,19 @@ int main(void)
         {
             command = strtok(NULL, " "); // into
 
-            command = strtok(NULL, "(");
+            int cnt = 0; // cnt: '(' 개수
+
+            for (int i = 0; i < sizeof(input); i++)
+            {
+                if (input[i] == '(')
+                    cnt++;
+            }
+
+            // command = 테이블명
+            if (cnt > 1) // columns(fields) 입력
+                command = strtok(NULL, "(");
+            else // columns(fields) 생략
+                command = strtok(NULL, " ");
         }
 
     } // while(1)
