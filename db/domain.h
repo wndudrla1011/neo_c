@@ -19,6 +19,7 @@ Domain *init_domain(Table *table) // Domain 생성 후 테이블 연결
 {
     Domain *head;
     head = (Domain *)malloc(sizeof(Domain));
+    head->next = NULL;
     table->dhead = head;
 
     return (head);
