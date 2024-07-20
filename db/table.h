@@ -72,13 +72,13 @@ void print_all_table(DB *db) // 모든 Table 출력
     }
 }
 
-Table *read_table(Table *h, char *tname) // Table 이름으로 Table 찾기
+Table *read_table(DB *db, char *tname) // Table 이름으로 Table 찾기
 {
-    if (h == NULL) // Table을 생성하기 전 상황
-        return (h);
+    if (db->thead == NULL) // Table을 생성하기 전 상황
+        return (db->thead);
 
     Table *cur;
-    cur = h;
+    cur = db->thead->next;
 
     while (strcmp(cur->tname, tname) && cur->next != NULL)
     {
@@ -87,7 +87,7 @@ Table *read_table(Table *h, char *tname) // Table 이름으로 Table 찾기
 
     if (cur == NULL) // Not found Table
     {
-        return (h);
+        return (db->thead);
     }
 
     return (cur);

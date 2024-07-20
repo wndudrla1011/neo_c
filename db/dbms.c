@@ -95,6 +95,8 @@ int main(void)
 
                 create_table(command, db, table, domain, data);
 
+                print_all_domain(table);
+
                 printf("Query Success!\n");
             }
         }
@@ -139,7 +141,15 @@ int main(void)
 
         else if (!strcasecmp(command, "desc")) // Query > desc table
         {
+            if (table == NULL) // Not found Table
+            {
+                printf("Table '%s' doesn't exist\n", command);
+                continue;
+            }
+
             command = strtok(NULL, ";"); // Table name
+
+            table = read_table(db, command);
 
             print_all_domain(table);
         }
@@ -168,7 +178,7 @@ int main(void)
             else // columns(fields) 생략
                 command = strtok(NULL, " ");
 
-            table = read_table(table, command); // 테이블명으로 테이블 찾기
+            table = read_table(db, command); // 테이블명으로 테이블 찾기
 
             if (table == NULL) // Not found Table
             {
