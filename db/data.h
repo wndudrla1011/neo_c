@@ -33,4 +33,19 @@ Data *find_end_data(Data *data) // Domain의 Data 목록에서 가장 마지막 
     return (cur);
 }
 
+void add_data(Table *table, Data *data)
+{
+    Domain *cur;
+    cur = table->dhead->next;
+
+    Data *end;
+    end = find_end_data(data); // Leaf Data
+    Data *new_data;
+    new_data = (Data *)malloc(sizeof(Data)); // 새 Data 생성
+
+    // while (cur->next != NULL) // 각 Domain에 Data 입력
+    // {
+    // }
+}
+
 #endif

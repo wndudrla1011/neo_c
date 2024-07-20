@@ -24,7 +24,7 @@ Domain *init_domain(Table *table) // Domain 생성 후 테이블 연결
     return (head);
 }
 
-Domain *find_end_domain(Domain *D) // Table의 Domain 목록에서 가장 마지막 domain 찾기
+Domain *find_end_domain(Domain *D) // Table의 Domain 목록에서 가장 마지막 Domain 찾기
 {
     Domain *cur;
     cur = D;

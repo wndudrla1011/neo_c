@@ -7,6 +7,7 @@
 #include "domain.h"
 #include "data.h"
 #include "./hooks/create_table.h"
+#include "./util/substring.h"
 
 #define MAX_COLUMN 20      // 최대 속성 값 개수
 #define MAX_INPUT 100      // 최대 입력 값 길이
@@ -168,6 +169,36 @@ int main(void)
                 command = strtok(NULL, " ");
 
             table = read_table(table, command); // 테이블명으로 테이블 찾기
+
+            if (table == NULL) // Not found Table
+            {
+                printf("Table '%s' doesn't exist\n", command);
+                continue;
+            }
+
+            command = strtok(NULL, "(");
+
+            int token_cnt = 0;
+            char *values[MAX_INPUT];
+            char *token;
+            char *pos;    // 첫 single quote가 등장하는 위치 == 문자열 데이터 시작 위치
+            char *unpack; // substring 결과
+
+            while ((token = strtok(NULL, ",);")) != NULL)
+            {
+                values[token_cnt++] = token;
+            }
+
+            for (int i = 0; i < token_cnt; i++)
+            {
+                if ((pos = strstr(values[i], "\'")) != NULL) // 문자열 데이터
+                {
+                    unpack = substring(1, strlen(pos) - 2, pos); // 맨 앞뒤 single quote 제거
+                    values[i] = unpack;
+                }
+            }
+
+            // add_data(table, data);
         }
 
     } // while(1)

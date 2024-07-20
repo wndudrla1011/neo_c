@@ -103,7 +103,6 @@ DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
 
     if (cur == NULL) // Not found DB
     {
-        printf("Unknown database '%s'\n", dname);
         return (h);
     }
 

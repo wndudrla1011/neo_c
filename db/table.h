@@ -87,7 +87,6 @@ Table *read_table(Table *h, char *tname) // Table 이름으로 Table 찾기
 
     if (cur == NULL) // Not found Table
     {
-        printf("Table '%s' doesn't exist\n", tname);
         return (h);
     }
 
