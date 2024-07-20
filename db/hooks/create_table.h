@@ -4,6 +4,7 @@
 #include "../util/getLen.h"
 #include "../db.h"
 #include "../table.h"
+#include "../domain.h"
 #include "../data.h"
 #include <string.h>
 

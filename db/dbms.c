@@ -4,6 +4,7 @@
 
 #include "db.h"
 #include "table.h"
+#include "domain.h"
 #include "data.h"
 #include "./hooks/create_table.h"
 
