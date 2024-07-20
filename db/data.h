@@ -20,4 +20,17 @@ Data *init_data(Domain *domain)
     return (head);
 }
 
+Data *find_end_data(Data *data) // Domain의 Data 목록에서 가장 마지막 Data 찾기
+{
+    Data *cur;
+    cur = data;
+
+    while (cur->next != NULL)
+    {
+        cur = cur->next;
+    }
+
+    return (cur);
+}
+
 #endif
