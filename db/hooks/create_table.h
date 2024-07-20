@@ -17,12 +17,12 @@ void create_table(char *name, DB *db, Table *table, Domain *domain, Data *data)
     char *attr_info[MAX_INPUT]; // create table 을 Tokenizer 한 결과 저장
     char *column = NULL, *type = NULL, *nullable = NULL;
 
-    int cnt = 0;       // create token 개수
-    int flag = 1;      // NOT NULL, NULL 구분용
-    int type_flag = 0; // 현재 데이터가 type인지 여부
-    int len = 0;       // 데이터 길이
-    char *token;       // 데이터 도메인 토큰
-    char *type_token;  // 타입 + 길이
+    int cnt = 0;             // create token 개수
+    int flag = 1;            // NOT NULL, NULL 구분용
+    int type_flag = 0;       // 현재 데이터가 type인지 여부
+    int len = 0;             // 데이터 길이
+    char *token = NULL;      // 데이터 도메인 토큰
+    char *type_token = NULL; // 타입 + 길이
 
     while ((token = strtok(NULL, ", );")) != NULL) // 토큰 저장
     {
