@@ -72,6 +72,28 @@ void print_all_table(DB *db) // 모든 Table 출력
     }
 }
 
+Table *read_table(Table *h, char *tname) // Table 이름으로 Table 찾기
+{
+    if (h == NULL) // Table을 생성하기 전 상황
+        return (h);
+
+    Table *cur;
+    cur = h;
+
+    while (strcmp(cur->tname, tname) && cur->next != NULL)
+    {
+        cur = cur->next;
+    }
+
+    if (cur == NULL) // Not found Table
+    {
+        printf("Table '%s' doesn't exist\n", tname);
+        return (h);
+    }
+
+    return (cur);
+}
+
 void delete_all_table(DB *db) // 모든 테이블 삭제
 {
     Table *cur;

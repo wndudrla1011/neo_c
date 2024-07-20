@@ -145,11 +145,17 @@ int main(void)
 
         else if (!strcasecmp(command, "insert")) // Query > insert table
         {
+            if (db == head)
+            {
+                printf("No database selected\n");
+                continue;
+            }
+
             command = strtok(NULL, " "); // into
 
             int cnt = 0; // cnt: '(' 개수
 
-            for (int i = 0; i < sizeof(input); i++)
+            for (int i = 0; i < sizeof(input); i++) // insert 쿼리에 columns 목록 존재 여부 확인
             {
                 if (input[i] == '(')
                     cnt++;
@@ -160,6 +166,8 @@ int main(void)
                 command = strtok(NULL, "(");
             else // columns(fields) 생략
                 command = strtok(NULL, " ");
+
+            table = read_table(table, command); // 테이블명으로 테이블 찾기
         }
 
     } // while(1)
