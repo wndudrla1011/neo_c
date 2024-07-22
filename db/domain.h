@@ -5,14 +5,16 @@
 #include <stdlib.h>
 #include "table.h"
 
+#define MAX_INPUT 100 // 최대 입력 값 길이
+
 typedef struct Domain // DCL용
 {
-    char *column;        // 컬령명
-    char *type;          // 데이터 타입
-    int len;             // 데이터 길이
-    char *nullable;      // 널 가능 여부
-    struct Domain *next; // 다음 Domain 포인터
-    struct Data *head;   // 도메인의 데이터 목록
+    char column[MAX_INPUT];   // 컬령명
+    char type[MAX_INPUT];     // 데이터 타입
+    int len;                  // 데이터 길이
+    char nullable[MAX_INPUT]; // 널 가능 여부
+    struct Domain *next;      // 다음 Domain 포인터
+    struct Data *head;        // 도메인의 데이터 목록
 } Domain;
 
 Domain *init_domain(Table *table) // Domain 생성 후 테이블 연결
@@ -44,10 +46,10 @@ void add_domain(Domain *D, char *column, char *type, int len, char *nullable) //
     end = find_end_domain(D); // Leaf Domain
     Domain *new_domain;
     new_domain = (Domain *)malloc(sizeof(Domain)); // 새 Domain 생성
-    new_domain->column = column;                   // 컬럼명
-    new_domain->type = type;                       // 데이터 타입
+    strcpy(new_domain->column, column);            // 컬럼명
+    strcpy(new_domain->type, type);                // 데이터 타입
     new_domain->len = len;                         // 데이터 길이
-    new_domain->nullable = nullable;               // 널 여부
+    strcpy(new_domain->nullable, nullable);        // 널 여부
     end->next = new_domain;                        // last domain -> new domain
     new_domain->next = NULL;
 }

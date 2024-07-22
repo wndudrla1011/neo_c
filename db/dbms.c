@@ -108,11 +108,7 @@ int main(void)
                     continue;
                 }
 
-                domain = init_domain(table); // Domain 초기화
-
-                create_table(command, db, table, table->dhead);
-
-                print_all_domain(table);
+                create_table(command, db, table, domain);
 
                 printf("Query Success!\n");
             }
@@ -158,15 +154,21 @@ int main(void)
 
         else if (!strcasecmp(command, "desc")) // Query > desc table
         {
-            if (db->thead == NULL) // Not found Table
+            command = strtok(NULL, ";"); // Table name
+
+            if (db == head) // use database 를 하지 않은 상태
+            {
+                printf("No database selected\n");
+                continue;
+            }
+
+            table = read_table(db->thead, command); // 찾는 테이블로 이동
+
+            if (table == NULL) // Not found Table
             {
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
             }
-
-            command = strtok(NULL, ";"); // Table name
-
-            table = read_table(thead, command);
 
             print_all_domain(table);
         }
