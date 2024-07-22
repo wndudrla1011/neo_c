@@ -74,6 +74,9 @@ void print_all_table(DB *db) // 모든 Table 출력
 
 Table *read_table(Table *h, char *tname) // Table 이름으로 Table 찾기
 {
+    if (h == NULL) // Table을 생성하기 전 상황
+        return (h);
+
     Table *cur;
     cur = h;
 

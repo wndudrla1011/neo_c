@@ -90,6 +90,9 @@ void print_all_db(DB *h) // 모든 DB 출력
 
 DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
 {
+    if (h == NULL)
+        return (h);
+
     DB *cur;
     cur = h;
 
