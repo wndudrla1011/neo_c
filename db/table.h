@@ -10,6 +10,7 @@ typedef struct Table
 {
     char tname[MAX_INPUT]; // 테이블명
     int cadinality;        // 튜블 개수 == tuple 스택의 top
+    int degree;            // 속성 개수
     struct Table *next;    // 다음 테이블 포인터
     struct Domain *dhead;  // 도메인 목록
 } Table;
