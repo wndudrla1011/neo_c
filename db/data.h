@@ -40,7 +40,7 @@ Data *find_end_data(Data *data) // Data 목록에서 가장 아래 Data
 void add_data(Data *data, char *iv)
 {
     Data *end;
-    end = find_bottom_data(data); // Leaf Data
+    end = find_end_data(data); // Leaf Data
     Data *new_data;
     new_data = (Data *)malloc(sizeof(Data)); // 새 Data 생성
     strcpy(new_data->value, iv);             // 입력 데이터 바인드
