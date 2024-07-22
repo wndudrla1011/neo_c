@@ -5,12 +5,11 @@
 #include "../db.h"
 #include "../table.h"
 #include "../domain.h"
-#include "../data.h"
 #include <string.h>
 
 char *types[] = {"int", "INT", "bigint", "BIGINT", "varchar", "VARCHAR", "text", "TEXT"};
 
-void create_table(char *name, DB *db, Table *table, Domain *domain, Data *data)
+void create_table(char *name, DB *db, Table *table, Domain *domain)
 {
     add_table(db, table, name); // 연결 리스트 -> New Table
 

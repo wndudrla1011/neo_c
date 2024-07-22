@@ -18,6 +18,7 @@ int main(void)
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
+    Table *thead = NULL;
     Domain *domain = NULL;
     Data *data = NULL;
     char input[MAX_INPUT]; // 입력 값
@@ -80,20 +81,27 @@ int main(void)
             {
                 command = strtok(NULL, "("); // table name
 
-                if (db == head)
+                if (db == head) // use database 를 하지 않은 상태
                 {
                     printf("No database selected\n");
                     continue;
                 }
 
-                if (db->tcnt == 0) // 첫 Table 생성
+                if (db->thead == NULL) // Table head 없음
                 {
-                    table = init_table(db);      // Table 초기화
-                    domain = init_domain(table); // Domain 초기화
-                    data = init_data(domain);    // Data 초기화
+                    table = init_table(db); // Table 초기화
+                    thead = table;
                 }
 
-                create_table(command, db, table, domain, data);
+                if (read_table(thead, command) != NULL) // 같은 이름의 Table이 이미 존재하는 경우
+                {
+                    printf("Table '%s' already exists\n", command);
+                    continue;
+                }
+
+                domain = init_domain(table); // Domain 초기화
+
+                create_table(command, db, table, table->dhead);
 
                 print_all_domain(table);
 
@@ -141,7 +149,7 @@ int main(void)
 
         else if (!strcasecmp(command, "desc")) // Query > desc table
         {
-            if (table == NULL) // Not found Table
+            if (db->thead == NULL) // Not found Table
             {
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
@@ -149,7 +157,7 @@ int main(void)
 
             command = strtok(NULL, ";"); // Table name
 
-            table = read_table(db, command);
+            table = read_table(thead, command);
 
             print_all_domain(table);
         }
@@ -178,7 +186,7 @@ int main(void)
             else // columns(fields) 생략
                 command = strtok(NULL, " ");
 
-            table = read_table(db, command); // 테이블명으로 테이블 찾기
+            table = read_table(thead, command); // 테이블명으로 테이블 찾기
 
             if (table == NULL) // Not found Table
             {

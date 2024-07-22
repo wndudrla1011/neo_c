@@ -52,10 +52,10 @@ void add_domain(Domain *D, char *column, char *type, int len, char *nullable) //
     new_domain->next = NULL;
 }
 
-void print_all_domain(Table *T) // Table의 모든 Domain 정보 출력
+void print_all_domain(Table *table) // Table의 모든 Domain 정보 출력
 {
     Domain *cur;
-    cur = T->dhead->next;
+    cur = table->dhead->next;
 
     if (cur != NULL)
     {
