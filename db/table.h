@@ -79,11 +79,10 @@ Table *read_table(Table *h, char *tname) // Table 이름으로 Table 찾기
 
     while (strcmp(cur->tname, tname) && cur->next != NULL)
     {
-        printf("tname: %s\n", cur->tname);
         cur = cur->next;
     }
 
-    if (cur->next == NULL) // Not found Table
+    if (cur->next == NULL && strcmp(cur->tname, tname)) // not found table
     {
         return NULL;
     }
