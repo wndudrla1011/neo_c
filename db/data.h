@@ -4,23 +4,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "table.h"
+#include "domain.h"
+
+#define MAX_INPUT 100 // 최대 입력 값 길이
 
 typedef struct Data
 {
-    char *value;       // 해당 Domain에 해당하는 데이터
-    struct Data *next; // 다음 데이터 포인터
+    char value[MAX_INPUT]; // 해당 Domain에 해당하는 데이터
+    struct Data *next;     // 다음 행 데이터
 } Data;
 
 Data *init_data(Domain *domain)
 {
     Data *head;
     head = (Data *)malloc(sizeof(Data));
+    head->next = NULL;
     domain->head = head;
 
     return (head);
 }
 
-Data *find_end_data(Data *data) // Domain의 Data 목록에서 가장 마지막 Data 찾기
+Data *find_end_data(Data *data) // Data 목록에서 가장 아래 Data
 {
     Data *cur;
     cur = data;
@@ -33,19 +37,15 @@ Data *find_end_data(Data *data) // Domain의 Data 목록에서 가장 마지막 
     return (cur);
 }
 
-void add_data(Table *table, Data *data)
+void add_data(Data *data, char *iv)
 {
-    Domain *cur;
-    cur = table->dhead->next;
-
     Data *end;
-    end = find_end_data(data); // Leaf Data
+    end = find_bottom_data(data); // Leaf Data
     Data *new_data;
     new_data = (Data *)malloc(sizeof(Data)); // 새 Data 생성
-
-    // while (cur->next != NULL) // 각 Domain에 Data 입력
-    // {
-    // }
+    strcpy(new_data->value, iv);             // 입력 데이터 바인드
+    end->next = new_data;
+    new_data->next = NULL;
 }
 
 #endif
