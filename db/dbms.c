@@ -68,12 +68,21 @@ int main(void)
 
             if (!strcasecmp(command, "database")) // Query > create database
             {
+                command = strtok(NULL, ";");
+
                 if (get_cnt_db(head) == 0) // 첫 DB 생성
                 {
                     db = init_db(); // DB 초기화
                     head = db;
                 }
-                add_db(db, strtok(NULL, ";")); // 연결 리스트 -> New DB
+
+                if (read_db(db, command) != NULL) // 같은 이름의 DB가 이미 존재하는 경우
+                {
+                    printf("Can't create database '%s'; database exists\n", command);
+                    continue;
+                }
+
+                add_db(db, command); // 연결 리스트 -> New DB
                 printf("Query Success!\n");
             }
 

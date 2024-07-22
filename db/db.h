@@ -90,9 +90,6 @@ void print_all_db(DB *h) // 모든 DB 출력
 
 DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
 {
-    if (h == NULL) // DB를 생성하기 전 상황
-        return (h);
-
     DB *cur;
     cur = h;
 
@@ -101,9 +98,9 @@ DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
         cur = cur->next;
     }
 
-    if (cur == NULL) // Not found DB
+    if (cur->next == NULL && strcmp(cur->dname, dname)) // Not found DB
     {
-        return (h);
+        return NULL;
     }
 
     return (cur);
