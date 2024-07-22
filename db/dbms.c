@@ -175,7 +175,7 @@ int main(void)
 
         else if (!strcasecmp(command, "insert")) // Query > insert table
         {
-            if (db == head)
+            if (db == head) // use database 하지 않은 상태
             {
                 printf("No database selected\n");
                 continue;
@@ -207,18 +207,21 @@ int main(void)
 
             command = strtok(NULL, "(");
 
-            int token_cnt = 0;
-            char *values[MAX_INPUT];
+            int degree = 0;          // 속성 개수
+            char *values[MAX_INPUT]; // 토큰화된 입력 데이터
             char *token;
             char *pos;    // 첫 single quote가 등장하는 위치 == 문자열 데이터 시작 위치
             char *unpack; // substring 결과
 
-            while ((token = strtok(NULL, ",);")) != NULL)
+            while ((token = strtok(NULL, ",);")) != NULL) // 토큰화
             {
-                values[token_cnt++] = token;
+                values[degree++] = token;
             }
 
-            for (int i = 0; i < token_cnt; i++)
+            table->degree = degree - 1;
+            table->cadinality++; // 행 개수 추가
+
+            for (int i = 0; i < table->degree; i++)
             {
                 if ((pos = strstr(values[i], "\'")) != NULL) // 문자열 데이터
                 {
@@ -227,7 +230,45 @@ int main(void)
                 }
             }
 
-            // add_data(table, data);
+            domain = table->dhead->next;
+
+            if (domain != NULL)
+            {
+                while (1)
+                {
+                    init_data(domain);
+                    if (domain->next == NULL)
+                    {
+                        break;
+                    }
+                    domain = domain->next;
+                }
+            }
+
+            domain = table->dhead->next;
+
+            for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
+            {
+                add_data(domain->head, values[i]);
+                domain = domain->next; // 다음 열 이동
+            }
+
+            // Select * From table;
+            domain = table->dhead->next;
+
+            int idx = table->cadinality;
+            for (int i = 0; i < table->cadinality; i++) // 행 이동
+            {
+                printf("------------------------------\n");
+                for (int j = 0; j < table->degree; j++) // 열 이동
+                {
+                    data = domain->head->next;
+                    printf("%s | ", data->value);
+                    domain = domain->next;
+                }
+                domain = table->dhead->next; // 첫 열로 이동
+                data = domain->head->next;
+            }
         }
 
     } // while(1)
