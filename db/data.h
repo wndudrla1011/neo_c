@@ -26,6 +26,22 @@ Data *init_data(Domain *domain)
     return (head);
 }
 
+int data_len(Data *h)
+{
+    int cnt;
+    Data *cur;
+    cur = h;
+
+    cnt = 0;
+    while (cur->next != NULL)
+    {
+        cnt++;
+        cur = cur->next;
+    }
+
+    return cnt;
+}
+
 Data *find_first_data(Data *h) // Data 목록에서 head 바로 뒤 Data
 {
     if (h == NULL)
@@ -63,6 +79,33 @@ Data *find_right_data(Data *data) // Data 목록에서 가장 우측 Data
     return (cur);
 }
 
+Data *find_bottom_index_data(Data *h, int idx)
+{
+    if (idx == 1)
+        return find_first_data(h);
+    else if (idx == data_len(h))
+        return find_bottom_data(h);
+    else if (idx < 1 || idx > data_len(h))
+    {
+        printf("Wrong index\n");
+        return NULL;
+    }
+    else
+    {
+        int i;
+        Data *prev;
+        prev = h;
+        i = 0;
+        while (i < idx - 1)
+        {
+            prev = prev->next;
+            i++;
+        }
+
+        return prev->next;
+    }
+}
+
 void add_bottom_data(Data *data, char *iv) // Link to last next data
 {
     Data *end;
@@ -72,6 +115,7 @@ void add_bottom_data(Data *data, char *iv) // Link to last next data
     strcpy(new_data->value, iv);             // 입력 데이터 바인드
     end->next = new_data;
     new_data->next = NULL;
+    new_data->tuple = NULL;
 }
 
 void add_right_data(Data *data, char *iv) // Link to last tuple data
@@ -83,6 +127,7 @@ void add_right_data(Data *data, char *iv) // Link to last tuple data
     strcpy(new_data->value, iv);             // 입력 데이터 바인드
     end->tuple = new_data;
     new_data->tuple = NULL;
+    new_data->next = NULL;
 }
 
 void print_tuple(Data *data)

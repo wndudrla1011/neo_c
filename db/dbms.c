@@ -229,6 +229,8 @@ int main(void)
                 }
             }
 
+            // >>>>>>>>>>>>>>>>>>>> Parsing Data
+
             domain = table->dhead->next; // 첫 번째 column 이동
 
             if (domain != NULL) // 각 Domain 마다 Data head 생성
@@ -244,6 +246,8 @@ int main(void)
                 }
             }
 
+            // >>>>>>>>>>>>>>>>>>>>> Init Data
+
             domain = table->dhead->next;              // 첫 번째 column 이동
             add_bottom_data(domain->head, values[0]); // 데이터 추가 (행 방향)
 
@@ -251,6 +255,8 @@ int main(void)
             {
                 add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
             }
+
+            // >>>>>>>>>>>>>>>>>>>>> Insert Data
         }
 
         else if (!strcasecmp(command, "select")) // Query > select ~ from
