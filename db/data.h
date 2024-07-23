@@ -37,6 +37,19 @@ Data *find_first_data(Data *h) // Data 목록에서 head 바로 뒤 Data
     return (cur);
 }
 
+Data *find_bottom_data(Data *data) // Data 목록에서 가장 아래 Data
+{
+    Data *cur;
+    cur = data;
+
+    while (cur->next != NULL)
+    {
+        cur = cur->next;
+    }
+
+    return (cur);
+}
+
 Data *find_right_data(Data *data) // Data 목록에서 가장 우측 Data
 {
     Data *cur;
