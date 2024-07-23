@@ -252,10 +252,10 @@ int main(void)
                 continue;
             }
 
-            int cnt = 0;       // token count
-            int pos_tname = 0; // table name 위치
-            char *columns[MAX_COLUMN];
-            char *tokens[MAX_INPUT];
+            int cnt = 0;               // token count
+            int pos_tname = 0;         // table name 위치
+            char *columns[MAX_COLUMN]; // 모든 column
+            char *tokens[MAX_INPUT];   // 모든 token
             char *token;
 
             while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
@@ -273,14 +273,13 @@ int main(void)
 
             ++pos_tname;
 
-            table = read_table(db->thead, columns[pos_tname]); // find table
+            table = read_table(db->thead, tokens[pos_tname]); // find table
 
             data = domain->head; // data head 이동
 
             while (data->next != NULL)
             {
-                printf("data: %s\n", data->next->value);
-                print_tuple(find_first_data(domain->head));
+                print_tuple(data->next);
                 data = data->next;
             }
         }
