@@ -42,6 +42,17 @@ int data_len(Data *h)
     return cnt;
 }
 
+void *find_data(Domain *domain, Data *data, char *column) // Tuple 내에서 값으로 Data 검색
+{
+    while (strcmp(domain->column, column))
+    {
+        data = data->tuple;
+        domain = domain->next;
+    }
+
+    printf("%s  |  ", data->value);
+}
+
 Data *find_bottom_data(Data *data) // Data 목록에서 가장 아래 Data
 {
     Data *cur;

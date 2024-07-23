@@ -275,13 +275,24 @@ int main(void)
 
             table = read_table(db->thead, tokens[pos_tname]); // find table
 
-            data = domain->head; // data head 이동
+            domain = table->dhead->next; // Move first column (head next)
 
-            while (data->next != NULL)
+            data = domain->head->next; // Move head data
+
+            while (data != NULL)
             {
-                print_tuple(data->next);
-                data = data->next;
+                printf("|  ");
+                for (int i = 0; i < pos_tname - 1; i++)
+                {
+                    find_data(domain, data, columns[i]);
+                }
+                printf("\n");
+
+                domain = table->dhead->next; // Move first column (head next)
+                data = data->next;           // next data (next tuple)
             }
+
+            // print_tuple(data->next);
         }
 
     } // while(1)
