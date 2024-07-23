@@ -37,14 +37,14 @@ Data *find_first_data(Data *h) // Data 목록에서 head 바로 뒤 Data
     return (cur);
 }
 
-Data *find_end_data(Data *data) // Data 목록에서 가장 아래 Data
+Data *find_right_data(Data *data) // Data 목록에서 가장 우측 Data
 {
     Data *cur;
     cur = data;
 
-    while (cur->next != NULL)
+    while (cur->tuple != NULL)
     {
-        cur = cur->next;
+        cur = cur->tuple;
     }
 
     return (cur);
@@ -53,12 +53,12 @@ Data *find_end_data(Data *data) // Data 목록에서 가장 아래 Data
 void add_data(Data *data, char *iv)
 {
     Data *end;
-    end = find_end_data(data); // Leaf Data
+    end = find_right_data(data);
     Data *new_data;
     new_data = (Data *)malloc(sizeof(Data)); // 새 Data 생성
     strcpy(new_data->value, iv);             // 입력 데이터 바인드
-    end->next = new_data;
-    new_data->next = NULL;
+    end->tuple = new_data;
+    new_data->tuple = NULL;
 }
 
 #endif
