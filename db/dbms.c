@@ -18,11 +18,8 @@ int main(void)
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
-    Table *thead = NULL; // Table head
     Domain *domain = NULL;
-    Domain *dhead = NULL; // Domain head
     Data *data = NULL;
-    Data *dthead = NULL;   // Data head
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
 
