@@ -42,17 +42,6 @@ int data_len(Data *h)
     return cnt;
 }
 
-Data *find_first_data(Data *h) // Data 목록에서 head 바로 뒤 Data
-{
-    if (h == NULL)
-        return (h);
-
-    Data *cur;
-    cur = h->next;
-
-    return (cur);
-}
-
 Data *find_bottom_data(Data *data) // Data 목록에서 가장 아래 Data
 {
     Data *cur;
@@ -77,33 +66,6 @@ Data *find_right_data(Data *data) // Data 목록에서 가장 우측 Data
     }
 
     return (cur);
-}
-
-Data *find_bottom_index_data(Data *h, int idx)
-{
-    if (idx == 1)
-        return find_first_data(h);
-    else if (idx == data_len(h))
-        return find_bottom_data(h);
-    else if (idx < 1 || idx > data_len(h))
-    {
-        printf("Wrong index\n");
-        return NULL;
-    }
-    else
-    {
-        int i;
-        Data *prev;
-        prev = h;
-        i = 0;
-        while (i < idx - 1)
-        {
-            prev = prev->next;
-            i++;
-        }
-
-        return prev->next;
-    }
 }
 
 void add_bottom_data(Data *data, char *iv) // Link to last next data
