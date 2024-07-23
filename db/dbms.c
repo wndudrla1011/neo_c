@@ -18,9 +18,11 @@ int main(void)
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
-    Table *thead = NULL;
+    Table *thead = NULL; // Table head
     Domain *domain = NULL;
+    Domain *dhead = NULL; // Domain head
     Data *data = NULL;
+    Data *dthead = NULL;   // Data head
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
 
@@ -251,23 +253,6 @@ int main(void)
             {
                 add_data(domain->head, values[i]);
                 domain = domain->next; // 다음 열 이동
-            }
-
-            // Select * From table;
-            domain = table->dhead->next;
-
-            int idx = table->cadinality;
-            for (int i = 0; i < table->cadinality; i++) // 행 이동
-            {
-                printf("------------------------------\n");
-                for (int j = 0; j < table->degree; j++) // 열 이동
-                {
-                    data = domain->head->next;
-                    printf("%s | ", data->value);
-                    domain = domain->next;
-                }
-                domain = table->dhead->next; // 첫 열로 이동
-                data = domain->head->next;
             }
         }
 

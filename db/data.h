@@ -11,6 +11,7 @@
 typedef struct Data
 {
     char value[MAX_INPUT]; // 해당 Domain에 해당하는 데이터
+    struct Data *tuple;    // 다음 열 데이터
     struct Data *next;     // 다음 행 데이터
 } Data;
 
@@ -18,10 +19,22 @@ Data *init_data(Domain *domain)
 {
     Data *head;
     head = (Data *)malloc(sizeof(Data));
+    head->tuple = NULL;
     head->next = NULL;
     domain->head = head;
 
     return (head);
+}
+
+Data *find_first_data(Data *h) // Data 목록에서 head 바로 뒤 Data
+{
+    if (h == NULL)
+        return (h);
+
+    Data *cur;
+    cur = h->next;
+
+    return (cur);
 }
 
 Data *find_end_data(Data *data) // Data 목록에서 가장 아래 Data
