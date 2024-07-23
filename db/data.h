@@ -92,11 +92,10 @@ void add_right_data(Data *data, char *iv) // Link to last tuple data
     new_data->next = NULL;
 }
 
-void print_tuple(Data *data)
+void print_tuple(Data *data) // Tuple 출력
 {
     Data *cur;
     cur = data;
-    int index = 1;
 
     while (cur->tuple != NULL)
     {
