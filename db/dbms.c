@@ -98,10 +98,10 @@ int main(void)
                 if (db->thead == NULL) // Table head 없음
                 {
                     table = init_table(db); // Table 초기화
-                    thead = table;
+                    db->thead = table;
                 }
 
-                if (read_table(thead, command) != NULL) // 같은 이름의 Table이 이미 존재하는 경우
+                if (read_table(db->thead, command) != NULL) // 같은 이름의 Table이 이미 존재하는 경우
                 {
                     printf("Table '%s' already exists\n", command);
                     continue;
@@ -196,7 +196,7 @@ int main(void)
             else // columns(fields) 생략
                 command = strtok(NULL, " ");
 
-            table = read_table(thead, command); // 테이블명으로 테이블 찾기
+            table = read_table(db->thead, command); // 테이블명으로 테이블 찾기
 
             if (table == NULL) // Not found Table
             {
@@ -231,7 +231,7 @@ int main(void)
 
             domain = table->dhead->next;
 
-            if (domain != NULL)
+            if (domain != NULL) // 각 Domain 마다 Data head 생성
             {
                 while (1)
                 {
@@ -248,8 +248,7 @@ int main(void)
 
             for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
             {
-                add_data(domain->head, values[i]);
-                domain = domain->next; // 다음 열 이동
+                add_data(domain->head, values[i]); // 데이터 추가 (열 방향)
             }
         }
 
