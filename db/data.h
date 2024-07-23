@@ -85,4 +85,19 @@ void add_right_data(Data *data, char *iv) // Link to last tuple data
     new_data->tuple = NULL;
 }
 
+void print_tuple(Data *data)
+{
+    Data *cur;
+    cur = data;
+    int index = 1;
+
+    while (cur->tuple != NULL)
+    {
+        printf("%s  |  ", cur->value);
+        cur = cur->tuple;
+    }
+
+    printf("%s\n", cur->value);
+}
+
 #endif
