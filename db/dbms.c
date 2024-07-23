@@ -244,9 +244,12 @@ int main(void)
                 }
             }
 
-            for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
+            domain = table->dhead->next;              // 첫 번째 column 이동
+            add_bottom_data(domain->head, values[0]); // 데이터 추가 (행 방향)
+
+            for (int i = 1; i < table->degree; i++) // 각 속성에 값 넣기
             {
-                add_data(domain->head, values[i]); // 데이터 추가 (열 방향)
+                add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
             }
         }
 
