@@ -217,8 +217,8 @@ int main(void)
                 values[degree++] = token;
             }
 
-            table->degree = degree - 1;
-            table->cadinality++; // 행 개수 추가
+            table->degree = degree - 1; // 열 개수 입력
+            table->cadinality++;        // 행 개수 추가
 
             for (int i = 0; i < table->degree; i++)
             {
@@ -229,7 +229,7 @@ int main(void)
                 }
             }
 
-            domain = table->dhead->next;
+            domain = table->dhead->next; // 첫 번째 column 이동
 
             if (domain != NULL) // 각 Domain 마다 Data head 생성
             {
@@ -243,8 +243,6 @@ int main(void)
                     domain = domain->next;
                 }
             }
-
-            domain = table->dhead->next;
 
             for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
             {
