@@ -267,7 +267,7 @@ int main(void)
             char *tokens[MAX_INPUT];
             char *token;
 
-            while ((token = strtok(NULL, ", ;")) != NULL)
+            while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
             {
                 if (!strcmp(token, "from"))
                     pos_tname = cnt;
@@ -275,15 +275,23 @@ int main(void)
                 tokens[cnt++] = token;
             }
 
-            for (int i = 0; i < pos_tname; i++)
+            for (int i = 0; i < pos_tname; i++) // save columns
             {
                 columns[i] = tokens[i];
-                printf("column: %s\n", columns[i]);
             }
 
             ++pos_tname;
 
             table = read_table(db->thead, columns[pos_tname]); // find table
+
+            data = domain->head; // data head 이동
+
+            while (data->next != NULL)
+            {
+                printf("data: %s\n", data->value);
+                print_tuple(find_first_data(domain->head));
+                data = data->next;
+            }
         }
 
     } // while(1)
