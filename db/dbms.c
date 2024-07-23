@@ -254,6 +254,7 @@ int main(void)
 
             int cnt = 0;               // token count
             int pos_tname = 0;         // table name 위치
+            int cnt_cols = 0;          // column 개수
             char *columns[MAX_COLUMN]; // 모든 column
             char *tokens[MAX_INPUT];   // 모든 token
             char *token;
@@ -275,24 +276,45 @@ int main(void)
 
             table = read_table(db->thead, tokens[pos_tname]); // find table
 
-            domain = table->dhead->next; // Move first column (head next)
+            cnt_cols = pos_tname - 1; // counting cols
 
-            data = domain->head->next; // Move head data
-
-            while (data != NULL)
+            if (!strcmp(columns[0], "*")) // select all
             {
-                printf("|  ");
-                for (int i = 0; i < pos_tname - 1; i++)
-                {
-                    find_data(domain, data, columns[i]);
-                }
-                printf("\n");
-
                 domain = table->dhead->next; // Move first column (head next)
-                data = data->next;           // next data (next tuple)
+
+                data = domain->head; // Move head data
+
+                while (data->next != NULL)
+                {
+                    print_tuple(data->next);
+                    data = data->next;
+                }
             }
 
-            // print_tuple(data->next);
+            // >>>>>>>>>>>>>>>>>>>>> Select all
+
+            else // select cols
+            {
+                domain = table->dhead->next; // Move first column (head next)
+
+                data = domain->head->next; // Move head data
+
+                while (data != NULL)
+                {
+                    printf("+--------------------------------------+\n");
+                    printf("|  ");
+                    for (int i = 0; i < pos_tname - 1; i++)
+                    {
+                        find_data(domain, data, columns[i]);
+                    }
+                    printf("\n+--------------------------------------+\n");
+
+                    domain = table->dhead->next; // Move first column (head next)
+                    data = data->next;           // next data (next tuple)
+                }
+            }
+
+            // >>>>>>>>>>>>>>>>>>>>> Select cols
         }
 
     } // while(1)

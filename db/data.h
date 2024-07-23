@@ -108,13 +108,16 @@ void print_tuple(Data *data) // Tuple 출력
     Data *cur;
     cur = data;
 
+    printf("+--------------------------------------+\n");
+    printf("|  ");
     while (cur->tuple != NULL)
     {
         printf("%s  |  ", cur->value);
         cur = cur->tuple;
     }
 
-    printf("%s\n", cur->value);
+    printf("%s  |\n", cur->value);
+    printf("+--------------------------------------+\n");
 }
 
 #endif
