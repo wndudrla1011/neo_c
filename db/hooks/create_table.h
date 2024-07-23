@@ -67,7 +67,20 @@ void create_table(char *name, DB *db, Table *table, Domain *domain)
 
             add_domain(domain, column, type, len, nullable); // Domain 추가
 
-            printf("%s\n", table->dhead == NULL ? "NULL" : "NOT");
+            domain = table->dhead->next; // 첫 번째 column 이동
+
+            if (domain != NULL) // 각 Domain 마다 Data head 생성
+            {
+                while (1)
+                {
+                    init_data(domain);
+                    if (domain->next == NULL)
+                    {
+                        break;
+                    }
+                    domain = domain->next;
+                }
+            }
 
             continue;
         }

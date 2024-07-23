@@ -233,27 +233,12 @@ int main(void)
 
             domain = table->dhead->next; // 첫 번째 column 이동
 
-            if (domain != NULL) // 각 Domain 마다 Data head 생성
+            for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
             {
-                while (1)
-                {
-                    init_data(domain);
-                    if (domain->next == NULL)
-                    {
-                        break;
-                    }
-                    domain = domain->next;
-                }
-            }
-
-            // >>>>>>>>>>>>>>>>>>>>> Init Data
-
-            domain = table->dhead->next;              // 첫 번째 column 이동
-            add_bottom_data(domain->head, values[0]); // 데이터 추가 (행 방향)
-
-            for (int i = 1; i < table->degree; i++) // 각 속성에 값 넣기
-            {
-                add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
+                if (i == 0)
+                    add_bottom_data(domain->head, values[i]);
+                else
+                    add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
             }
 
             // >>>>>>>>>>>>>>>>>>>>> Insert Data
@@ -294,7 +279,7 @@ int main(void)
 
             while (data->next != NULL)
             {
-                printf("data: %s\n", data->value);
+                printf("data: %s\n", data->next->value);
                 print_tuple(find_first_data(domain->head));
                 data = data->next;
             }
