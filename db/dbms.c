@@ -265,7 +265,6 @@ int main(void)
             int pos_tname = 0; // table name 위치
             char *columns[MAX_COLUMN];
             char *tokens[MAX_INPUT];
-            char *pos_col; // columns 시작 위치
             char *token;
 
             while ((token = strtok(NULL, ", ;")) != NULL)
