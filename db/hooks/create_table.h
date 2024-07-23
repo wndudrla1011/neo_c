@@ -13,7 +13,9 @@ void create_table(char *name, DB *db, Table *table, Domain *domain)
 {
     add_table(db, table, name); // 연결 리스트 -> New Table
 
-    domain = init_domain(read_table(db->thead, name)); // Table을 찾은 후 Domain 초기화 및 연결
+    table = read_table(db->thead, name);
+
+    domain = init_domain(table); // Table을 찾은 후 Domain 초기화 및 연결
 
     char *attr_info[MAX_INPUT]; // create table 을 Tokenizer 한 결과 저장
     char *column = NULL, *type = NULL, *nullable = NULL;
@@ -64,6 +66,8 @@ void create_table(char *name, DB *db, Table *table, Domain *domain)
             flag = 1, type_flag = 0; // flag 초기화
 
             add_domain(domain, column, type, len, nullable); // Domain 추가
+
+            printf("%s\n", table->dhead == NULL ? "NULL" : "NOT");
 
             continue;
         }
