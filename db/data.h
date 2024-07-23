@@ -63,7 +63,18 @@ Data *find_right_data(Data *data) // Data 목록에서 가장 우측 Data
     return (cur);
 }
 
-void add_data(Data *data, char *iv)
+void add_bottom_data(Data *data, char *iv) // Link to last next data
+{
+    Data *end;
+    end = find_bottom_data(data);
+    Data *new_data;
+    new_data = (Data *)malloc(sizeof(Data)); // 새 Data 생성
+    strcpy(new_data->value, iv);             // 입력 데이터 바인드
+    end->next = new_data;
+    new_data->next = NULL;
+}
+
+void add_right_data(Data *data, char *iv) // Link to last tuple data
 {
     Data *end;
     end = find_right_data(data);
