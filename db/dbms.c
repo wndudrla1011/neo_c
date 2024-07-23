@@ -241,6 +241,8 @@ int main(void)
                     add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
             }
 
+            printf("Query Success!\n");
+
             // >>>>>>>>>>>>>>>>>>>>> Insert Data
         }
 
