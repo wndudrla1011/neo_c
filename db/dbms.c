@@ -253,6 +253,40 @@ int main(void)
             }
         }
 
+        else if (!strcasecmp(command, "select")) // Query > select ~ from
+        {
+            if (db == head)
+            {
+                printf("No database selected\n");
+                continue;
+            }
+
+            int cnt = 0;       // token count
+            int pos_tname = 0; // table name 위치
+            char *columns[MAX_COLUMN];
+            char *tokens[MAX_INPUT];
+            char *pos_col; // columns 시작 위치
+            char *token;
+
+            while ((token = strtok(NULL, ", ;")) != NULL)
+            {
+                if (!strcmp(token, "from"))
+                    pos_tname = cnt;
+
+                tokens[cnt++] = token;
+            }
+
+            for (int i = 0; i < pos_tname; i++)
+            {
+                columns[i] = tokens[i];
+                printf("column: %s\n", columns[i]);
+            }
+
+            ++pos_tname;
+
+            table = read_table(db->thead, columns[pos_tname]); // find table
+        }
+
     } // while(1)
 
     return 0;
