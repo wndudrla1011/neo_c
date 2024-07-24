@@ -258,11 +258,13 @@ int main(void)
 
             int cnt = 0;               // token count
             int cnt_cols = 0;          // column 개수
+            int cnt_cons = 0;          // 조건 개수
             int pos_tname = 0;         // table name 위치
             int pos_cons = 0;          // conditions 시작 위치
             int flag = 0;              // 0: none, 1: and, 2: or
             char *columns[MAX_COLUMN]; // 모든 column
-            char wheres[MAX_INPUT] = "";
+            char wheres[MAX_INPUT];    // 조건절
+            char *wtokens[MAX_INPUT];
             char *tokens[MAX_INPUT]; // 모든 token
             char *token;
 
@@ -283,6 +285,8 @@ int main(void)
             }
 
             ++pos_tname;
+            free(token);
+            token = NULL;
 
             for (int i = pos_cons + 1; i < cnt - 1; i++) // create where clause
             {
@@ -296,22 +300,47 @@ int main(void)
                     strcat(wheres, tokens[i]);
             }
 
-            printf("%s\n", wheres);
+            token = strtok(wheres, " ");
+            wtokens[0] = token;
+            cnt_cons++;
 
-            table = read_table(db->thead, tokens[pos_tname]); // find table
+            while ((token = strtok(NULL, " ")) != NULL)
+            {
+                if (!strcmp(token, "or"))
+                    flag = 2;
+                else if (!strcmp(token, "and"))
+                    flag = 1;
+
+                wtokens[cnt_cons++] = token;
+            }
+
+            // >>>>>>>>>>>>>>>>>>>>> Parsing where
 
             cnt_cols = pos_tname - 1; // counting cols
+
+            char *col;
+            char *var;
+            int result = 0;
+
+            table = read_table(db->thead, tokens[pos_tname]); // find table
 
             if (!strcmp(columns[0], "*")) // select all
             {
                 domain = table->dhead->next; // Move first column (head next)
 
-                data = domain->head; // Move head data
+                data = domain->head->next; // Move head data
 
-                while (data->next != NULL)
+                while (data != NULL)
                 {
-                    print_tuple(data->next);
-                    data = data->next;
+                    result = find_data(table, domain, data, "id", "3", '<');
+
+                    if (result) // 조건에 부합
+                    {
+                        print_tuple(data);
+                    }
+
+                    domain = table->dhead->next; // Move first column (head next)
+                    data = data->next;           // next data (next tuple)
                 }
             }
 
@@ -325,13 +354,17 @@ int main(void)
 
                 while (data != NULL)
                 {
-                    printf("+--------------------------------------+\n");
-                    printf("|  ");
-                    for (int i = 0; i < pos_tname - 1; i++)
+                    result = find_data(table, domain, data, "id", "3", '<');
+
+                    if (result) // 조건에 부합
                     {
-                        find_data(domain, data, columns[i]);
+                        printf("+--------------------------------------+\n");
+                        for (int i = 0; i < cnt_cols; i++) // 조건에 부합하는 Tuple 출력
+                        {
+                            print_data(domain, data, columns[i]);
+                        }
+                        printf("\n+--------------------------------------+\n");
                     }
-                    printf("\n+--------------------------------------+\n");
 
                     domain = table->dhead->next; // Move first column (head next)
                     data = data->next;           // next data (next tuple)

@@ -42,15 +42,78 @@ int data_len(Data *h)
     return cnt;
 }
 
-void *find_data(Domain *domain, Data *data, char *column) // Tuple 내에서 값으로 Data 검색
+/*
+ * col: 조건 컬럼
+ * val: 조건 값
+ * op: 연산자
+ */
+int find_data(Table *table, Domain *domain, Data *data, char *col, char *val, char op) // 조건에 맞는 Tuple 검색
 {
-    while (strcmp(domain->column, column))
+    int result = 0; // 조건 부합 => 1
+
+    while (strcmp(domain->column, col)) // 검사해야 할 컬럼
     {
         data = data->tuple;
         domain = domain->next;
     }
 
-    printf("%s  |  ", data->value);
+    if (strstr(domain->type, "int")) // 숫자 타입
+    {
+        int limit = atoi(val);        // 제한 값
+        int item = atoi(data->value); // 타깃 값
+
+        switch (op)
+        {
+        case '<':
+            if (item < limit)
+                result = 1;
+            break;
+        case '>':
+            if (item > limit)
+                result = 1;
+            break;
+        case '=':
+            if (item == limit)
+                result = 1;
+            break;
+        case '!':
+            if (item != limit)
+                result = 1;
+            break;
+        default:
+            break;
+        }
+    }
+
+    else // 문자열 타입
+    {
+        char *limit = val;
+        char *item = data->value;
+
+        switch (op)
+        {
+        case '<':
+            if (strcmp(item, limit) == -1)
+                result = 1;
+            break;
+        case '>':
+            if (strcmp(item, limit) == 1)
+                result = 1;
+            break;
+        case '=':
+            if (!strcmp(item, limit))
+                result = 1;
+            break;
+        case '!':
+            if (strcmp(item, limit))
+                result = 1;
+            break;
+        default:
+            break;
+        }
+    }
+
+    return result;
 }
 
 Data *find_bottom_data(Data *data) // Data 목록에서 가장 아래 Data
@@ -118,6 +181,18 @@ void print_tuple(Data *data) // Tuple 출력
 
     printf("%s  |\n", cur->value);
     printf("+--------------------------------------+\n");
+}
+
+void print_data(Domain *domain, Data *data, char *column) // 검색하는 컬럼 출력
+{
+    printf("|  ");
+    while (strcmp(domain->column, column))
+    {
+        data = data->tuple;
+        domain = domain->next;
+    }
+
+    printf("%s  |  ", data->value);
 }
 
 #endif
