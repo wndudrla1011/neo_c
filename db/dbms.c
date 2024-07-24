@@ -264,8 +264,8 @@ int main(void)
             int flag = 0;              // 0: none, 1: and, 2: or
             char *columns[MAX_COLUMN]; // 모든 column
             char wheres[MAX_INPUT];    // 조건절
-            char *wtokens[MAX_INPUT];
-            char *tokens[MAX_INPUT]; // 모든 token
+            char *wtokens[MAX_INPUT];  // 모든 조건 token
+            char *tokens[MAX_INPUT];   // 모든 token
             char *token;
 
             while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
@@ -312,6 +312,13 @@ int main(void)
                     flag = 1;
 
                 wtokens[cnt_cons++] = token;
+            }
+
+            if (flag > 0) // 조건문 2개
+            {
+            }
+            else // 조건문 1개
+            {
             }
 
             // >>>>>>>>>>>>>>>>>>>>> Parsing where
