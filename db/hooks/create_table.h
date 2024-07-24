@@ -6,6 +6,7 @@
 #include "../table.h"
 #include "../domain.h"
 #include <string.h>
+#include <ctype.h>
 
 char *types[] = {"int", "INT", "bigint", "BIGINT", "varchar", "VARCHAR", "text", "TEXT"};
 
@@ -18,7 +19,9 @@ void create_table(char *name, DB *db, Table *table, Domain *domain)
     domain = init_domain(table); // Table을 찾은 후 Domain 초기화 및 연결
 
     char *attr_info[MAX_INPUT]; // create table 을 Tokenizer 한 결과 저장
-    char *column = NULL, *type = NULL, *nullable = NULL;
+    char *column = NULL;
+    char type[MAX_INPUT];
+    char *nullable = NULL;
 
     int cnt = 0;             // create token 개수
     int flag = 1;            // NOT NULL, NULL 구분용
@@ -39,7 +42,13 @@ void create_table(char *name, DB *db, Table *table, Domain *domain)
             if (strstr(attr_info[i], types[j]) != NULL) // 데이터 타입 목록과 일치
             {
                 type_token = strtok(attr_info[i], "("); // 데이터 타입
-                type = type_token;
+
+                int k = 0;
+                for (k = 0; k < strlen(type_token); k++)
+                {
+                    type[k] = tolower(type_token[k]);
+                }
+                type[k] = '\0'; // 마지막 문자 NULL
 
                 len = getLen(type_token, types[j]); // 타입에 맞는 데이터 길이를 구함
 
