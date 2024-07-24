@@ -13,6 +13,8 @@
 #define MAX_INPUT 100      // 최대 입력 값 길이
 #define MAX_CADINALITY 200 // 최대 튜플 개수
 
+char op[] = {'<', '>', '=', '!'};
+
 int main(void)
 {
     DB *db = NULL;
@@ -255,16 +257,22 @@ int main(void)
             }
 
             int cnt = 0;               // token count
-            int pos_tname = 0;         // table name 위치
             int cnt_cols = 0;          // column 개수
+            int pos_tname = 0;         // table name 위치
+            int pos_cons = 0;          // conditions 시작 위치
+            int flag = 0;              // 0: none, 1: and, 2: or
             char *columns[MAX_COLUMN]; // 모든 column
-            char *tokens[MAX_INPUT];   // 모든 token
+            char wheres[MAX_INPUT] = "";
+            char *tokens[MAX_INPUT]; // 모든 token
             char *token;
 
             while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
             {
                 if (!strcmp(token, "from"))
                     pos_tname = cnt;
+
+                if (!strcmp(token, "where"))
+                    pos_cons = cnt;
 
                 tokens[cnt++] = token;
             }
@@ -275,6 +283,20 @@ int main(void)
             }
 
             ++pos_tname;
+
+            for (int i = pos_cons + 1; i < cnt - 1; i++) // create where clause
+            {
+                if (!strcmp(tokens[i], "or") || !strcmp(tokens[i], "and"))
+                {
+                    strcat(wheres, " ");
+                    strcat(wheres, tokens[i]);
+                    strcat(wheres, " ");
+                }
+                else
+                    strcat(wheres, tokens[i]);
+            }
+
+            printf("%s\n", wheres);
 
             table = read_table(db->thead, tokens[pos_tname]); // find table
 
