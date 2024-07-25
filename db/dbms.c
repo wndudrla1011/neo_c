@@ -326,7 +326,24 @@ int main(void)
 
             if (flag > 0) // 조건문 2개
             {
+                for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
+                {
+                    if (strstr(wtokens[0], search_op[i]) != NULL)
+                    {
+                        op1 = op[i];
+                        col1 = strtok(wtokens[0], search_op[i]);
+                        val1 = strtok(NULL, search_op[i]);
+                    }
+
+                    if (strstr(wtokens[2], search_op[i]) != NULL)
+                    {
+                        op2 = op[i];
+                        col2 = strtok(wtokens[2], search_op[i]);
+                        val2 = strtok(NULL, search_op[i]);
+                    }
+                }
             }
+
             else // 조건문 1개
             {
                 for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
@@ -356,7 +373,7 @@ int main(void)
 
                 while (data != NULL)
                 {
-                    result = find_data(table, domain, data, "id", "3", '<');
+                    result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
 
                     if (result) // 조건에 부합
                     {
@@ -378,7 +395,7 @@ int main(void)
 
                 while (data != NULL)
                 {
-                    result = find_data(table, domain, data, col1, val1, op1);
+                    result = find_single_data(table, domain, data, col1, val1, op1);
 
                     if (result) // 조건에 부합
                     {

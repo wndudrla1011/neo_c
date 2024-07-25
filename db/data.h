@@ -44,11 +44,12 @@ int data_len(Data *h)
 }
 
 /*
+ * 단일 조건에 맞는 Tuple 검색
  * col: 조건 컬럼
  * val: 조건 값
  * op: 연산자
  */
-int find_data(Table *table, Domain *domain, Data *data, char *col, char *val, char op) // 조건에 맞는 Tuple 검색
+int find_single_data(Table *table, Domain *domain, Data *data, char *col, char *val, char op)
 {
     int result = 0; // 조건 부합 => 1
 
@@ -115,6 +116,155 @@ int find_data(Table *table, Domain *domain, Data *data, char *col, char *val, ch
     }
 
     return result;
+}
+
+/*
+ * 다중 조건에 맞는 Tuple 검색
+ * col1: 조건1 컬럼
+ * val1: 조건1 값
+ * op1: 조건1 연산자
+ * col2: 조건2 컬럼
+ * val2: 조건2 값
+ * op2: 조건2 연산자
+ */
+int find_multi_data(Table *table, Domain *domain, Data *data, char *col1, char *val1, char op1, char *col2, char *val2, char op2, int flag)
+{
+    int result1 = 0; // 조건 부합 => 1
+    int result2 = 0; // 조건 부합 => 1
+
+    while (strcmp(domain->column, col1)) // find col1
+    {
+        data = data->tuple;
+        domain = domain->next;
+    }
+
+    if (strstr(domain->type, "int")) // 숫자 타입
+    {
+        int limit = atoi(val1);       // 제한 값
+        int item = atoi(data->value); // 타깃 값
+
+        switch (op1)
+        {
+        case '<':
+            if (item < limit)
+                result1 = 1;
+            break;
+        case '>':
+            if (item > limit)
+                result1 = 1;
+            break;
+        case '=':
+            if (item == limit)
+                result1 = 1;
+            break;
+        case '!':
+            if (item != limit)
+                result1 = 1;
+            break;
+        default:
+            break;
+        }
+    }
+
+    else // 문자열 타입
+    {
+        char *limit = substring(1, strlen(val1) - 2, val1);
+        char *item = data->value;
+
+        switch (op1)
+        {
+        case '<':
+            if (strcmp(item, limit) == -1)
+                result1 = 1;
+            break;
+        case '>':
+            if (strcmp(item, limit) == 1)
+                result1 = 1;
+            break;
+        case '=':
+            if (!strcmp(item, limit))
+                result1 = 1;
+            break;
+        case '!':
+            if (strcmp(item, limit))
+                result1 = 1;
+            break;
+        default:
+            break;
+        }
+    }
+
+    if (flag == 1) // and 연산
+    {
+        if (!result1) // false
+            return result1;
+    }
+
+    domain = table->dhead->next; // Move first column (head next)
+
+    while (strcmp(domain->column, col2)) // find col2
+    {
+        data = data->tuple;
+        domain = domain->next;
+    }
+
+    if (strstr(domain->type, "int")) // 숫자 타입
+    {
+        int limit = atoi(val2);       // 제한 값
+        int item = atoi(data->value); // 타깃 값
+
+        switch (op2)
+        {
+        case '<':
+            if (item < limit)
+                result2 = 1;
+            break;
+        case '>':
+            if (item > limit)
+                result2 = 1;
+            break;
+        case '=':
+            if (item == limit)
+                result2 = 1;
+            break;
+        case '!':
+            if (item != limit)
+                result2 = 1;
+            break;
+        default:
+            break;
+        }
+    }
+
+    else // 문자열 타입
+    {
+        char *limit = substring(1, strlen(val2) - 2, val2);
+        char *item = data->value;
+
+        switch (op2)
+        {
+        case '<':
+            if (strcmp(item, limit) == -1)
+                result2 = 1;
+            break;
+        case '>':
+            if (strcmp(item, limit) == 1)
+                result2 = 1;
+            break;
+        case '=':
+            if (!strcmp(item, limit))
+                result2 = 1;
+            break;
+        case '!':
+            if (strcmp(item, limit))
+                result2 = 1;
+            break;
+        default:
+            break;
+        }
+    }
+
+    return flag == 1 ? result1 & result2 : result1 | result2;
 }
 
 Data *find_bottom_data(Data *data) // Data 목록에서 가장 아래 Data
