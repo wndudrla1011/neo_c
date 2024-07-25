@@ -258,6 +258,12 @@ int main(void)
             query_select(db, table, domain, data);
         }
 
+        else if (!strcasecmp(command, "exit\n"))
+        {
+            printf("Bye~\n");
+            break;
+        }
+
         else if (command[0] == '\n')
         {
             continue;
