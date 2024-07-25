@@ -373,14 +373,14 @@ int main(void)
 
                 while (data != NULL)
                 {
-                    if (flag > 0) // 단일 조건
-                    {
-                        result = find_single_data(table, domain, data, col1, val1, op1);
-                    }
-
-                    else // 다중 조건
+                    if (flag > 0) // 다중 조건
                     {
                         result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                    }
+
+                    else // 단일 조건
+                    {
+                        result = find_single_data(table, domain, data, col1, val1, op1);
                     }
 
                     if (result) // 조건에 부합
@@ -403,14 +403,14 @@ int main(void)
 
                 while (data != NULL)
                 {
-                    if (flag > 0) // 단일 조건
-                    {
-                        result = find_single_data(table, domain, data, col1, val1, op1);
-                    }
-
-                    else // 다중 조건
+                    if (flag > 0) // 다중 조건
                     {
                         result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                    }
+
+                    else // 단일 조건
+                    {
+                        result = find_single_data(table, domain, data, col1, val1, op1);
                     }
 
                     if (result) // 조건에 부합

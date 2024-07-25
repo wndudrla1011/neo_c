@@ -72,6 +72,8 @@
     "system_error": "c",
     "array": "c",
     "tuple": "c",
-    "utility": "c"
+    "utility": "c",
+    "domain.h": "c",
+    "data.h": "c"
   }
 }
