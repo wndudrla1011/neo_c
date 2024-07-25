@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "table.h"
 #include "domain.h"
+#include "./util/substring.h"
 
 #define MAX_INPUT 100 // 최대 입력 값 길이
 
@@ -87,7 +88,7 @@ int find_data(Table *table, Domain *domain, Data *data, char *col, char *val, ch
 
     else // 문자열 타입
     {
-        char *limit = val;
+        char *limit = substring(1, strlen(val) - 2, val);
         char *item = data->value;
 
         switch (op)
