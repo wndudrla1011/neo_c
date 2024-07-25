@@ -23,6 +23,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
     int pos_tname = 0;         // table name 위치
     int pos_cons = 0;          // conditions 시작 위치
     int flag = 0;              // 0: none, 1: and, 2: or
+    int flag_empty = 1;        // 0: not empty, 1: empty
     char *columns[MAX_COLUMN]; // 모든 column
     char wheres[MAX_INPUT];    // 조건절
     char *wtokens[MAX_INPUT];  // 모든 조건 token
@@ -170,12 +171,14 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
                 if (result) // 조건에 부합
                 {
+                    flag_empty = 0;
                     print_tuple(data);
                 }
             }
 
             else // where 문 존재x
             {
+                flag_empty = 0;
                 print_tuple(data);
             }
 
@@ -208,6 +211,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
                 if (result) // 조건에 부합
                 {
+                    flag_empty = 0;
                     printf("+--------------------------------------+\n");
                     for (int i = 0; i < cnt_cols; i++) // 조건에 부합하는 Tuple 출력
                     {
@@ -219,6 +223,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
             else // where 문 존재x
             {
+                flag_empty = 0;
                 printf("+--------------------------------------+\n");
                 printf("|  ");
                 for (int i = 0; i < pos_tname - 1; i++)
@@ -234,6 +239,11 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
     }
 
     // >>>>>>>>>>>>>>>>>>>>> Select cols
+
+    if (flag_empty == 1)
+    {
+        printf("Empty set\n");
+    }
 }
 
 #endif
