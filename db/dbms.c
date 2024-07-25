@@ -275,8 +275,6 @@ int main(void)
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
             }
-
-            printf("%s\n", table->tname);
         }
 
         else if (!strcasecmp(command, "exit\n"))

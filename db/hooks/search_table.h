@@ -142,6 +142,12 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
         return;
     }
 
+    if (table->cadinality == 0) // insert 0회
+    {
+        printf("Empty set\n");
+        return;
+    }
+
     if (!strcmp(columns[0], "*")) // select all
     {
         domain = table->dhead->next; // Move first column (head next)
