@@ -14,6 +14,7 @@
 #define MAX_CADINALITY 200 // 최대 튜플 개수
 
 char op[] = {'<', '>', '=', '!'};
+char *search_op[] = {"<", ">", "=", "!"};
 
 int main(void)
 {
@@ -266,7 +267,9 @@ int main(void)
             char wheres[MAX_INPUT];    // 조건절
             char *wtokens[MAX_INPUT];  // 모든 조건 token
             char *tokens[MAX_INPUT];   // 모든 token
-            char *token;
+            char *token = NULL;
+
+            wheres[0] = '\0'; // 조건절 초기화
 
             while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
             {
@@ -314,19 +317,33 @@ int main(void)
                 wtokens[cnt_cons++] = token;
             }
 
+            char *col1 = NULL; // 조건1 -> 속성
+            char *val1 = NULL; // 조건1 -> 값
+            char op1;          // 조건1 -> 연산자
+            char *col2 = NULL; // 조건2 -> 속성
+            char *val2 = NULL; // 조건2 -> 값
+            char op2;          /// 조건2 -> 연산자
+
             if (flag > 0) // 조건문 2개
             {
             }
             else // 조건문 1개
             {
+                for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
+                {
+                    if (strstr(wtokens[0], search_op[i]) != NULL)
+                    {
+                        op1 = op[i];
+                        col1 = strtok(wtokens[0], search_op[i]);
+                        val1 = strtok(NULL, search_op[i]);
+                    }
+                }
             }
 
             // >>>>>>>>>>>>>>>>>>>>> Parsing where
 
             cnt_cols = pos_tname - 1; // counting cols
 
-            char *col;
-            char *var;
             int result = 0;
 
             table = read_table(db->thead, tokens[pos_tname]); // find table
@@ -361,7 +378,7 @@ int main(void)
 
                 while (data != NULL)
                 {
-                    result = find_data(table, domain, data, "id", "3", '<');
+                    result = find_data(table, domain, data, col1, val1, op1);
 
                     if (result) // 조건에 부합
                     {
