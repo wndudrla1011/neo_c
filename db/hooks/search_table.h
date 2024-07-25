@@ -136,6 +136,12 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
     table = read_table(db->thead, tokens[pos_tname]); // find table
 
+    if (table == NULL)
+    {
+        printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
+        return;
+    }
+
     if (!strcmp(columns[0], "*")) // select all
     {
         domain = table->dhead->next; // Move first column (head next)
