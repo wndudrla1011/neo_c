@@ -247,15 +247,36 @@ int main(void)
             // >>>>>>>>>>>>>>>>>>>>> Insert Data
         }
 
-        else if (!strcasecmp(command, "select")) // Query > select ~ from
+        else if (!strcasecmp(command, "select")) // Query > select table
         {
-            if (db == head)
+            if (db == head) // not found db
             {
                 printf("No database selected\n");
                 continue;
             }
 
             query_select(db, table, domain, data);
+        }
+
+        else if (!strcasecmp(command, "update")) // Query > update table
+        {
+            command = strtok(NULL, " "); // table name
+
+            if (db == head)
+            {
+                printf("No database selected\n");
+                continue;
+            }
+
+            table = read_table(db->thead, command);
+
+            if (table == NULL)
+            {
+                printf("Table '%s' doesn't exist\n", command);
+                continue;
+            }
+
+            printf("%s\n", table->tname);
         }
 
         else if (!strcasecmp(command, "exit\n"))

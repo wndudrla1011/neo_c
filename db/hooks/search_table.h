@@ -128,7 +128,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
     int result = 0; // 데이터 탐색 결과
 
-    if (db->thead == NULL)
+    if (db->thead == NULL) // empty table list
     {
         printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
         return;
@@ -136,7 +136,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
     table = read_table(db->thead, tokens[pos_tname]); // find table
 
-    if (table == NULL)
+    if (table == NULL) // not found table
     {
         printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
         return;
