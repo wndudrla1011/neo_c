@@ -29,6 +29,13 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
     char *tokens[MAX_INPUT];   // 모든 token
     char *token = NULL;
 
+    char *col1 = NULL; // 조건1 -> 속성
+    char *val1 = NULL; // 조건1 -> 값
+    char op1;          // 조건1 -> 연산자
+    char *col2 = NULL; // 조건2 -> 속성
+    char *val2 = NULL; // 조건2 -> 값
+    char op2;          /// 조건2 -> 연산자
+
     wheres[0] = '\0'; // 조건절 초기화
 
     while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
@@ -51,77 +58,75 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
     free(token);
     token = NULL;
 
-    for (int i = pos_cons + 1; i < cnt - 1; i++) // create where clause
+    if (pos_cons > 0) // where문 존재
     {
-        if (!strcmp(tokens[i], "or") || !strcmp(tokens[i], "and"))
+        for (int i = pos_cons + 1; i < cnt - 1; i++) // create where clause
         {
-            strcat(wheres, " ");
-            strcat(wheres, tokens[i]);
-            strcat(wheres, " ");
-        }
-        else
-            strcat(wheres, tokens[i]);
-    }
-
-    token = strtok(wheres, " ");
-    wtokens[0] = token;
-    cnt_cons++;
-
-    while ((token = strtok(NULL, " ")) != NULL)
-    {
-        if (!strcmp(token, "or"))
-            flag = 2;
-        else if (!strcmp(token, "and"))
-            flag = 1;
-
-        wtokens[cnt_cons++] = token;
-    }
-
-    char *col1 = NULL; // 조건1 -> 속성
-    char *val1 = NULL; // 조건1 -> 값
-    char op1;          // 조건1 -> 연산자
-    char *col2 = NULL; // 조건2 -> 속성
-    char *val2 = NULL; // 조건2 -> 값
-    char op2;          /// 조건2 -> 연산자
-
-    if (flag > 0) // 조건문 2개
-    {
-        for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
-        {
-            if (strstr(wtokens[0], search_op[i]) != NULL)
+            if (!strcmp(tokens[i], "or") || !strcmp(tokens[i], "and"))
             {
-                op1 = op[i];
-                col1 = strtok(wtokens[0], search_op[i]);
-                val1 = strtok(NULL, search_op[i]);
+                strcat(wheres, " ");
+                strcat(wheres, tokens[i]);
+                strcat(wheres, " ");
             }
-
-            if (strstr(wtokens[2], search_op[i]) != NULL)
+            else
             {
-                op2 = op[i];
-                col2 = strtok(wtokens[2], search_op[i]);
-                val2 = strtok(NULL, search_op[i]);
+                strcat(wheres, tokens[i]);
             }
         }
-    }
 
-    else // 조건문 1개
-    {
-        for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
+        token = strtok(wheres, " ");
+        wtokens[0] = token;
+        cnt_cons++;
+
+        while ((token = strtok(NULL, " ")) != NULL)
         {
-            if (strstr(wtokens[0], search_op[i]) != NULL)
+            if (!strcmp(token, "or"))
+                flag = 2;
+            else if (!strcmp(token, "and"))
+                flag = 1;
+
+            wtokens[cnt_cons++] = token;
+        }
+
+        if (flag > 0) // 조건문 2개
+        {
+            for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
             {
-                op1 = op[i];
-                col1 = strtok(wtokens[0], search_op[i]);
-                val1 = strtok(NULL, search_op[i]);
+                if (strstr(wtokens[0], search_op[i]) != NULL)
+                {
+                    op1 = op[i];
+                    col1 = strtok(wtokens[0], search_op[i]);
+                    val1 = strtok(NULL, search_op[i]);
+                }
+
+                if (strstr(wtokens[2], search_op[i]) != NULL)
+                {
+                    op2 = op[i];
+                    col2 = strtok(wtokens[2], search_op[i]);
+                    val2 = strtok(NULL, search_op[i]);
+                }
             }
         }
-    }
 
-    // >>>>>>>>>>>>>>>>>>>>> Parsing where
+        else // 조건문 1개
+        {
+            for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
+            {
+                if (strstr(wtokens[0], search_op[i]) != NULL)
+                {
+                    op1 = op[i];
+                    col1 = strtok(wtokens[0], search_op[i]);
+                    val1 = strtok(NULL, search_op[i]);
+                }
+            }
+        }
+
+        // >>>>>>>>>>>>>>>>>>>>> Parsing where
+    }
 
     cnt_cols = pos_tname - 1; // counting cols
 
-    int result = 0;
+    int result = 0; // 데이터 탐색 결과
 
     table = read_table(db->thead, tokens[pos_tname]); // find table
 
@@ -133,18 +138,26 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
         while (data != NULL)
         {
-            if (flag > 0) // 다중 조건
+            if (pos_cons > 0) // where 문 존재
             {
-                result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                if (flag > 0) // 다중 조건
+                {
+                    result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                }
+
+                else // 단일 조건
+                {
+                    result = find_single_data(table, domain, data, col1, val1, op1);
+                }
+
+                if (result) // 조건에 부합
+                {
+                    print_tuple(data);
+                }
             }
 
-            else // 단일 조건
-            {
-                result = find_single_data(table, domain, data, col1, val1, op1);
-            }
-
-            if (result) // 조건에 부합
-            {
+            else // where 문 존재x
+            {   
                 print_tuple(data);
             }
 
@@ -163,22 +176,36 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
         while (data != NULL)
         {
-            if (flag > 0) // 다중 조건
+            if (pos_cons > 0) // where 문 존재
             {
-                result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                if (flag > 0) // 다중 조건
+                {
+                    result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                }
+
+                else // 단일 조건
+                {
+                    result = find_single_data(table, domain, data, col1, val1, op1);
+                }
+
+                if (result) // 조건에 부합
+                {
+                    printf("+--------------------------------------+\n");
+                    for (int i = 0; i < cnt_cols; i++) // 조건에 부합하는 Tuple 출력
+                    {
+                        print_data(domain, data, columns[i]);
+                    }
+                    printf("\n+--------------------------------------+\n");
+                }
             }
 
-            else // 단일 조건
-            {
-                result = find_single_data(table, domain, data, col1, val1, op1);
-            }
-
-            if (result) // 조건에 부합
+            else // where 문 존재x
             {
                 printf("+--------------------------------------+\n");
-                for (int i = 0; i < cnt_cols; i++) // 조건에 부합하는 Tuple 출력
+                printf("|  ");
+                for (int i = 0; i < pos_tname - 1; i++)
                 {
-                    print_data(domain, data, columns[i]);
+                    find_data(domain, data, columns[i]);
                 }
                 printf("\n+--------------------------------------+\n");
             }

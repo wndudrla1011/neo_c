@@ -43,6 +43,17 @@ int data_len(Data *h)
     return cnt;
 }
 
+void *find_data(Domain *domain, Data *data, char *column) // 조건이 없는 Tuple 검색
+{
+    while (strcmp(domain->column, column))
+    {
+        data = data->tuple;
+        domain = domain->next;
+    }
+
+    printf("%s  |  ", data->value);
+}
+
 /*
  * 단일 조건에 맞는 Tuple 검색
  * col: 조건 컬럼
