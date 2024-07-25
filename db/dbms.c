@@ -258,6 +258,11 @@ int main(void)
             query_select(db, table, domain, data);
         }
 
+        else // not exists command
+        {
+            printf("You have an error in your SQL syntax;\n");
+        }
+
     } // while(1)
 
     return 0;
