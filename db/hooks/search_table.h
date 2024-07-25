@@ -9,8 +9,8 @@
 #include "../domain.h"
 #include "../data.h"
 
-#define MAX_COLUMN 20      // 최대 속성 값 개수
-#define MAX_INPUT 100      // 최대 입력 값 길이
+#define MAX_COLUMN 20 // 최대 속성 값 개수
+#define MAX_INPUT 100 // 최대 입력 값 길이
 
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
@@ -46,7 +46,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
         if (!strcmp(token, "where"))
             pos_cons = cnt;
 
-            tokens[cnt++] = token;
+        tokens[cnt++] = token;
     }
 
     for (int i = 0; i < pos_tname; i++) // save columns
@@ -128,6 +128,12 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
     int result = 0; // 데이터 탐색 결과
 
+    if (db->thead == NULL)
+    {
+        printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
+        return;
+    }
+
     table = read_table(db->thead, tokens[pos_tname]); // find table
 
     if (!strcmp(columns[0], "*")) // select all
@@ -157,7 +163,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
             }
 
             else // where 문 존재x
-            {   
+            {
                 print_tuple(data);
             }
 
