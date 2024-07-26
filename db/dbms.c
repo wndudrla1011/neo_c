@@ -68,6 +68,11 @@ int main(void)
                     print_all_table(db); // 생성된 Table 출력
                 }
             }
+
+            else
+            {
+                printf("You have an error in your SQL syntax;\n");
+            }
         }
 
         else if (!strcasecmp(command, "create"))
@@ -185,7 +190,7 @@ int main(void)
                 continue;
             }
 
-            print_all_domain(table);
+            print_all_domain(table); // Table의 Domain 출력
         }
 
         else if (!strcasecmp(command, "insert")) // Query > insert table
