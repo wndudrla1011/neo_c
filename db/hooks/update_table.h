@@ -31,7 +31,7 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
     char op1;          // 조건1 -> 연산자
     char *col2 = NULL; // 조건2 -> 속성
     char *val2 = NULL; // 조건2 -> 값
-    char op2;          /// 조건2 -> 연산자
+    char op2;          // 조건2 -> 연산자
 
     wheres[0] = '\0'; // 조건절 초기화
 
