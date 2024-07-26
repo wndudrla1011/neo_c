@@ -36,6 +36,12 @@ int main(void)
             is_where = 1;
         }
 
+        if (strstr(input, ";") == NULL) // 세미콜론 포함x
+        {
+            printf("Complete the command, including the ';'\n");
+            continue;
+        }
+
         command = strtok(input, " ");
 
         if (!strcasecmp(command, "show"))
@@ -69,7 +75,7 @@ int main(void)
                 }
             }
 
-            else
+            else // handling syntax error
             {
                 printf("You have an error in your SQL syntax;\n");
             }
@@ -126,7 +132,7 @@ int main(void)
                 printf("Query Success!\n");
             }
 
-            else
+            else // handling syntax error
             {
                 printf("You have an error in your SQL syntax;\n");
             }
