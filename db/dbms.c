@@ -72,11 +72,11 @@ int main(void)
 
         else if (!strcasecmp(command, "create"))
         {
-            command = strtok(NULL, " ");
+            command = strtok(NULL, " "); // database or table
 
             if (!strcasecmp(command, "database")) // Query > create database
             {
-                command = strtok(NULL, ";");
+                command = strtok(NULL, ";"); // database name
 
                 if (get_cnt_db(head) == 0) // 첫 DB 생성
                 {
@@ -107,7 +107,7 @@ int main(void)
                 if (db->thead == NULL) // Table head 없음
                 {
                     table = init_table(db); // Table 초기화
-                    db->thead = table;
+                    db->thead = table;      // table head 설정
                 }
 
                 if (read_table(db->thead, command) != NULL) // 같은 이름의 Table이 이미 존재하는 경우
@@ -116,7 +116,7 @@ int main(void)
                     continue;
                 }
 
-                create_table(command, db, table, domain);
+                create_table(command, db, table, domain); // 테이블 생성
 
                 printf("Query Success!\n");
             }
@@ -128,27 +128,27 @@ int main(void)
 
             db = read_db(head, command); // 찾은 DB로 이동
 
-            if (db == NULL)
+            if (db == NULL) // not found db
                 printf("Unknown database '%s'\n", command);
-            else
+            else // found db
                 printf("Database changed\n");
         }
 
         else if (!strcasecmp(command, "drop"))
         {
-            command = strtok(NULL, " ");
+            command = strtok(NULL, " "); // database
 
             if (!strcasecmp(command, "database")) // Query > drop database
             {
-                command = strtok(NULL, ";");
+                command = strtok(NULL, ";"); // database name
 
-                if (read_db(head, command) == NULL)
+                if (read_db(head, command) == NULL) // not found db
                 {
                     printf("Now current DB is NULL\nPlease use another DB\n");
                     continue;
                 }
 
-                delete_db(head, command);
+                delete_db(head, command); // DB 삭제
                 printf("Query Success!\n");
             }
 
@@ -156,7 +156,14 @@ int main(void)
             {
                 command = strtok(NULL, ";"); // table name
 
-                delete_table(db, command);
+                if (read_table(db->thead, command) == NULL) // not found table
+                {
+                    printf("Table '%s' doesn't exist\n", command);
+                    continue;
+                }
+
+                delete_table(db, command); // Table 삭제
+                printf("Query Success!\n");
             }
         }
 
