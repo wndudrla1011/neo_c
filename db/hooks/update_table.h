@@ -88,10 +88,10 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
         }
 
         token = strtok(wheres, " ");
-        wtokens[0] = token;
-        cnt_cons++;
+        wtokens[0] = token; // 조건절 저장
+        cnt_cons++;         // 조건절 개수 카운팅
 
-        while ((token = strtok(NULL, " ")) != NULL)
+        while ((token = strtok(NULL, " ")) != NULL) // 조건절 저장
         {
             if (!strcmp(token, "or"))
                 flag = 2;
