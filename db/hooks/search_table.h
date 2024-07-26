@@ -12,8 +12,8 @@
 #define MAX_COLUMN 20 // 최대 속성 값 개수
 #define MAX_INPUT 100 // 최대 입력 값 길이
 
-extern char op[] = {'<', '>', '=', '!'};
-extern char *search_op[] = {"<", ">", "=", "!"};
+char op[] = {'<', '>', '=', '!'};
+char *search_op[] = {"<", ">", "=", "!"};
 
 void query_select(DB *db, Table *table, Domain *domain, Data *data)
 {
