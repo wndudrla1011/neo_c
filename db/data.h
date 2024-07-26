@@ -372,13 +372,13 @@ void update_data(Domain *domain, Data *data, char *column, char *value)
     strcpy(data->value, value);
 }
 
-void delete_data(Table *table, Domain *domain, Data *h, Data *data)
+void delete_data(Table *table, Domain *domain, Data *data)
 {
     Data *cur;
     cur = data;
 
     Data *prev;
-    prev = h;
+    prev = domain->head;
 
     while (prev->next->value != data->value) // find prev Data
     {
