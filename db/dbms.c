@@ -125,6 +125,11 @@ int main(void)
 
                 printf("Query Success!\n");
             }
+
+            else
+            {
+                printf("You have an error in your SQL syntax;\n");
+            }
         }
 
         else if (!strcasecmp(command, "use")) // Query > use database
