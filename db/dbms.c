@@ -23,12 +23,18 @@ int main(void)
     Table *table = NULL;
     Domain *domain = NULL;
     Data *data = NULL;
+    int is_where = 0;      // where절 존재 여부 > delete에서 사용
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
 
     while (1)
     {
         fgets(input, MAX_INPUT, stdin);
+
+        if (strstr(input, "where") != NULL) // where절 존재
+        {
+            is_where = 1;
+        }
 
         command = strtok(input, " ");
 
@@ -286,8 +292,6 @@ int main(void)
 
         else if (!strcasecmp(command, "delete")) // Query > delete table
         {
-            int is_where = 0;
-
             command = strtok(NULL, " "); // from
 
             if (db == head) // not found db
@@ -296,13 +300,12 @@ int main(void)
                 continue;
             }
 
-            if (strstr(input, "where") != NULL)
+            if (is_where) // where절 존재
             {
-                is_where = 1;
                 command = strtok(NULL, " "); // table name
             }
 
-            else
+            else // where절 존재x
             {
                 command = strtok(NULL, ";"); // table name
             }

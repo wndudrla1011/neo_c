@@ -45,7 +45,7 @@ void query_delete(DB *db, Table *table, Domain *domain, Data *data, int is_where
         {
             prev = cur;
             cur = cur->next;
-            delete_data(table, domain, domain->head, prev);
+            delete_data(table, domain, prev);
         }
 
         return;
@@ -149,7 +149,7 @@ void query_delete(DB *db, Table *table, Domain *domain, Data *data, int is_where
         {
             prev = cur;
             cur = cur->next;
-            delete_data(table, domain, domain->head, prev);
+            delete_data(table, domain, prev);
         }
 
         else
