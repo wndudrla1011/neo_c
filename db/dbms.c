@@ -36,12 +36,6 @@ int main(void)
             is_where = 1;
         }
 
-        if (strstr(input, ";") == NULL) // 세미콜론 포함x
-        {
-            printf("Complete the command, including the ';'\n");
-            continue;
-        }
-
         command = strtok(input, " ");
 
         if (!strcasecmp(command, "show"))
@@ -353,6 +347,12 @@ int main(void)
 
         else if (command[0] == '\n')
         {
+            continue;
+        }
+
+        else if (strstr(input, ";") == NULL) // 세미콜론 포함x
+        {
+            printf("Complete the command, including the ';'\n");
             continue;
         }
 
