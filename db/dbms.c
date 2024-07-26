@@ -237,9 +237,9 @@ int main(void)
 
             for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
             {
-                if (i == 0)
+                if (i == 0) // 첫 열 데이터 넣기
                     add_bottom_data(domain->head, values[i]);
-                else
+                else                                                           // 나머지 열 데이터 넣기
                     add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
             }
 
@@ -263,7 +263,7 @@ int main(void)
         {
             command = strtok(NULL, " "); // table name
 
-            if (db == head)
+            if (db == head) // not found db
             {
                 printf("No database selected\n");
                 continue;
@@ -271,7 +271,7 @@ int main(void)
 
             table = read_table(db->thead, command);
 
-            if (table == NULL)
+            if (table == NULL) // not found table
             {
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
@@ -287,7 +287,7 @@ int main(void)
         {
             command = strtok(NULL, " "); // from
 
-            if (db == head)
+            if (db == head) // not found db
             {
                 printf("No database selected\n");
                 continue;
@@ -297,7 +297,7 @@ int main(void)
 
             table = read_table(db->thead, command);
 
-            if (table == NULL)
+            if (table == NULL) // not found table
             {
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
