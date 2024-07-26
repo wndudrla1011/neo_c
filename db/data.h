@@ -372,4 +372,34 @@ void update_data(Domain *domain, Data *data, char *column, char *value)
     strcpy(data->value, value);
 }
 
+void delete_data(Table *table, Domain *domain, Data *h, Data *data)
+{
+    Data *cur;
+    cur = data;
+
+    Data *prev;
+    prev = h;
+
+    while (prev->next->value != data->value) // find prev Data
+    {
+        prev = prev->next;
+    }
+
+    // remove vertical chain
+    prev->next = data->next;
+    data->next = NULL;
+
+    // remove horizental chain
+    while (cur->tuple != NULL)
+    {
+        prev = cur;
+        cur = cur->tuple;
+        free(prev);
+    }
+
+    prev = cur;
+    cur = cur->tuple;
+    free(prev);
+}
+
 #endif

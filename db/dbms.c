@@ -9,6 +9,7 @@
 #include "./hooks/create_table.h"
 #include "./hooks/search_table.h"
 #include "./hooks/update_table.h"
+#include "./hooks/delete_table.h"
 #include "./util/substring.h"
 
 #define MAX_COLUMN 20      // 최대 속성 값 개수
@@ -302,6 +303,9 @@ int main(void)
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
             }
+
+            query_delete(db, table, domain, data);
+            printf("Query Success!\n");
         }
 
         else if (!strcasecmp(command, "exit\n"))
