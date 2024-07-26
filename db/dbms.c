@@ -280,6 +280,16 @@ int main(void)
             command = strtok(NULL, " "); // set
 
             query_update(db, table, domain, data);
+            printf("Query Success!\n");
+        }
+
+        else if (!strcasecmp(command, "delete")) // Query > delete table
+        {
+            if (db == head)
+            {
+                printf("No database selected\n");
+                continue;
+            }
         }
 
         else if (!strcasecmp(command, "exit\n"))
