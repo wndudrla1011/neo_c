@@ -51,23 +51,20 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
         tokens[cnt++] = token;
     }
 
-    for (int i = 0; i < pos_cons; i++) // set절 처리
+    for (int i = 0; i < cnt - pos_cons; i++) // set절 처리
     {
-        for (int j = 0; j < sizeof(search_op) / sizeof(char *); j++)
+        if (!strcmp(tokens[i], "="))
         {
-            if (!strcmp(tokens[i], search_op[j]))
-            {
-                columns[cnt_set] = tokens[i - 1];
-                values[cnt_set] = tokens[i + 1];
-                cnt_set++;
-            }
+            columns[cnt_set] = tokens[i - 1];
+            values[cnt_set] = tokens[i + 1];
+            cnt_set++;
+        }
 
-            else if (strstr(tokens[i], search_op[j]) != NULL)
-            {
-                columns[cnt_set] = strtok(tokens[i], search_op[j]);
-                values[cnt_set] = strtok(NULL, search_op[j]);
-                cnt_set++;
-            }
+        else if (strstr(tokens[i], "=") != NULL)
+        {
+            columns[cnt_set] = strtok(tokens[i], "=");
+            values[cnt_set] = strtok(NULL, "=");
+            cnt_set++;
         }
     }
 
@@ -171,10 +168,10 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
 
         else // where 문 존재x
         {
-            // for (int i = 0; i < pos_tname - 1; i++)
-            // {
-            //     find_data(domain, data, columns[i]);
-            // }
+            for (int i = 0; i < cnt_set; i++)
+            {
+                update_data(domain, data, columns[i], values[i]);
+            }
         }
 
         domain = table->dhead->next; // Move first column (head next)
