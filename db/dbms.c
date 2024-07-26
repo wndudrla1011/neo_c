@@ -147,7 +147,7 @@ int main(void)
 
             else if (!strcasecmp(command, "table")) // Query > drop table
             {
-                command = strtok(NULL, ";");
+                command = strtok(NULL, ";"); // table name
 
                 delete_table(db, command);
             }
@@ -285,9 +285,21 @@ int main(void)
 
         else if (!strcasecmp(command, "delete")) // Query > delete table
         {
+            command = strtok(NULL, " "); // from
+
             if (db == head)
             {
                 printf("No database selected\n");
+                continue;
+            }
+
+            command = strtok(NULL, " "); // table name
+
+            table = read_table(db->thead, command);
+
+            if (table == NULL)
+            {
+                printf("Table '%s' doesn't exist\n", command);
                 continue;
             }
         }
