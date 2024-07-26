@@ -11,6 +11,7 @@
 #include "./hooks/update_table.h"
 #include "./hooks/delete_table.h"
 #include "./util/substring.h"
+#include "./util/handle_branket.h"
 
 #define MAX_COLUMN 20      // 최대 속성 값 개수
 #define MAX_INPUT 100      // 최대 입력 값 길이
@@ -102,6 +103,12 @@ int main(void)
             else if (!strcasecmp(command, "table")) // Query > create table
             {
                 command = strtok(NULL, "("); // table name
+
+                if (command == NULL) // handling syntax error
+                {
+                    printf("You have an error in your SQL syntax;\n");
+                    continue;
+                }
 
                 if (db == head) // use database 를 하지 않은 상태
                 {
