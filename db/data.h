@@ -357,4 +357,19 @@ void print_data(Domain *domain, Data *data, char *column) // 검색하는 컬럼
     printf("%s  |  ", data->value);
 }
 
+/*
+ * column: 수정하려는 컬럼
+ * value: 수정하려는 값
+ */
+void update_data(Domain *domain, Data *data, char *column, char *value)
+{
+    while (strcmp(domain->column, column)) // find column
+    {
+        data = data->tuple;
+        domain = domain->next;
+    }
+
+    strcpy(data->value, value);
+}
+
 #endif

@@ -21,7 +21,6 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
     int flag = 0;              // 0: none, 1: and, 2: or
     char *columns[MAX_COLUMN]; // 모든 set절 column
     char *values[MAX_COLUMN];  // 모든 set절 value
-    char ops[MAX_COLUMN];      // 모든 set절 연산자
     char wheres[MAX_INPUT];    // 조건절
     char *wtokens[MAX_INPUT];  // where 뒤의 모든 토큰
     char *tokens[MAX_INPUT];   // 모든 token
@@ -60,7 +59,6 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
             {
                 columns[cnt_set] = tokens[i - 1];
                 values[cnt_set] = tokens[i + 1];
-                ops[cnt_set] = op[j];
                 cnt_set++;
             }
 
@@ -68,7 +66,6 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
             {
                 columns[cnt_set] = strtok(tokens[i], search_op[j]);
                 values[cnt_set] = strtok(NULL, search_op[j]);
-                ops[cnt_set] = op[j];
                 cnt_set++;
             }
         }
@@ -143,61 +140,46 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
         // >>>>>>>>>>>>>>>>>>>>> Parsing where
     }
 
-    printf("---------set절 파싱---------\n");
-    for (int i = 0; i < cnt_set; i++)
-    {
-        printf("%s %s %c\n", columns[i], values[i], ops[i]);
-    }
-
-    printf("---------where절 파싱---------\n");
-    printf("%s %s %c\n", col1, val1, op1);
-    printf("%s %s %c\n", col2, val2, op2);
-
     int result = 0; // 데이터 탐색 결과
 
     domain = table->dhead->next; // Move first column (head next)
 
     data = domain->head->next; // Move head data
 
-    // while (data != NULL)
-    // {
-    //     if (pos_cons > 0) // where 문 존재
-    //     {
-    //         if (flag > 0) // 다중 조건
-    //         {
-    //             result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
-    //         }
+    while (data != NULL)
+    {
+        if (pos_cons > 0) // where 문 존재
+        {
+            if (flag > 0) // 다중 조건
+            {
+                result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+            }
 
-    //         else // 단일 조건
-    //         {
-    //             result = find_single_data(table, domain, data, col1, val1, op1);
-    //         }
+            else // 단일 조건
+            {
+                result = find_single_data(table, domain, data, col1, val1, op1);
+            }
 
-    //         if (result) // 조건에 부합
-    //         {
-    //             printf("+--------------------------------------+\n");
-    //             for (int i = 0; i < cnt_cols; i++) // 조건에 부합하는 Tuple 출력
-    //             {
-    //                 print_data(domain, data, columns[i]);
-    //             }
-    //             printf("\n+--------------------------------------+\n");
-    //         }
-    //     }
+            if (result) // 조건에 부합
+            {
+                for (int i = 0; i < cnt_set; i++) // 조건에 부합하는 Tuple 수정
+                {
+                    update_data(domain, data, columns[i], values[i]);
+                }
+            }
+        }
 
-    //     else // where 문 존재x
-    //     {
-    //         printf("+--------------------------------------+\n");
-    //         printf("|  ");
-    //         for (int i = 0; i < pos_tname - 1; i++)
-    //         {
-    //             find_data(domain, data, columns[i]);
-    //         }
-    //         printf("\n+--------------------------------------+\n");
-    //     }
+        else // where 문 존재x
+        {
+            // for (int i = 0; i < pos_tname - 1; i++)
+            // {
+            //     find_data(domain, data, columns[i]);
+            // }
+        }
 
-    //     domain = table->dhead->next; // Move first column (head next)
-    //     data = data->next;           // next data (next tuple)
-    // }
+        domain = table->dhead->next; // Move first column (head next)
+        data = data->next;           // next data (next tuple)
+    }
 }
 
 #endif
