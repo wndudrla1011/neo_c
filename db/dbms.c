@@ -286,6 +286,8 @@ int main(void)
 
         else if (!strcasecmp(command, "delete")) // Query > delete table
         {
+            int is_where = 0;
+
             command = strtok(NULL, " "); // from
 
             if (db == head) // not found db
@@ -294,7 +296,16 @@ int main(void)
                 continue;
             }
 
-            command = strtok(NULL, " "); // table name
+            if (strstr(input, "where") != NULL)
+            {
+                is_where = 1;
+                command = strtok(NULL, " "); // table name
+            }
+
+            else
+            {
+                command = strtok(NULL, ";"); // table name
+            }
 
             table = read_table(db->thead, command);
 
@@ -304,7 +315,7 @@ int main(void)
                 continue;
             }
 
-            query_delete(db, table, domain, data);
+            query_delete(db, table, domain, data, is_where);
             printf("Query Success!\n");
         }
 
