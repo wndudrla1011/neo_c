@@ -19,6 +19,8 @@
 
 int main(void)
 {
+    FILE *store; // 파일 저장소
+    store = fopen("\\home\\jooyoungkim\\db.txt", "a+");
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
