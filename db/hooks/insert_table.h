@@ -9,7 +9,7 @@
 #include "../domain.h"
 #include "../data.h"
 
-void query_insert(DB *db, Table *table, Domain *domain, Data *data)
+void query_insert(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
 {
     int degree = 0;          // 속성 개수
     char *values[MAX_INPUT]; // 토큰화된 입력 데이터
@@ -41,10 +41,18 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data)
     for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
     {
         if (i == 0) // 첫 열 데이터 넣기
+        {
+            fprintf(store, "%s |  ", values[i]);
             add_bottom_data(domain->head, values[i]);
-        else                                                           // 나머지 열 데이터 넣기
+        }
+        else // 나머지 열 데이터 넣기
+        {
+            fprintf(store, "%s |  ", values[i]);
             add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
+        }
     }
+
+    fputs("\n", store);
 
     // >>>>>>>>>>>>>>>>>>>>> Insert Data
 }

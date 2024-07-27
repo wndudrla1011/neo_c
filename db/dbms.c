@@ -20,7 +20,7 @@
 int main(void)
 {
     FILE *store; // 파일 저장소
-    store = fopen("\\home\\jooyoungkim\\db.txt", "a+");
+    store = fopen("store.txt", "a+");
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
@@ -241,7 +241,7 @@ int main(void)
 
             command = strtok(NULL, "("); // values
 
-            query_insert(db, table, domain, data);
+            query_insert(db, table, domain, data, store);
             printf("Query Success!\n");
         }
 
@@ -315,6 +315,7 @@ int main(void)
         else if (!strcasecmp(command, "exit\n"))
         {
             printf("Bye~\n");
+            fclose(store);
             break;
         }
 
@@ -334,7 +335,7 @@ int main(void)
             printf("You have an error in your SQL syntax;\n");
         }
 
-    } // while(1)
+    } // while(1)*/
 
     return 0;
 }
