@@ -15,7 +15,7 @@
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
 
-void query_select(DB *db, Table *table, Domain *domain, Data *data)
+void query_select(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
 {
     int cnt = 0;               // token count
     int cnt_cols = 0;          // column 개수
@@ -143,11 +143,11 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
         return;
     }
 
-    if (table->cadinality == 0) // insert 0회
-    {
-        printf("Empty set\n");
-        return;
-    }
+    // if (table->cadinality == 0) // insert 0회
+    // {
+    //     printf("Empty set\n");
+    //     return;
+    // }
 
     if (!strcmp(columns[0], "*")) // select all
     {
@@ -155,7 +155,16 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
         data = domain->head->next; // Move head data
 
-        while (data != NULL)
+        char str[MAX_INPUT];
+
+        while (!feof(store))
+        {
+            fgets(str, MAX_INPUT, store);
+
+            printf("%s", str);
+        }
+
+        /*while (data != NULL)
         {
             if (pos_cons > 0) // where 문 존재
             {
@@ -184,7 +193,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
             domain = table->dhead->next; // Move first column (head next)
             data = data->next;           // next data (next tuple)
-        }
+        }*/
     }
 
     // >>>>>>>>>>>>>>>>>>>>> Select all
@@ -240,10 +249,10 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
 
     // >>>>>>>>>>>>>>>>>>>>> Select cols
 
-    if (flag_empty == 1)
-    {
-        printf("Empty set\n");
-    }
+    // if (flag_empty == 1)
+    // {
+    //     printf("Empty set\n");
+    // }
 }
 
 #endif

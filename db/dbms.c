@@ -253,7 +253,7 @@ int main(void)
                 continue;
             }
 
-            query_select(db, table, domain, data);
+            query_select(db, table, domain, data, store);
         }
 
         else if (!strcasecmp(command, "update")) // Query > update table
