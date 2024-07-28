@@ -156,10 +156,17 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
         data = domain->head->next; // Move head data
 
         char record[MAX_INPUT];
+        char *cur = NULL;
 
         while (fgets(record, MAX_INPUT, store) != NULL)
         {
-            printf("%s", record);
+            cur = strtok(record, ",");
+            printf("%s ", cur);
+
+            while ((cur = strtok(NULL, ",")) != NULL)
+            {
+                printf("%s ", cur);
+            }
         }
 
         /*while (data != NULL)
