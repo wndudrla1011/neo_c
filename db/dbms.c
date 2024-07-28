@@ -132,7 +132,6 @@ int main(void)
                 }
 
                 create_table(command, db, table, domain, store); // 테이블 생성
-
                 printf("Query Success!\n");
             }
 
