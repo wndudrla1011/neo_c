@@ -10,6 +10,7 @@
 #include "./hooks/search_table.h"
 #include "./hooks/update_table.h"
 #include "./hooks/delete_table.h"
+#include "./hooks/insert_table.h"
 #include "./util/substring.h"
 #include "./util/handle_branket.h"
 
@@ -19,6 +20,8 @@
 
 int main(void)
 {
+    FILE *store; // 파일 저장소
+    store = fopen("store.txt", "a+");
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
@@ -128,7 +131,7 @@ int main(void)
                     continue;
                 }
 
-                create_table(command, db, table, domain); // 테이블 생성
+                create_table(command, db, table, domain, store); // 테이블 생성
 
                 printf("Query Success!\n");
             }
@@ -237,46 +240,10 @@ int main(void)
                 continue;
             }
 
-            command = strtok(NULL, "(");
+            command = strtok(NULL, "("); // values
 
-            int degree = 0;          // 속성 개수
-            char *values[MAX_INPUT]; // 토큰화된 입력 데이터
-            char *token;
-            char *pos;    // 첫 single quote가 등장하는 위치 == 문자열 데이터 시작 위치
-            char *unpack; // substring 결과
-
-            while ((token = strtok(NULL, ",);")) != NULL) // 토큰화
-            {
-                values[degree++] = token;
-            }
-
-            table->degree = degree - 1; // 열 개수 입력
-            table->cadinality++;        // 행 개수 추가
-
-            for (int i = 0; i < table->degree; i++)
-            {
-                if ((pos = strstr(values[i], "\'")) != NULL) // 문자열 데이터
-                {
-                    unpack = substring(1, strlen(pos) - 2, pos); // 맨 앞뒤 single quote 제거
-                    values[i] = unpack;
-                }
-            }
-
-            // >>>>>>>>>>>>>>>>>>>> Parsing Data
-
-            domain = table->dhead->next; // 첫 번째 column 이동
-
-            for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
-            {
-                if (i == 0) // 첫 열 데이터 넣기
-                    add_bottom_data(domain->head, values[i]);
-                else                                                           // 나머지 열 데이터 넣기
-                    add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
-            }
-
+            query_insert(db, table, domain, data, store);
             printf("Query Success!\n");
-
-            // >>>>>>>>>>>>>>>>>>>>> Insert Data
         }
 
         else if (!strcasecmp(command, "select")) // Query > select table
@@ -287,7 +254,7 @@ int main(void)
                 continue;
             }
 
-            query_select(db, table, domain, data);
+            query_select(db, table, domain, data, store);
         }
 
         else if (!strcasecmp(command, "update")) // Query > update table
@@ -349,6 +316,7 @@ int main(void)
         else if (!strcasecmp(command, "exit\n"))
         {
             printf("Bye~\n");
+            fclose(store);
             break;
         }
 
@@ -368,7 +336,7 @@ int main(void)
             printf("You have an error in your SQL syntax;\n");
         }
 
-    } // while(1)
+    } // while(1)*/
 
     return 0;
 }

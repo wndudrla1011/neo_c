@@ -10,7 +10,7 @@
 
 char *types[] = {"int", "INT", "bigint", "BIGINT", "varchar", "VARCHAR", "text", "TEXT"};
 
-void create_table(char *name, DB *db, Table *table, Domain *domain)
+void create_table(char *name, DB *db, Table *table, Domain *domain, FILE *store)
 {
     add_table(db, table, name); // 연결 리스트 -> New Table
 
@@ -96,6 +96,18 @@ void create_table(char *name, DB *db, Table *table, Domain *domain)
 
         if (type_flag == 0) // 현재 토큰이 타입이 아님
             column = attr_info[i];
+    }
+
+    domain = table->dhead->next; // 첫 번째 column 이동
+
+    while (domain != NULL) // 컬럼 데이터 파일에 입력
+    {
+        if (domain->next == NULL)
+            fprintf(store, "%s\n", domain->column);
+        else
+            fprintf(store, "%s,", domain->column);
+
+        domain = domain->next;
     }
 }
 
