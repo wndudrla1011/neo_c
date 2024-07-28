@@ -31,6 +31,12 @@ int main(void)
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
 
+    if (store == NULL)
+    {
+        printf("파일을 열 수 없습니다.\n");
+        return 0;
+    }
+
     while (1)
     {
         fgets(input, MAX_INPUT, stdin);
