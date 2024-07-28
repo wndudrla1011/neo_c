@@ -42,13 +42,25 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
     {
         if (i == 0) // 첫 열 데이터 넣기
         {
+            if (strlen(values[i]) > domain->len) // DCL 정의한 길이보다 긴 경우
+            {
+                printf("ERROR: Data too long for column '%s'\n", domain->column);
+                exit(1);
+            }
             fprintf(store, "%s |  ", values[i]);
             add_bottom_data(domain->head, values[i]);
+            domain = domain->next;
         }
         else // 나머지 열 데이터 넣기
         {
+            if (strlen(values[i]) > domain->len) // DCL 정의한 길이보다 긴 경우
+            {
+                printf("ERROR: Data too long for column '%s'\n", domain->column);
+                exit(1);
+            }
             fprintf(store, "%s |  ", values[i]);
             add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
+            domain = domain->next;
         }
     }
 
