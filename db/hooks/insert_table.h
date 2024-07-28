@@ -47,7 +47,7 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
                 printf("ERROR: Data too long for column '%s'\n", domain->column);
                 exit(1);
             }
-            fprintf(store, "%s |  ", values[i]);
+            fprintf(store, "%s,", values[i]);
             add_bottom_data(domain->head, values[i]);
             domain = domain->next;
         }
@@ -58,7 +58,10 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
                 printf("ERROR: Data too long for column '%s'\n", domain->column);
                 exit(1);
             }
-            fprintf(store, "%s |  ", values[i]);
+            if (i == table->degree - 1)
+                fprintf(store, "%s", values[i]);
+            else
+                fprintf(store, "%s,", values[i]);
             add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
             domain = domain->next;
         }
