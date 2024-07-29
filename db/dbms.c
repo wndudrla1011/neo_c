@@ -246,7 +246,7 @@ int main(void)
 
             command = strtok(NULL, "("); // values
 
-            query_insert(db, table, domain, data, store);
+            query_insert(db, table, domain, data, "store.txt");
             printf("Query Success!\n");
         }
 

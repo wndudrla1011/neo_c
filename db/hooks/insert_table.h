@@ -9,13 +9,20 @@
 #include "../domain.h"
 #include "../data.h"
 
-void query_insert(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
+void query_insert(DB *db, Table *table, Domain *domain, Data *data, const char *filename)
 {
+    FILE *store = fopen(filename, "a+");
     int degree = 0;          // 속성 개수
     char *values[MAX_INPUT]; // 토큰화된 입력 데이터
     char *token;
     char *pos;    // 첫 single quote가 등장하는 위치 == 문자열 데이터 시작 위치
     char *unpack; // substring 결과
+
+    if (store == NULL)
+    {
+        printf("파일을 열 수 없습니다.\n");
+        exit(1);
+    }
 
     while ((token = strtok(NULL, ",);")) != NULL) // 토큰화
     {
@@ -70,6 +77,8 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
     fputs("\n", store);
 
     // >>>>>>>>>>>>>>>>>>>>> Insert Data
+
+    fclose(store);
 }
 
 #endif

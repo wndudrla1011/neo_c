@@ -10,14 +10,14 @@
 
 char *types[] = {"int", "INT", "bigint", "BIGINT", "varchar", "VARCHAR", "text", "TEXT"};
 
-void create_table(char *name, DB *db, Table *table, Domain *domain, FILE *filename)
+void create_table(char *name, DB *db, Table *table, Domain *domain, const char *filename)
 {
     FILE *store = fopen(filename, "a+");
 
     if (store == NULL)
     {
         printf("파일을 열 수 없습니다.\n");
-        return 0;
+        exit(1);
     }
 
     add_table(db, table, name); // 연결 리스트 -> New Table
