@@ -17,8 +17,11 @@
 #define MAX_INPUT 100      // 최대 입력 값 길이
 #define MAX_CADINALITY 200 // 최대 튜플 개수
 
+const char *filename = "db.dat";
+
 int main(void)
 {
+    FILE *store = fopen(filename, "wb"); // 바이너리 모드로 파일 열기
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
@@ -27,6 +30,12 @@ int main(void)
     int is_where = 0;      // where절 존재 여부 > delete에서 사용
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
+
+    if (!store)
+    {
+        printf("Failed file open");
+        return 0;
+    }
 
     while (1)
     {
@@ -312,6 +321,7 @@ int main(void)
         else if (!strcasecmp(command, "exit\n"))
         {
             printf("Bye~\n");
+            fclose(store);
             break;
         }
 
