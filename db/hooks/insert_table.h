@@ -19,9 +19,7 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data)
 
     while ((token = strtok(NULL, ",);")) != NULL) // 토큰화
     {
-        values[degree] = (char *)malloc(sizeof(char));
-        if (values[degree] != NULL)
-            values[degree++] = token;
+        values[degree++] = token;
     }
 
     table->degree = degree - 1; // 열 개수 입력
@@ -43,25 +41,10 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data)
     for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
     {
         if (i == 0) // 첫 열 데이터 넣기
-        {
-            if (strlen(values[i]) > domain->len) // DCL 정의한 길이보다 긴 경우
-            {
-                printf("ERROR: Data too long for column '%s'\n", domain->column);
-                exit(1);
-            }
             add_bottom_data(domain->head, values[i]);
-            domain = domain->next;
-        }
-        else // 나머지 열 데이터 넣기
-        {
-            if (strlen(values[i]) > domain->len) // DCL 정의한 길이보다 긴 경우
-            {
-                printf("ERROR: Data too long for column '%s'\n", domain->column);
-                exit(1);
-            }
+
+        else                                                           // 나머지 열 데이터 넣기
             add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
-            domain = domain->next;
-        }
     }
 
     // >>>>>>>>>>>>>>>>>>>>> Insert Data
