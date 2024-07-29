@@ -9,20 +9,13 @@
 #include "../domain.h"
 #include "../data.h"
 
-void query_insert(DB *db, Table *table, Domain *domain, Data *data, const char *filename)
+void query_insert(DB *db, Table *table, Domain *domain, Data *data)
 {
-    FILE *store = fopen(filename, "a+");
     int degree = 0;          // 속성 개수
     char *values[MAX_INPUT]; // 토큰화된 입력 데이터
     char *token = NULL;
     char *pos = NULL;    // 첫 single quote가 등장하는 위치 == 문자열 데이터 시작 위치
     char *unpack = NULL; // substring 결과
-
-    if (store == NULL)
-    {
-        printf("파일을 열 수 없습니다.\n");
-        exit(1);
-    }
 
     while ((token = strtok(NULL, ",);")) != NULL) // 토큰화
     {
@@ -56,7 +49,6 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data, const char *
                 printf("ERROR: Data too long for column '%s'\n", domain->column);
                 exit(1);
             }
-            fprintf(store, "%s,", values[i]);
             add_bottom_data(domain->head, values[i]);
             domain = domain->next;
         }
@@ -67,20 +59,12 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data, const char *
                 printf("ERROR: Data too long for column '%s'\n", domain->column);
                 exit(1);
             }
-            if (i == table->degree - 1)
-                fprintf(store, "%s", values[i]);
-            else
-                fprintf(store, "%s,", values[i]);
             add_right_data(find_bottom_data(domain->head), values[i]); // 데이터 추가 (열 방향)
             domain = domain->next;
         }
     }
 
-    fputs("\n", store);
-
     // >>>>>>>>>>>>>>>>>>>>> Insert Data
-
-    fclose(store);
 }
 
 #endif

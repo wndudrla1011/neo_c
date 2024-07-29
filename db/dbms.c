@@ -19,8 +19,6 @@
 
 int main(void)
 {
-    FILE *store; // 파일 저장소
-    store = fopen("store.txt", "a+");
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
@@ -29,12 +27,6 @@ int main(void)
     int is_where = 0;      // where절 존재 여부 > delete에서 사용
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
-
-    if (store == NULL)
-    {
-        printf("파일을 열 수 없습니다.\n");
-        return 0;
-    }
 
     while (1)
     {
@@ -136,7 +128,7 @@ int main(void)
                     continue;
                 }
 
-                create_table(command, db, table, domain, "store.txt"); // 테이블 생성
+                create_table(command, db, table, domain); // 테이블 생성
                 printf("Query Success!\n");
             }
 
@@ -246,7 +238,7 @@ int main(void)
 
             command = strtok(NULL, "("); // values
 
-            query_insert(db, table, domain, data, "store.txt");
+            query_insert(db, table, domain, data);
             printf("Query Success!\n");
         }
 
@@ -258,7 +250,7 @@ int main(void)
                 continue;
             }
 
-            query_select(db, table, domain, data, "store.txt");
+            query_select(db, table, domain, data);
         }
 
         else if (!strcasecmp(command, "update")) // Query > update table
@@ -320,7 +312,6 @@ int main(void)
         else if (!strcasecmp(command, "exit\n"))
         {
             printf("Bye~\n");
-            fclose(store);
             break;
         }
 

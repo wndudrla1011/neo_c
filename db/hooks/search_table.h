@@ -15,9 +15,8 @@
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
 
-void query_select(DB *db, Table *table, Domain *domain, Data *data, const char *filename)
+void query_select(DB *db, Table *table, Domain *domain, Data *data)
 {
-    FILE *store = fopen(filename, "r");
     int cnt = 0;               // token count
     int cnt_cols = 0;          // column 개수
     int cnt_cons = 0;          // 조건 개수
@@ -39,12 +38,6 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data, const char *
     char op2;          // 조건2 -> 연산자
 
     wheres[0] = '\0'; // 조건절 초기화
-
-    if (store == NULL)
-    {
-        printf("파일을 열 수 없습니다.\n");
-        exit(1);
-    }
 
     while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
     {
@@ -150,11 +143,11 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data, const char *
         return;
     }
 
-    // if (table->cadinality == 0) // insert 0회
-    // {
-    //     printf("Empty set\n");
-    //     return;
-    // }
+    if (table->cadinality == 0) // insert 0회
+    {
+        printf("Empty set\n");
+        return;
+    }
 
     if (!strcmp(columns[0], "*")) // select all
     {
@@ -162,23 +155,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data, const char *
 
         data = domain->head->next; // Move head data
 
-        int cnt_header = 0;       // column 개수
-        char *headers[MAX_INPUT]; // columns를 담을 배열
-        char record[MAX_INPUT];
-        char *token = NULL;
-
-        while (fgets(record, MAX_INPUT, store) != NULL)
-        {
-            token = strtok(record, ",");
-            headers[cnt_header++] = token;
-
-            while ((token = strtok(NULL, ",")) != NULL)
-            {
-                headers[cnt_header++] = token;
-            }
-        }
-
-        /*while (data != NULL)
+        while (data != NULL)
         {
             if (pos_cons > 0) // where 문 존재
             {
@@ -207,7 +184,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data, const char *
 
             domain = table->dhead->next; // Move first column (head next)
             data = data->next;           // next data (next tuple)
-        }*/
+        }
     }
 
     // >>>>>>>>>>>>>>>>>>>>> Select all
@@ -263,10 +240,10 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data, const char *
 
     // >>>>>>>>>>>>>>>>>>>>> Select cols
 
-    // if (flag_empty == 1)
-    // {
-    //     printf("Empty set\n");
-    // }
+    if (flag_empty == 1)
+    {
+        printf("Empty set\n");
+    }
 }
 
 #endif
