@@ -33,7 +33,7 @@ int main(void)
 
     if (!store)
     {
-        printf("Failed file open");
+        perror("Failed file open\n");
         return 0;
     }
 
@@ -103,6 +103,12 @@ int main(void)
                 {
                     printf("Can't create database '%s'; database exists\n", command);
                     continue;
+                }
+
+                size_t written = fwrite(db, sizeof(db), 1, store);
+                if (written != 1)
+                {
+                    perror("Failed write the file\n");
                 }
 
                 add_db(db, command); // 연결 리스트 -> New DB
