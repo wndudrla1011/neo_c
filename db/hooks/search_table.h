@@ -15,8 +15,9 @@
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
 
-void query_select(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
+void query_select(DB *db, Table *table, Domain *domain, Data *data, const char *filename)
 {
+    FILE *store = fopen(filename, "r");
     int cnt = 0;               // token count
     int cnt_cols = 0;          // column 개수
     int cnt_cons = 0;          // 조건 개수
@@ -38,6 +39,12 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
     char op2;          // 조건2 -> 연산자
 
     wheres[0] = '\0'; // 조건절 초기화
+
+    if (store == NULL)
+    {
+        printf("파일을 열 수 없습니다.\n");
+        exit(1);
+    }
 
     while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
     {
@@ -155,17 +162,19 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data, FILE *store)
 
         data = domain->head->next; // Move head data
 
+        int cnt_header = 0;       // column 개수
+        char *headers[MAX_INPUT]; // columns를 담을 배열
         char record[MAX_INPUT];
-        char *cur = NULL;
+        char *token = NULL;
 
         while (fgets(record, MAX_INPUT, store) != NULL)
         {
-            cur = strtok(record, ",");
-            printf("%s ", cur);
+            token = strtok(record, ",");
+            headers[cnt_header++] = token;
 
-            while ((cur = strtok(NULL, ",")) != NULL)
+            while ((token = strtok(NULL, ",")) != NULL)
             {
-                printf("%s ", cur);
+                headers[cnt_header++] = token;
             }
         }
 

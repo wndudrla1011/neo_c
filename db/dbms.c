@@ -258,7 +258,7 @@ int main(void)
                 continue;
             }
 
-            query_select(db, table, domain, data, store);
+            query_select(db, table, domain, data, "store.txt");
         }
 
         else if (!strcasecmp(command, "update")) // Query > update table
