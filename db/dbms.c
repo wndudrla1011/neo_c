@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #include "db.h"
 #include "table.h"
@@ -105,11 +106,7 @@ int main(void)
                     continue;
                 }
 
-                size_t written = fwrite(db, sizeof(db), 1, store);
-                if (written != 1)
-                {
-                    perror("Failed write the file\n");
-                }
+                write_file(filename, head);
 
                 add_db(db, command); // 연결 리스트 -> New DB
                 printf("Query Success!\n");
@@ -327,6 +324,7 @@ int main(void)
         else if (!strcasecmp(command, "exit\n"))
         {
             printf("Bye~\n");
+
             fclose(store);
             break;
         }
@@ -334,6 +332,16 @@ int main(void)
         else if (command[0] == '\n')
         {
             continue;
+        }
+
+        else if (!strcasecmp(command, "test\n"))
+        {
+            DB *cur = read_file(filename);
+            while (cur != NULL)
+            {
+                printf("%s\n", cur->dname);
+                cur = cur->next;
+            }
         }
 
         else if (strstr(input, ";") == NULL) // 세미콜론 포함x
