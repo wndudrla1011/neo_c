@@ -14,9 +14,9 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data, const char *
     FILE *store = fopen(filename, "a+");
     int degree = 0;          // 속성 개수
     char *values[MAX_INPUT]; // 토큰화된 입력 데이터
-    char *token;
-    char *pos;    // 첫 single quote가 등장하는 위치 == 문자열 데이터 시작 위치
-    char *unpack; // substring 결과
+    char *token = NULL;
+    char *pos = NULL;    // 첫 single quote가 등장하는 위치 == 문자열 데이터 시작 위치
+    char *unpack = NULL; // substring 결과
 
     if (store == NULL)
     {
@@ -26,7 +26,9 @@ void query_insert(DB *db, Table *table, Domain *domain, Data *data, const char *
 
     while ((token = strtok(NULL, ",);")) != NULL) // 토큰화
     {
-        values[degree++] = token;
+        values[degree] = (char *)malloc(sizeof(char));
+        if (values[degree] != NULL)
+            values[degree++] = token;
     }
 
     table->degree = degree - 1; // 열 개수 입력
