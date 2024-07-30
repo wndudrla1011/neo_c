@@ -102,14 +102,14 @@ int get_cnt_dir(const char *parent)
     return count;
 }
 
-char *read_dir(char *dname, char *path) // DB 폴더로 DB 찾기
+char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 {
-    char db_path[1024];
-    sprintf(db_path, "%s/%s", path, dname);
+    char path[1024];
+    sprintf(path, "%s/%s", parent, name);
 
-    char *ptr = db_path; // 반환할 문자열 (db 경로)
+    char *ptr = path; // 반환할 문자열 (폴더 경로)
 
-    if (directoryExists(db_path)) // DB 폴더 존재
+    if (directoryExists(path)) // 폴더 존재
     {
         return ptr;
     }
@@ -144,7 +144,7 @@ char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾
     return "head";
 }
 
-void add_dir(char *name, char *parent) // 마지막 노드에 새 DB 추가
+void add_dir(char *name, char *parent) // 마지막 노드에 새 폴더 추가
 {
     char path[1024];
     char *end;
@@ -153,12 +153,12 @@ void add_dir(char *name, char *parent) // 마지막 노드에 새 DB 추가
     char oldName[1024];
     char newName[1024];
     end = find_end_dir(parent); // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
-    sprintf(oldName, "%s/%s", parent, end);
-    sprintf(newName, "%s/%s_%s", parent, end, name); // 가장 최근 생성한 dir -> 새로운 dir
-    renameDirectory(oldName, newName);               // 연결 네이밍
+    sprintf(oldName, "%s/%s", parent, end); //기존 폴더명
+    sprintf(newName, "%s/%s_%s", parent, end, name); // 변경할 폴더명
+    renameDirectory(oldName, newName);               // 폴더명 변경
     sprintf(path, "%s/%s", parent, name);         // 새 폴더 생성
 
-    createDirectory(path); // 새로운 DB 폴더 생성
+    createDirectory(path); // 새로운 폴더 생성
 }
 
 void print_all_dir(char *parent)
