@@ -13,16 +13,16 @@
 #include "./hooks/delete_table.h"
 #include "./hooks/insert_table.h"
 #include "./util/substring.h"
+#include "./util/directory.h"
 
 #define MAX_COLUMN 20      // 최대 속성 값 개수
 #define MAX_INPUT 100      // 최대 입력 값 길이
 #define MAX_CADINALITY 200 // 최대 튜플 개수
 
-const char *filename = "db.dat";
+char *path = "/home/jooyoungkim/joosql";
 
 int main(void)
 {
-    FILE *store = fopen(filename, "wb"); // 바이너리 모드로 파일 열기
     DB *db = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
@@ -32,10 +32,13 @@ int main(void)
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
 
-    if (!store)
+    if (directoryExists(path))
     {
-        perror("Failed file open\n");
-        return 0;
+        printf("디렉토리가 이미 존재합니다: %s\n", path);
+    }
+    else
+    {
+        createDirectory(path);
     }
 
     while (1)
@@ -106,9 +109,8 @@ int main(void)
                     continue;
                 }
 
-                write_file(filename, head);
-
                 add_db(db, command); // 연결 리스트 -> New DB
+
                 printf("Query Success!\n");
             }
 
@@ -324,24 +326,12 @@ int main(void)
         else if (!strcasecmp(command, "exit\n"))
         {
             printf("Bye~\n");
-
-            fclose(store);
             break;
         }
 
         else if (command[0] == '\n')
         {
             continue;
-        }
-
-        else if (!strcasecmp(command, "test\n"))
-        {
-            DB *cur = read_file(filename);
-            while (cur != NULL)
-            {
-                printf("%s\n", cur->dname);
-                cur = cur->next;
-            }
         }
 
         else if (strstr(input, ";") == NULL) // 세미콜론 포함x
