@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "db.h"
 
 #define MAX_INPUT 100 // 최대 입력 값 길이
 
