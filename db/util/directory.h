@@ -102,7 +102,7 @@ int get_cnt_dir(const char *parent)
     return count;
 }
 
-char *fread_dir(char *dname, char *path) // DB 폴더로 DB 찾기
+char *read_dir(char *dname, char *path) // DB 폴더로 DB 찾기
 {
     char db_path[1024];
     sprintf(db_path, "%s/%s", path, dname);
@@ -117,6 +117,39 @@ char *fread_dir(char *dname, char *path) // DB 폴더로 DB 찾기
     {
         return NULL;
     }
+}
+
+void print_all_dir(char *parent)
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(parent)) == NULL) // cd joosql
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return;
+    }
+
+    printf("======================================\n");
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
+        {
+            if (strstr(entry->d_name, "head") != NULL) // head는 출력하지 않음
+            {
+                continue;
+            }
+            else if (strstr(entry->d_name, "_") != NULL) // next ptr 를 가진 경우
+            {
+                printf("%s\n", strtok(entry->d_name, "_"));
+            }
+            else
+            {
+                printf("%s\n", entry->d_name);
+            }
+        }
+    }
+    printf("======================================\n\n");
 }
 
 #endif
