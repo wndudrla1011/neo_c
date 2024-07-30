@@ -24,6 +24,7 @@ char *root = "/home/jooyoungkim/joosql";
 int main(void)
 {
     DB *db = NULL;
+    char *db_dir = NULL;
     DB *head = NULL; // DB head
     Table *table = NULL;
     Domain *domain = NULL;
@@ -58,7 +59,7 @@ int main(void)
 
             if (!strcasecmp(command, "databases")) // Query > show databases
             {
-                if (get_cnt_db(head) == 0)
+                if (fget_cnt_db(root) == 0) // 생성한 DB 폴더가 없는 경우
                 {
                     printf("No database exist\n");
                     continue;
@@ -66,7 +67,7 @@ int main(void)
 
                 else
                 {
-                    print_all_db(head); // 생성된 DB 출력
+                    fprint_all_db(root); // 생성된 DB 폴더명 출력
                 }
             }
 
@@ -103,7 +104,7 @@ int main(void)
                     head = db;
                 }
 
-                if (fread_db(db, command, root)) // 같은 이름의 DB 폴더가 이미 존재하는 경우
+                if (fread_db(db, command, root) != NULL) // 같은 이름의 DB 폴더가 이미 존재하는 경우
                 {
                     printf("Can't create database '%s'; database exists\n", command);
                     continue;
@@ -156,9 +157,7 @@ int main(void)
         {
             command = strtok(NULL, ";"); // DB name
 
-            db = read_db(head, command); // 찾은 DB로 이동
-
-            if (db == NULL) // not found db
+            if (fread_db(head, command, root) == NULL) // not found db
                 printf("Unknown database '%s'\n", command);
             else // found db
                 printf("Database changed\n");

@@ -181,6 +181,39 @@ void print_all_db(DB *h) // 모든 DB 출력
     }
 }
 
+void fprint_all_db(char *parent)
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(parent)) == NULL) // cd joosql
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return;
+    }
+
+    printf("======================================\n");
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
+        {
+            if (strstr(entry->d_name, "head") != NULL) // head는 출력하지 않음
+            {
+                continue;
+            }
+            else if (strstr(entry->d_name, "_") != NULL) // next ptr 를 가진 경우
+            {
+                printf("%s\n", strtok(entry->d_name, "_"));
+            }
+            else
+            {
+                printf("%s\n", entry->d_name);
+            }
+        }
+    }
+    printf("======================================\n\n");
+}
+
 DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
 {
     if (h == NULL)
@@ -202,18 +235,20 @@ DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
     return (cur);
 }
 
-int fread_db(DB *h, char *dname, char *path) // DB 폴더로 DB 찾기
+char *fread_db(DB *h, char *dname, char *path) // DB 폴더로 DB 찾기
 {
     char db_path[MAX_INPUT];
     sprintf(db_path, "%s/%s", path, dname);
 
+    char *ptr = db_path; // 반환할 문자열 (db 경로)
+
     if (directoryExists(db_path)) // DB 폴더 존재
     {
-        return 1;
+        return ptr;
     }
     else
     {
-        return 0;
+        return NULL;
     }
 }
 
