@@ -1,3 +1,7 @@
+#define MAX_COLUMN 20      // 최대 속성 값 개수
+#define MAX_INPUT 100      // 최대 입력 값 길이
+#define MAX_CADINALITY 200 // 최대 튜플 개수
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,11 +19,7 @@
 #include "./util/substring.h"
 #include "./util/directory.h"
 
-#define MAX_COLUMN 20      // 최대 속성 값 개수
-#define MAX_INPUT 100      // 최대 입력 값 길이
-#define MAX_CADINALITY 200 // 최대 튜플 개수
-
-char *path = "/home/jooyoungkim/joosql";
+char *root = "/home/jooyoungkim/joosql";
 
 int main(void)
 {
@@ -32,13 +32,13 @@ int main(void)
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
 
-    if (directoryExists(path))
+    if (directoryExists(root))
     {
-        printf("디렉토리가 이미 존재합니다: %s\n", path);
+        printf("디렉토리가 이미 존재합니다: %s\n", root);
     }
     else
     {
-        createDirectory(path);
+        createDirectory(root);
     }
 
     while (1)
@@ -97,19 +97,19 @@ int main(void)
             {
                 command = strtok(NULL, ";"); // database name
 
-                if (get_cnt_db(head) == 0) // 첫 DB 생성
+                if (fget_cnt_db(root) == 0) // 첫 DB 생성
                 {
-                    db = init_db(); // DB 초기화
+                    db = init_db(root); // DB 초기화
                     head = db;
                 }
 
-                if (read_db(db, command) != NULL) // 같은 이름의 DB가 이미 존재하는 경우
+                if (fread_db(db, command, root)) // 같은 이름의 DB 폴더가 이미 존재하는 경우
                 {
                     printf("Can't create database '%s'; database exists\n", command);
                     continue;
                 }
 
-                add_db(db, command); // 연결 리스트 -> New DB
+                add_db(db, command, root); // 연결 리스트 -> New DB
 
                 printf("Query Success!\n");
             }
