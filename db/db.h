@@ -23,17 +23,6 @@ DB *init_db(char *parent) // DB 목록의 head 생성
     head = (DB *)malloc(sizeof(DB));
     head->next = NULL;
 
-    sprintf(db_path, "%s/head", parent);
-
-    if (directoryExists(db_path))
-    {
-        printf("디렉토리가 이미 존재합니다: %s\n", db_path);
-    }
-    else
-    {
-        createDirectory(db_path);
-    }
-
     return (head);
 }
 
@@ -52,46 +41,6 @@ int get_cnt_db(DB *h) // 생성된 DB 개수
     }
 
     return cnt;
-}
-
-int fget_cnt_db(const char *parent)
-{
-    DIR *dir;
-    struct dirent *entry;
-    struct stat info;
-    int count = 0;
-    char path[1024];
-
-    if ((dir = opendir(parent)) == NULL)
-    {
-        perror("디렉토리를 열 수 없습니다");
-        return -1;
-    }
-
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-        {
-            continue;
-        }
-
-        snprintf(path, sizeof(path), "%s/%s", parent, entry->d_name);
-
-        if (stat(path, &info) != 0)
-        {
-            perror("stat 실패");
-            closedir(dir);
-            return -1;
-        }
-
-        if (S_ISDIR(info.st_mode))
-        {
-            count++;
-        }
-    }
-
-    closedir(dir);
-    return count;
 }
 
 DB *find_end_db(DB *db) // 가장 마지막 DB 찾기
@@ -132,7 +81,7 @@ char *ffind_end_db(const char *dirName) // 가장 최근에 생성한 폴더 찾
     return "head";
 }
 
-void add_db(DB *db, char *name, char *parent) // 마지막 노드에 새 DB 추가
+void add_db(char *name, char *parent) // 마지막 노드에 새 DB 추가
 {
     char db_path[MAX_INPUT];
     char *end;
@@ -233,23 +182,6 @@ DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
     }
 
     return (cur);
-}
-
-char *fread_db(DB *h, char *dname, char *path) // DB 폴더로 DB 찾기
-{
-    char db_path[MAX_INPUT];
-    sprintf(db_path, "%s/%s", path, dname);
-
-    char *ptr = db_path; // 반환할 문자열 (db 경로)
-
-    if (directoryExists(db_path)) // DB 폴더 존재
-    {
-        return ptr;
-    }
-    else
-    {
-        return NULL;
-    }
 }
 
 void delete_db(DB *h, char *name) // DB 삭제
