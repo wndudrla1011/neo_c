@@ -7,8 +7,6 @@
 #include "domain.h"
 #include "./util/substring.h"
 
-#define MAX_INPUT 100 // 최대 입력 값 길이
-
 typedef struct Data
 {
     char value[MAX_INPUT]; // 해당 Domain에 해당하는 데이터

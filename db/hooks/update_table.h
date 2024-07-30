@@ -9,9 +9,6 @@
 #include "../domain.h"
 #include "../data.h"
 
-#define MAX_COLUMN 20 // 최대 속성 값 개수
-#define MAX_INPUT 100 // 최대 입력 값 길이
-
 void query_update(DB *db, Table *table, Domain *domain, Data *data)
 {
     int cnt = 0;               // token count

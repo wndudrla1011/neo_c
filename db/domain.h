@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_INPUT 100 // 최대 입력 값 길이
-
 typedef struct Domain // DCL용
 {
     char column[MAX_INPUT];   // 컬령명

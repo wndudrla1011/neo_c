@@ -10,9 +10,6 @@
 #include "../data.h"
 #include "./search.h"
 
-#define MAX_COLUMN 20 // 최대 속성 값 개수
-#define MAX_INPUT 100 // 최대 입력 값 길이
-
 void query_delete(DB *db, Table *table, Domain *domain, Data *data, int is_where)
 {
     int cnt = 0;              // token count

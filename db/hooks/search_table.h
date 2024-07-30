@@ -9,9 +9,6 @@
 #include "../domain.h"
 #include "../data.h"
 
-#define MAX_COLUMN 20 // 최대 속성 값 개수
-#define MAX_INPUT 100 // 최대 입력 값 길이
-
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
 

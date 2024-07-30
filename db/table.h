@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_INPUT 100 // 최대 입력 값 길이
-
 typedef struct Table
 {
     char tname[MAX_INPUT]; // 테이블명
