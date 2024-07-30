@@ -56,55 +56,15 @@ DB *find_end_db(DB *db) // 가장 마지막 DB 찾기
     return (cur);
 }
 
-char *ffind_end_db(const char *dirName) // 가장 최근에 생성한 폴더 찾기
+void add_db(DB *db, char *name, char *parent) // 마지막 노드에 새 DB 추가
 {
-    DIR *dir;
-    struct dirent *entry;
-
-    if ((dir = opendir(dirName)) == NULL)
-    {
-        perror("디렉토리를 열 수 없습니다");
-        return NULL;
-    }
-
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
-        {
-            if (strstr(entry->d_name, "_") == NULL) // Leaf Folder
-            {
-                return entry->d_name;
-            }
-        }
-    }
-
-    return "head";
-}
-
-void add_db(char *name, char *parent) // 마지막 노드에 새 DB 추가
-{
-    char db_path[MAX_INPUT];
-    char *end;
-
-    // 디렉토리 처리
-    char oldName[MAX_INPUT];
-    char newName[MAX_INPUT];
-    end = ffind_end_db(parent); // 부모 폴더에서 가장 최근에 생성한 DB 폴더 찾기
-    sprintf(oldName, "%s/%s", parent, end);
-    sprintf(newName, "%s/%s_%s", parent, end, name); // 가장 최근 생성한 DB -> 새로운 DB
-    renameDirectory(oldName, newName);               // 연결 네이밍
-    sprintf(db_path, "%s/%s", parent, name);         // 새 DB 폴더 생성
-
-    createDirectory(db_path); // 새로운 DB 폴더 생성
-
-    // 메모리 처리
-    // DB *end;
-    // end = find_end_db(db); // Leaf DB
-    // DB *new_db;
-    // new_db = (DB *)malloc(sizeof(DB)); // 새 DB 생성
-    // strcpy(new_db->dname, name);       // DB명 입력
-    // end->next = new_db;                // last db -> new db
-    // new_db->next = NULL;
+    DB *end;
+    end = find_end_db(db); // Leaf DB
+    DB *new_db;
+    new_db = (DB *)malloc(sizeof(DB)); // 새 DB 생성
+    strcpy(new_db->dname, name);       // DB명 입력
+    end->next = new_db;                // last db -> new db
+    new_db->next = NULL;
 }
 
 void print_all_db(DB *h) // 모든 DB 출력
