@@ -91,8 +91,6 @@ int get_cnt_dir(const char *parent)
         return -1;
     }
 
-    printf("get_cnt_dir mid \n");
-
     while ((entry = readdir(dir)) != NULL)
     {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
@@ -101,8 +99,6 @@ int get_cnt_dir(const char *parent)
         }
 
         sprintf(path, "%s/%s", parent, entry->d_name);
-
-        printf("path : %s\n", path);
 
         if (stat(path, &info) != 0)
         {
@@ -127,9 +123,6 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
     char *path = NULL;
     char *lt = NULL, *rt = NULL;
 
-    // strcpy(parent, "home");
-
-    printf("parent : %s\n", parent);
     if ((dir = opendir(parent)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
@@ -138,8 +131,6 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 
     while ((entry = readdir(dir)) != NULL)
     {
-
-        printf("entry->dname : %s  \n", entry->d_name);
         if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
         {
             if (strstr(entry->d_name, "_") != NULL) // Leaf folder가 아닌 경우 ("_" 존재)
@@ -165,21 +156,14 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
         }
     }
 
-    printf("111111\n");
-
     closedir(dir);
 
-    printf("22222\n");
-
-    printf("path : %d\n", path);
     if (path != NULL && directoryExists(path)) // 폴더 존재
     {
-
         return path;
     }
     else
     {
-        printf("re null \n");
         return NULL;
     }
 }
@@ -192,22 +176,17 @@ char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾
     head = (char *)malloc(sizeof(10));
     strcpy(head, "head");
 
-    printf("00000\n");
     char tmp[100000];
 
     strcpy(tmp, dirName);
-    printf("2222\n");
     if ((dir = opendir(dirName)) == NULL)
     {
-        printf("11111\n");
         perror("디렉토리를 열 수 없습니다");
         return NULL;
     }
-    printf("33333\n");
 
     while ((entry = readdir(dir)) != NULL)
     {
-        printf("bef: %s\n", entry->d_name);
         if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
         {
             if (strstr(entry->d_name, "_") == NULL) // Leaf Folder
@@ -216,7 +195,6 @@ char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾
                 return entry->d_name;
             }
         }
-        printf("after: %s\n", entry->d_name);
     }
 
     closedir(dir);
@@ -232,14 +210,11 @@ void add_dir(char *name, const char *parent) // 마지막 노드에 새 폴더 �
     char oldName[1024] = {0};
     char newName[1024] = {0};
 
-    printf("11111\n");
-    end = find_end_dir(parent); // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
-    printf("end: %s\n", end);
+    end = find_end_dir(parent);                      // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
     sprintf(oldName, "%s/%s", parent, end);          // 기존 폴더명
     sprintf(newName, "%s/%s_%s", parent, end, name); // 변경할 폴더명
     renameDirectory(oldName, newName);               // 폴더명 변경
     sprintf(path, "%s/%s", parent, name);            // 새 폴더 생성
-    printf("path: %s\n", path);
 
     createDirectory(path); // 새로운 폴더 생성
 }
