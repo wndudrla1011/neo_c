@@ -20,6 +20,8 @@
 #include "./util/substring.h"
 #include "./util/directory.h"
 
+char *root = "/home/jooyoungkim/joosql";
+
 int main(void)
 {
     DB *db = NULL;
@@ -30,6 +32,15 @@ int main(void)
     int is_where = 0;      // where절 존재 여부 > delete에서 사용
     char input[MAX_INPUT]; // 입력 값
     char *command;         // 명령어
+
+    if (directoryExists(root))
+    {
+        printf("디렉토리가 이미 존재합니다: %s\n", root);
+    }
+    else
+    {
+        createDirectory(root);
+    }
 
     while (1)
     {
@@ -85,16 +96,19 @@ int main(void)
             if (!strcasecmp(command, "database")) // Query > create database
             {
                 command = strtok(NULL, ";"); // database name
-                if (get_cnt_db(head) == 0)   // 첫 DB 생성
+
+                if (get_cnt_db(head) == 0) // 첫 DB 생성
                 {
                     db = init_db(); // DB 초기화
                     head = db;
                 }
+
                 if (read_db(db, command) != NULL) // 같은 이름의 DB가 이미 존재하는 경우
                 {
                     printf("Can't create database '%s'; database exists\n", command);
                     continue;
                 }
+
                 add_db(db, command); // 연결 리스트 -> New DB
                 printf("Query Success!\n");
             }
@@ -107,21 +121,25 @@ int main(void)
                     printf("You have an error in your SQL syntax;\n");
                     continue;
                 }
+
                 if (db == head) // use database 를 하지 않은 상태
                 {
                     printf("No database selected\n");
                     continue;
                 }
+
                 if (db->thead == NULL) // Table head 없음
                 {
                     table = init_table(db); // Table 초기화
                     db->thead = table;      // table head 설정
                 }
+
                 if (read_table(db->thead, command) != NULL) // 같은 이름의 Table이 이미 존재하는 경우
                 {
                     printf("Table '%s' already exists\n", command);
                     continue;
                 }
+
                 create_table(command, db, table, domain); // 테이블 생성
                 printf("Query Success!\n");
             }
@@ -135,8 +153,10 @@ int main(void)
         else if (!strcasecmp(command, "use")) // Query > use database
         {
             command = strtok(NULL, ";"); // DB name
+
             db = read_db(head, command); // 찾은 DB로 이동
-            if (db == NULL)              // not found db
+
+            if (db == NULL) // not found db
                 printf("Unknown database '%s'\n", command);
             else // found db
                 printf("Database changed\n");
