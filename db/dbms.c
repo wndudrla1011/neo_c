@@ -1,5 +1,5 @@
 #define MAX_COLUMN 20      // 최대 속성 값 개수
-#define MAX_INPUT 100      // 최대 입력 값 길이
+#define MAX_INPUT 10000    // 최대 입력 값 길이
 #define MAX_CADINALITY 200 // 최대 튜플 개수
 
 #include <stdio.h>
@@ -25,13 +25,16 @@ char *root = "/home/jooyoungkim/joosql";
 int main(void)
 {
     DB *db = NULL;
+
     DB *head = NULL; // DB head
     Table *table = NULL;
     Domain *domain = NULL;
     Data *data = NULL;
-    int is_where = 0;      // where절 존재 여부 > delete에서 사용
-    char input[MAX_INPUT]; // 입력 값
-    char *command;         // 명령어
+    int is_where = 0;          // where절 존재 여부 > delete에서 사용
+    char input[MAX_INPUT];     // 입력 값
+    char *command;             // 명령어
+    char db_dir[MAX_INPUT];    // DB 폴더
+    char table_dir[MAX_INPUT]; // Table 폴더
 
     if (directoryExists(root))
     {
@@ -59,14 +62,15 @@ int main(void)
 
             if (!strcasecmp(command, "databases")) // Query > show databases
             {
-                if (get_cnt_db(head) == 0)
+                if (get_cnt_dir(root) == 0) // 생성한 DB 폴더가 없는 경우
                 {
                     printf("No database exist\n");
                     continue;
                 }
+
                 else
                 {
-                    print_all_db(head); // 생성된 DB 출력
+                    print_all_dir(root); // 생성된 DB 폴더명 출력
                 }
             }
 
@@ -97,50 +101,62 @@ int main(void)
             {
                 command = strtok(NULL, ";"); // database name
 
-                if (get_cnt_db(head) == 0) // 첫 DB 생성
+                if (get_cnt_dir(root) == 0) // 첫 DB 생성
                 {
+                    char *ret = init_dir(root);
+                    strcpy(db_dir, ret);
+                    free(ret);
                     db = init_db(); // DB 초기화
-                    head = db;
+                    head = db;      // DB head 설정
                 }
 
-                if (read_db(db, command) != NULL) // 같은 이름의 DB가 이미 존재하는 경우
+                if (read_dir(command, root) != NULL) // 같은 이름의 DB 폴더가 이미 존재하는 경우
                 {
                     printf("Can't create database '%s'; database exists\n", command);
                     continue;
                 }
 
-                add_db(db, command); // 연결 리스트 -> New DB
+                add_dir(command, root); // root 폴더에 추가
+
                 printf("Query Success!\n");
             }
 
             else if (!strcasecmp(command, "table")) // Query > create table
             {
                 command = strtok(NULL, "("); // table name
-                if (command == NULL)         // handling syntax error
+                printf("00\n");
+                if (command == NULL) // handling syntax error
                 {
                     printf("You have an error in your SQL syntax;\n");
                     continue;
                 }
-
-                if (db == head) // use database 를 하지 않은 상태
+                printf("11\n");
+                if (db_dir == NULL) // use database 를 하지 않은 상태
                 {
                     printf("No database selected\n");
                     continue;
                 }
-
+                printf("22\n");
                 if (db->thead == NULL) // Table head 없음
                 {
+                    char *ret = init_dir(db_dir); // DB dir -> Table head
+                    if (ret != NULL)
+                    {
+                        strcpy(table_dir, ret);
+                        free(ret);
+                    }
                     table = init_table(db); // Table 초기화
                     db->thead = table;      // table head 설정
                 }
-
-                if (read_table(db->thead, command) != NULL) // 같은 이름의 Table이 이미 존재하는 경우
+                printf("33\n");
+                if (read_table(db->thead, command) != NULL) // 같은 이름의 Table 폴더가 이미 존재하는 경우
                 {
                     printf("Table '%s' already exists\n", command);
                     continue;
                 }
 
-                create_table(command, db, table, domain); // 테이블 생성
+                create_dir(command, db_dir); // DB 폴더에 Table 폴더 생성
+
                 printf("Query Success!\n");
             }
 
@@ -154,12 +170,29 @@ int main(void)
         {
             command = strtok(NULL, ";"); // DB name
 
-            db = read_db(head, command); // 찾은 DB로 이동
+            char *res = read_dir(command, root);
+
+            strcpy(db_dir, res);
+
+            db = read_db(head, command);
+
+            if (res != NULL && db == NULL) // DB dir 존재 && DB 존재x
+            {
+                db = init_db();      // DB 초기화
+                head = db;           // DB head 설정
+                add_db(db, command); // 연결 리스트 -> New DB
+            }
 
             if (db == NULL) // not found db
+            {
                 printf("Unknown database '%s'\n", command);
+                continue;
+            }
             else // found db
+            {
                 printf("Database changed\n");
+                free(res);
+            }
         }
 
         else if (!strcasecmp(command, "drop"))

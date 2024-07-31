@@ -54,9 +54,10 @@ int renameDirectory(const char *oldName, const char *newName) // 디렉토리 �
     }
 }
 
-void init_dir(const char *parent)
+char *init_dir(const char *parent)
 {
     char path[1024] = {0};
+    char *ptr = (char *)malloc(1024 * sizeof(char));
 
     sprintf(path, "%s/head", parent);
 
@@ -68,6 +69,9 @@ void init_dir(const char *parent)
     {
         createDirectory(path);
     }
+
+    strcpy(ptr, path);
+    return ptr;
 }
 
 int get_cnt_dir(const char *parent)
@@ -110,18 +114,17 @@ int get_cnt_dir(const char *parent)
     return count;
 }
 
-int read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
+char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 {
     DIR *dir;
     struct dirent *entry;
-    char *path = (char *)malloc(1024 * sizeof(char));
+    char *path;
     char *lt = NULL, *rt = NULL;
-    int flag = 0;
 
     if ((dir = opendir(parent)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
-        return -1;
+        return NULL;
     }
 
     while ((entry = readdir(dir)) != NULL)
@@ -134,6 +137,7 @@ int read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
                 rt = strtok(NULL, "_");          // 다음 폴더명 토큰화
                 if (!strcmp(name, lt))           // 동일 폴더인지 비교
                 {
+                    path = (char *)malloc(sizeof(strlen(parent) + strlen(lt) + strlen(rt) + 3));
                     sprintf(path, "%s/%s_%s", parent, lt, rt);
                     break;
                 }
@@ -142,6 +146,7 @@ int read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
             {
                 if (!strcmp(name, entry->d_name)) // 동일 폴더인지 비교
                 {
+                    path = (char *)malloc(sizeof(strlen(parent) + strlen(name) + 3));
                     sprintf(path, "%s/%s", parent, name);
                     break;
                 }
@@ -153,26 +158,38 @@ int read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 
     if (directoryExists(path)) // 폴더 존재
     {
-        flag = 1;
+        return path;
     }
-
-    free(path);
-    return flag;
+    else
+    {
+        return NULL;
+    }
 }
 
 char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾기
 {
-    DIR *dir;
+    DIR *dir = NULL;
     struct dirent *entry;
+    char *head;
+    head = (char *)malloc(sizeof(10));
+    strcpy(head, "head");
 
+    printf("00000\n");
+    char tmp[100000];
+
+    strcpy(tmp, dirName);
+    printf("2222\n");
     if ((dir = opendir(dirName)) == NULL)
     {
+        printf("11111\n");
         perror("디렉토리를 열 수 없습니다");
         return NULL;
     }
+    printf("33333\n");
 
     while ((entry = readdir(dir)) != NULL)
     {
+        printf("bef: %s\n", entry->d_name);
         if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
         {
             if (strstr(entry->d_name, "_") == NULL) // Leaf Folder
@@ -181,10 +198,11 @@ char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾
                 return entry->d_name;
             }
         }
+        printf("after: %s\n", entry->d_name);
     }
 
     closedir(dir);
-    return "head";
+    return head;
 }
 
 void add_dir(char *name, const char *parent) // 마지막 노드에 새 폴더 추가
@@ -195,11 +213,15 @@ void add_dir(char *name, const char *parent) // 마지막 노드에 새 폴더 �
     // 디렉토리 처리
     char oldName[1024] = {0};
     char newName[1024] = {0};
-    end = find_end_dir(parent);                      // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
+
+    printf("11111\n");
+    end = find_end_dir(parent); // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
+    printf("end: %s\n", end);
     sprintf(oldName, "%s/%s", parent, end);          // 기존 폴더명
     sprintf(newName, "%s/%s_%s", parent, end, name); // 변경할 폴더명
     renameDirectory(oldName, newName);               // 폴더명 변경
     sprintf(path, "%s/%s", parent, name);            // 새 폴더 생성
+    printf("path: %s\n", path);
 
     createDirectory(path); // 새로운 폴더 생성
 }
