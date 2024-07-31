@@ -54,10 +54,9 @@ int renameDirectory(const char *oldName, const char *newName) // 디렉토리 �
     }
 }
 
-char *init_dir(const char *parent)
+void init_dir(const char *parent)
 {
     char path[1024] = {0};
-    char *ptr = (char *)malloc(1024 * sizeof(char));
 
     sprintf(path, "%s/head", parent);
 
@@ -69,9 +68,6 @@ char *init_dir(const char *parent)
     {
         createDirectory(path);
     }
-
-    ptr = path;
-    return ptr;
 }
 
 int get_cnt_dir(const char *parent)
@@ -114,17 +110,18 @@ int get_cnt_dir(const char *parent)
     return count;
 }
 
-char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
+int read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 {
     DIR *dir;
     struct dirent *entry;
-    char *path;
+    char *path = (char *)malloc(1024 * sizeof(char));
     char *lt = NULL, *rt = NULL;
+    int flag = 0;
 
     if ((dir = opendir(parent)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
-        return NULL;
+        return -1;
     }
 
     while ((entry = readdir(dir)) != NULL)
@@ -137,7 +134,6 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
                 rt = strtok(NULL, "_");          // 다음 폴더명 토큰화
                 if (!strcmp(name, lt))           // 동일 폴더인지 비교
                 {
-                    path = (char *)malloc(sizeof(strlen(parent) + strlen(lt) + strlen(rt) + 3));
                     sprintf(path, "%s/%s_%s", parent, lt, rt);
                     break;
                 }
@@ -146,7 +142,6 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
             {
                 if (!strcmp(name, entry->d_name)) // 동일 폴더인지 비교
                 {
-                    path = (char *)malloc(sizeof(strlen(parent) + strlen(name) + 3));
                     sprintf(path, "%s/%s", parent, name);
                     break;
                 }
@@ -158,12 +153,11 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 
     if (directoryExists(path)) // 폴더 존재
     {
-        return path;
+        flag = 1;
     }
-    else
-    {
-        return NULL;
-    }
+
+    free(path);
+    return flag;
 }
 
 char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾기
