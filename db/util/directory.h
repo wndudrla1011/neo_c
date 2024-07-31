@@ -54,10 +54,10 @@ int renameDirectory(const char *oldName, const char *newName) // 디렉토리 �
     }
 }
 
-char *init_dir(char *parent)
+char *init_dir(const char *parent)
 {
-    char path[1024];
-    char *ptr;
+    char path[1024] = {0};
+    char *ptr = (char *)malloc(1024 * sizeof(char));
 
     sprintf(path, "%s/head", parent);
 
@@ -118,8 +118,8 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 {
     DIR *dir;
     struct dirent *entry;
-    char path[1024];
-    char *lt, *rt;
+    char *path;
+    char *lt = NULL, *rt = NULL;
 
     if ((dir = opendir(parent)) == NULL)
     {
@@ -137,6 +137,7 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
                 rt = strtok(NULL, "_");          // 다음 폴더명 토큰화
                 if (!strcmp(name, lt))           // 동일 폴더인지 비교
                 {
+                    path = (char *)malloc(sizeof(strlen(parent) + strlen(lt) + strlen(rt) + 3));
                     sprintf(path, "%s/%s_%s", parent, lt, rt);
                     break;
                 }
@@ -145,6 +146,7 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
             {
                 if (!strcmp(name, entry->d_name)) // 동일 폴더인지 비교
                 {
+                    path = (char *)malloc(sizeof(strlen(parent) + strlen(name) + 3));
                     sprintf(path, "%s/%s", parent, name);
                     break;
                 }
@@ -154,11 +156,9 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 
     closedir(dir);
 
-    char *ptr = path; // 반환할 문자열 (폴더 경로)
-
     if (directoryExists(path)) // 폴더 존재
     {
-        return ptr;
+        return path;
     }
     else
     {
@@ -193,23 +193,20 @@ char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾
     return "head";
 }
 
-void add_dir(char *name, char *parent) // 마지막 노드에 새 폴더 추가
+void add_dir(char *name, const char *parent) // 마지막 노드에 새 폴더 추가
 {
-    printf("parent > %s\n", parent);
-    char path[1024];
+    char path[1024] = {0};
     char *end;
 
     // 디렉토리 처리
-    char oldName[1024];
-    char newName[1024];
-    end = find_end_dir(parent); // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
-    printf("end > %s\n", end);
+    char oldName[1024] = {0};
+    char newName[1024] = {0};
+    end = find_end_dir(parent);                      // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
     sprintf(oldName, "%s/%s", parent, end);          // 기존 폴더명
     sprintf(newName, "%s/%s_%s", parent, end, name); // 변경할 폴더명
     renameDirectory(oldName, newName);               // 폴더명 변경
     sprintf(path, "%s/%s", parent, name);            // 새 폴더 생성
 
-    printf("path > %s\n", path);
     createDirectory(path); // 새로운 폴더 생성
 }
 

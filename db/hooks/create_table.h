@@ -102,15 +102,17 @@ void create_table(char *name, DB *db, Table *table, Domain *domain)
 
 void create_dir(char *name, char *parent)
 {
-    char *table_dir = NULL;
-    char *domain_dir = NULL;
-    char new_domain[1024];
+    char table_dir[1024] = {0};
+    char domain_dir[1024] = {0};
+    char new_domain[1024] = {0};
 
-    add_dir(name, parent); // DB 폴더에 Table 폴더 생성
+    char *ret = read_dir(name, parent); // Table 폴더 찾기
+    strcpy(table_dir, ret);
+    free(ret);
 
-    table_dir = read_dir(name, parent); // Table 폴더 찾기
-
-    domain_dir = init_dir(table_dir); // Table 폴더 내 Domain 폴더 생성
+    ret = init_dir(table_dir); // Table 폴더 내 Domain 폴더 생성
+    strcpy(domain_dir, ret);
+    free(ret);
 
     char *attr_info[MAX_INPUT]; // create table 을 Tokenizer 한 결과 저장
     char *column = NULL;
@@ -182,7 +184,7 @@ void create_dir(char *name, char *parent)
 
             printf("%s\n", new_domain);
 
-            add_dir(new_domain, domain_dir);
+            add_dir(new_domain, table_dir);
 
             continue;
         }

@@ -16,7 +16,7 @@ typedef struct DB
     struct Table *thead;   // 테이블 목록 (Table 순차 검색)
 } DB;
 
-DB *init_db(char *parent) // DB 목록의 head 생성
+DB *init_db() // DB 목록의 head 생성
 {
     char db_path[MAX_INPUT];
     DB *head;
@@ -56,7 +56,7 @@ DB *find_end_db(DB *db) // 가장 마지막 DB 찾기
     return (cur);
 }
 
-void add_db(DB *db, char *name, char *parent) // 마지막 노드에 새 DB 추가
+void add_db(DB *db, char *name) // 마지막 노드에 새 DB 추가
 {
     DB *end;
     end = find_end_db(db); // Leaf DB
