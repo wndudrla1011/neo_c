@@ -140,7 +140,9 @@ int main(void)
                     continue;
                 }
 
-                if (db->thead == NULL) // Table head 없음
+                char *res = read_dir("head", db_dir); // Table head 탐색
+
+                if (res == NULL) // Table head 없음
                 {
                     char *ret = init_dir(db_dir); // DB dir -> Table head
                     if (ret != NULL)
@@ -151,10 +153,22 @@ int main(void)
                     table = init_table(db); // Table 초기화
                     db->thead = table;      // DB 구조체와 연결
                 }
+                else // Table head 존재
+                {
+                    if (table == NULL) // Table dir 존재 && Table 존재x
+                    {
+                        table = init_table(db); // Table 초기화
+                        db->thead = table;      // DB 구조체와 연결
+                    }
+                    free(res);
+                }
 
-                if (read_table(db->thead, command) != NULL) // 같은 이름의 Table 폴더가 이미 존재하는 경우
+                res = read_dir(command, db_dir); // 현재 Table 탐색
+
+                if (res != NULL) // 같은 이름의 Table 폴더가 이미 존재하는 경우
                 {
                     printf("Table '%s' already exists\n", command);
+                    free(res);
                     continue;
                 }
 
@@ -255,6 +269,8 @@ int main(void)
 
         else if (!strcasecmp(command, "insert")) // Query > insert table
         {
+            char table_dir[1024] = {0}; // 테이블 경로
+
             if (db == head) // use database 하지 않은 상태
             {
                 printf("No database selected\n");
@@ -277,17 +293,33 @@ int main(void)
             else // columns(fields) 생략
                 command = strtok(NULL, " ");
 
-            table = read_table(db->thead, command); // 테이블명으로 테이블 찾기
+            char *res = read_dir(command, db_dir); // 현재 Table 폴더 탐색
 
-            if (table == NULL) // Not found Table
+            strcpy(table_dir, res); // 현재 Table 폴더 경로
+
+            if (res != NULL)
+            {
+                if (table == NULL) // Table dir 존재 && Table 존재x
+                {
+                    table = init_table(db); // Table 초기화
+                    db->thead = table;      // DB 구조체와 연결
+                }
+
+                free(res);
+            }
+            else
             {
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
             }
 
+            add_table(db, table, command); // 연결 리스트 -> New Table
+
+            table = read_table(db->thead, command);
+
             command = strtok(NULL, "("); // values
 
-            query_insert(db, table, domain, data);
+            query_insert(table_dir, db, table, domain, data);
             printf("Query Success!\n");
         }
 
