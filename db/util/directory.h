@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+DIR *dir;
+
 int directoryExists(const char *dirName)
 { // 디렉토리 존재 여부 확인
     struct stat info;
@@ -85,8 +87,11 @@ int get_cnt_dir(const char *parent)
     if ((dir = opendir(parent)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
+        closedir(dir);
         return -1;
     }
+
+    printf("get_cnt_dir mid \n");
 
     while ((entry = readdir(dir)) != NULL)
     {
@@ -96,6 +101,8 @@ int get_cnt_dir(const char *parent)
         }
 
         sprintf(path, "%s/%s", parent, entry->d_name);
+
+        printf("path : %s\n", path);
 
         if (stat(path, &info) != 0)
         {
@@ -116,11 +123,13 @@ int get_cnt_dir(const char *parent)
 
 char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 {
-    DIR *dir;
     struct dirent *entry;
-    char *path;
+    char *path = NULL;
     char *lt = NULL, *rt = NULL;
 
+    // strcpy(parent, "home");
+
+    printf("parent : %s\n", parent);
     if ((dir = opendir(parent)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
@@ -129,6 +138,8 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 
     while ((entry = readdir(dir)) != NULL)
     {
+
+        printf("entry->dname : %s  \n", entry->d_name);
         if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
         {
             if (strstr(entry->d_name, "_") != NULL) // Leaf folder가 아닌 경우 ("_" 존재)
@@ -154,14 +165,21 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
         }
     }
 
+    printf("111111\n");
+
     closedir(dir);
 
-    if (directoryExists(path)) // 폴더 존재
+    printf("22222\n");
+
+    printf("path : %d\n", path);
+    if (path != NULL && directoryExists(path)) // 폴더 존재
     {
+
         return path;
     }
     else
     {
+        printf("re null \n");
         return NULL;
     }
 }
@@ -234,6 +252,7 @@ void print_all_dir(char *parent)
     if ((dir = opendir(parent)) == NULL) // cd joosql
     {
         perror("디렉토리를 열 수 없습니다");
+        closedir(dir);
         return;
     }
 

@@ -98,7 +98,7 @@ DB *read_db(DB *h, char *dname) // DB 이름으로 DB 찾기
         return (h);
 
     DB *cur;
-    cur = h;
+    cur = h->next;
 
     while (strcmp(cur->dname, dname) && cur->next != NULL)
     {

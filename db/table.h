@@ -15,15 +15,9 @@ typedef struct Table
 
 Table *init_table(DB *db) // Table 목록의 head 생성
 {
-
-    printf("init table \n");
     Table *head;
     head = (Table *)malloc(sizeof(Table));
     head->next = NULL;
-
-    head->tname[0] = NULL;
-
-    printf("head->tname : %s\n", head->tname);
     db->thead = head; // DB의 Table head 설정
 
     return (head);
@@ -85,11 +79,6 @@ Table *read_table(Table *h, char *tname) // Table 이름으로 Table 찾기
     Table *cur;
     cur = h;
 
-    printf("cur : %d h : %d tname :%d\n", cur, h, tname);
-
-    printf("tname : %s\n", tname);
-
-    printf("cur->name : %s\n", cur->tname);
     while (strcmp(cur->tname, tname) && cur->next != NULL)
     {
         printf("cur->name : %s\n", cur->tname);

@@ -105,13 +105,15 @@ void create_dir(char *name, char *parent)
     char table_dir[1024] = {0};
     char domain_dir[1024] = {0};
     char new_domain[1024] = {0};
+
     printf("create_dir func start\n");
     add_dir(name, parent); // Table 폴더 생성
     printf("add dir func end\n");
+
     char *ret = read_dir(name, parent); // Table 폴더 찾기
-    printf("%s\n", ret);
+
     strcpy(table_dir, ret);
-    printf("%s\n", table_dir);
+
     free(ret);
 
     ret = init_dir(table_dir); // Table 폴더 내 Domain 폴더 생성

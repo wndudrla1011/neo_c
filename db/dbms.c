@@ -20,7 +20,7 @@
 #include "./util/substring.h"
 #include "./util/directory.h"
 
-char *root = "/home/jooyoungkim/joosql";
+char *root = "joosql";
 
 int main(void)
 {
@@ -32,7 +32,7 @@ int main(void)
     Data *data = NULL;
     int is_where = 0;          // where절 존재 여부 > delete에서 사용
     char input[MAX_INPUT];     // 입력 값
-    char *command;             // 명령어
+    char *command = NULL;      // 명령어
     char db_dir[MAX_INPUT];    // DB 폴더
     char table_dir[MAX_INPUT]; // Table 폴더
 
@@ -110,9 +110,12 @@ int main(void)
                     head = db;      // DB head 설정
                 }
 
-                if (read_dir(command, root) != NULL) // 같은 이름의 DB 폴더가 이미 존재하는 경우
+                char *res = read_dir(command, root);
+
+                if (res != NULL) // 같은 이름의 DB 폴더가 이미 존재하는 경우
                 {
                     printf("Can't create database '%s'; database exists\n", command);
+                    free(res);
                     continue;
                 }
 
@@ -124,19 +127,19 @@ int main(void)
             else if (!strcasecmp(command, "table")) // Query > create table
             {
                 command = strtok(NULL, "("); // table name
-                printf("00\n");
+
                 if (command == NULL) // handling syntax error
                 {
                     printf("You have an error in your SQL syntax;\n");
                     continue;
                 }
-                printf("11\n");
-                if (db_dir == NULL) // use database 를 하지 않은 상태
+
+                if (db == head) // use database 를 하지 않은 상태
                 {
                     printf("No database selected\n");
                     continue;
                 }
-                printf("22\n");
+
                 if (db->thead == NULL) // Table head 없음
                 {
                     char *ret = init_dir(db_dir); // DB dir -> Table head
@@ -146,9 +149,8 @@ int main(void)
                         free(ret);
                     }
                     table = init_table(db); // Table 초기화
-                    db->thead = table;      // table head 설정
                 }
-                printf("33\n");
+
                 if (read_table(db->thead, command) != NULL) // 같은 이름의 Table 폴더가 이미 존재하는 경우
                 {
                     printf("Table '%s' already exists\n", command);
@@ -174,16 +176,17 @@ int main(void)
 
             strcpy(db_dir, res);
 
-            db = read_db(head, command);
-
             if (res != NULL && db == NULL) // DB dir 존재 && DB 존재x
             {
-                db = init_db();      // DB 초기화
-                head = db;           // DB head 설정
-                add_db(db, command); // 연결 리스트 -> New DB
+                db = init_db(); // DB 초기화
+                head = db;      // DB head 설정
             }
 
-            if (db == NULL) // not found db
+            add_db(db, command); // 연결 리스트 -> New DB
+
+            db = read_db(head, command);
+
+            if (db_dir == NULL) // not found db
             {
                 printf("Unknown database '%s'\n", command);
                 continue;
