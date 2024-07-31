@@ -149,6 +149,7 @@ int main(void)
                         free(ret);
                     }
                     table = init_table(db); // Table 초기화
+                    db->thead = table;      // DB 구조체와 연결
                 }
 
                 if (read_table(db->thead, command) != NULL) // 같은 이름의 Table 폴더가 이미 존재하는 경우
@@ -157,7 +158,7 @@ int main(void)
                     continue;
                 }
 
-                create_dir(command, db_dir); // DB 폴더에 Table 폴더 생성
+                create_table(command, db_dir, db, table, domain); // DB 폴더에 Table 폴더 생성
 
                 printf("Query Success!\n");
             }
@@ -172,9 +173,9 @@ int main(void)
         {
             command = strtok(NULL, ";"); // DB name
 
-            char *res = read_dir(command, root);
+            char *res = read_dir(command, root); // 현재 DB 탐색
 
-            strcpy(db_dir, res);
+            strcpy(db_dir, res); // 현재 DB 경로 저장
 
             if (res != NULL && db == NULL) // DB dir 존재 && DB 존재x
             {
