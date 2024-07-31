@@ -152,6 +152,8 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
         }
     }
 
+    closedir(dir);
+
     char *ptr = path; // 반환할 문자열 (폴더 경로)
 
     if (directoryExists(path)) // 폴더 존재
@@ -162,8 +164,6 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
     {
         return NULL;
     }
-
-    closedir(dir);
 }
 
 char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾기
@@ -183,6 +183,7 @@ char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾
         {
             if (strstr(entry->d_name, "_") == NULL) // Leaf Folder
             {
+                closedir(dir);
                 return entry->d_name;
             }
         }
