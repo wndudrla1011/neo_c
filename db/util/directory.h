@@ -8,35 +8,47 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-int directoryExists(const char* dirName) { //디렉토리 존재 여부 확인
+int directoryExists(const char *dirName)
+{ // 디렉토리 존재 여부 확인
     struct stat info;
-    
-    if (stat(dirName, &info) != 0) {
-        return 0;  // 디렉토리가 존재하지 않음
-    } else if (info.st_mode & S_IFDIR) {
-        return 1;  // 디렉토리가 존재함
-    } else {
-        return 0;  // 다른 종류의 파일이 존재함
+
+    if (stat(dirName, &info) != 0)
+    {
+        return 0; // 디렉토리가 존재하지 않음
+    }
+    else if (info.st_mode & S_IFDIR)
+    {
+        return 1; // 디렉토리가 존재함
+    }
+    else
+    {
+        return 0; // 다른 종류의 파일이 존재함
     }
 }
 
-int createDirectory(const char* dirName) { // 디렉토리 생성
-    if (mkdir(dirName, 0777) == 0) {
+int createDirectory(const char *dirName)
+{ // 디렉토리 생성
+    if (mkdir(dirName, 0777) == 0)
+    {
         printf("디렉토리 생성 성공: %s\n", dirName);
         return 0;
-    } else {
+    }
+    else
+    {
         perror("디렉토리 생성 실패");
         return -1;
     }
 }
 
-int renameDirectory(const char *oldName, const char *newName) //디렉토리 이름 변경
+int renameDirectory(const char *oldName, const char *newName) // 디렉토리 이름 변경
 {
     if (!rename(oldName, newName))
     {
         printf("디렉토리 이름 변경 성공: %s -> %s\n", oldName, newName);
         return 0;
-    } else {
+    }
+    else
+    {
         perror("디렉토리 이름 변경 실패");
         return -1;
     }
@@ -104,8 +116,41 @@ int get_cnt_dir(const char *parent)
 
 char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 {
+    DIR *dir;
+    struct dirent *entry;
     char path[1024];
-    sprintf(path, "%s/%s", parent, name);
+    char *lt, *rt;
+
+    if ((dir = opendir(parent)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return NULL;
+    }
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
+        {
+            if (strstr(entry->d_name, "_") != NULL) // Leaf folder가 아닌 경우 ("_" 존재)
+            {
+                lt = strtok(entry->d_name, "_"); // 폴더명만 토큰화
+                rt = strtok(NULL, "_");          // 다음 폴더명 토큰화
+                if (!strcmp(name, lt))           // 동일 폴더인지 비교
+                {
+                    sprintf(path, "%s/%s_%s", parent, lt, rt);
+                    break;
+                }
+            }
+            else // Leaf folder
+            {
+                if (!strcmp(name, entry->d_name)) // 동일 폴더인지 비교
+                {
+                    sprintf(path, "%s/%s", parent, name);
+                    break;
+                }
+            }
+        }
+    }
 
     char *ptr = path; // 반환할 문자열 (폴더 경로)
 
@@ -152,11 +197,11 @@ void add_dir(char *name, char *parent) // 마지막 노드에 새 폴더 추가
     // 디렉토리 처리
     char oldName[1024];
     char newName[1024];
-    end = find_end_dir(parent); // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
-    sprintf(oldName, "%s/%s", parent, end); //기존 폴더명
+    end = find_end_dir(parent);                      // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
+    sprintf(oldName, "%s/%s", parent, end);          // 기존 폴더명
     sprintf(newName, "%s/%s_%s", parent, end, name); // 변경할 폴더명
     renameDirectory(oldName, newName);               // 폴더명 변경
-    sprintf(path, "%s/%s", parent, name);         // 새 폴더 생성
+    sprintf(path, "%s/%s", parent, name);            // 새 폴더 생성
 
     createDirectory(path); // 새로운 폴더 생성
 }
