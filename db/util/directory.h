@@ -95,7 +95,7 @@ int get_cnt_dir(const char *parent)
             continue;
         }
 
-        snprintf(path, sizeof(path), "%s/%s", parent, entry->d_name);
+        sprintf(path, "%s/%s", parent, entry->d_name);
 
         if (stat(path, &info) != 0)
         {
@@ -162,6 +162,8 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
     {
         return NULL;
     }
+
+    closedir(dir);
 }
 
 char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾기
@@ -186,23 +188,27 @@ char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾
         }
     }
 
+    closedir(dir);
     return "head";
 }
 
 void add_dir(char *name, char *parent) // 마지막 노드에 새 폴더 추가
 {
+    printf("parent > %s\n", parent);
     char path[1024];
     char *end;
 
     // 디렉토리 처리
     char oldName[1024];
     char newName[1024];
-    end = find_end_dir(parent);                      // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
+    end = find_end_dir(parent); // 부모 폴더에서 가장 최근에 생성한 폴더 찾기
+    printf("end > %s\n", end);
     sprintf(oldName, "%s/%s", parent, end);          // 기존 폴더명
     sprintf(newName, "%s/%s_%s", parent, end, name); // 변경할 폴더명
     renameDirectory(oldName, newName);               // 폴더명 변경
     sprintf(path, "%s/%s", parent, name);            // 새 폴더 생성
 
+    printf("path > %s\n", path);
     createDirectory(path); // 새로운 폴더 생성
 }
 
@@ -237,6 +243,8 @@ void print_all_dir(char *parent)
         }
     }
     printf("======================================\n\n");
+
+    closedir(dir);
 }
 
 #endif
