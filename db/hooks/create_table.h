@@ -13,9 +13,9 @@ char *types[] = {"int", "INT", "bigint", "BIGINT", "varchar", "VARCHAR", "text",
 
 void create_table(char *name, char *parent, DB *db, Table *table, Domain *domain)
 {
-    char table_dir[1024] = {0};  // 테이블 경로
-    char domain_dir[1024] = {0}; // Domain 경로
-    char domainName[1024] = {0}; // 생성할 Domain 폴더명
+    char table_dir[MAX_INPUT] = {0}; // 테이블 경로
+    char domainName[MAX_INPUT] = {0};
+    char domain_dir[MAX_INPUT] = {0};
 
     add_table(db, table, name); // 연결 리스트 -> New Table
 
@@ -83,24 +83,24 @@ void create_table(char *name, char *parent, DB *db, Table *table, Domain *domain
 
             flag = 1, type_flag = 0; // flag 초기화
 
-            // Domain 폴더 이름 생성
+            add_domain(domain, column, type, len, nullable); // Domain 추가
+
+            char *res = init_dir(table_dir);
+
+            free(res);
+
+            strcat(domainName, "_");
             strcat(domainName, column);
-            strcat(domainName, "-");
+            strcat(domainName, "_");
             strcat(domainName, type);
-            strcat(domainName, "-");
+            strcat(domainName, "_");
 
             char len_str[1024];
             sprintf(len_str, "%d", len);
 
             strcat(domainName, len_str);
-            strcat(domainName, "-");
+            strcat(domainName, "_");
             strcat(domainName, nullable);
-
-            add_dir(domainName, table_dir); // Table dir > Domain 폴더 추가
-
-            domainName[0] = '\0'; // domainName 초기화
-
-            add_domain(domain, column, type, len, nullable); // Domain 추가
 
             domain = table->dhead->next; // 첫 번째 column 이동
 
@@ -116,6 +116,10 @@ void create_table(char *name, char *parent, DB *db, Table *table, Domain *domain
                     domain = domain->next;
                 }
             }
+
+            sprintf(domain_dir, "%s/%s", table_dir, domainName); // 경로 생성
+            createDirectory(domain_dir);                         // 폴더 생성
+            domainName[0] = '\0';                                // domainName 초기화
 
             continue;
         }
