@@ -81,7 +81,6 @@ Table *read_table(Table *h, char *tname) // Table 이름으로 Table 찾기
 
     while (strcmp(cur->tname, tname) && cur->next != NULL)
     {
-        printf("cur->name : %s\n", cur->tname);
         cur = cur->next;
     }
 
