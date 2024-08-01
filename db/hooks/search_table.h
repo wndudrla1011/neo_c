@@ -12,8 +12,9 @@
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
 
-void query_select(DB *db, Table *table, Domain *domain, Data *data)
+void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data)
 {
+    char table_dir[MAX_INPUT] = {0};
     int cnt = 0;               // token count
     int cnt_cols = 0;          // column 개수
     int cnt_cons = 0;          // 조건 개수
@@ -132,13 +133,17 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
         return;
     }
 
-    table = read_table(db->thead, tokens[pos_tname]); // find table
+    char *res = read_dir(tokens[pos_tname], parent); // Table 폴더 탐색
 
-    if (table == NULL) // not found table
+    if (res == NULL) // not found table
     {
         printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
         return;
     }
+
+    free(res);
+
+    strcpy(table_dir, res); // Table 폴더 저장
 
     if (table->cadinality == 0) // insert 0회
     {
@@ -146,7 +151,9 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
         return;
     }
 
-    if (!strcmp(columns[0], "*")) // select all
+    table = read_table(db->thead, tokens[pos_tname]); // find table
+
+    /*if (!strcmp(columns[0], "*")) // select all
     {
         domain = table->dhead->next; // Move first column (head next)
 
@@ -169,14 +176,14 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
                 if (result) // 조건에 부합
                 {
                     flag_empty = 0;
-                    print_tuple(data);
+                    select_all_dir(table_dir);
                 }
             }
 
             else // where 문 존재x
             {
                 flag_empty = 0;
-                print_tuple(data);
+                select_all_dir(table_dir);
             }
 
             domain = table->dhead->next; // Move first column (head next)
@@ -233,7 +240,7 @@ void query_select(DB *db, Table *table, Domain *domain, Data *data)
             domain = table->dhead->next; // Move first column (head next)
             data = data->next;           // next data (next tuple)
         }
-    }
+    }*/
 
     // >>>>>>>>>>>>>>>>>>>>> Select cols
 
