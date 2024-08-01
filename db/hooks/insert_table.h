@@ -9,6 +9,8 @@
 #include "../domain.h"
 #include "../data.h"
 
+int row;
+
 void query_insert(char *table_dir, DB *db, Table *table, Domain *domain, Data *data)
 {
     int degree = 0;          // 속성 개수
@@ -38,8 +40,10 @@ void query_insert(char *table_dir, DB *db, Table *table, Domain *domain, Data *d
 
     for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
     {
-        save_data_dir(table_dir, i, values[i]);
+        save_data_dir(table_dir, i, row, values[i]);
     }
+
+    row++;
 
     // >>>>>>>>>>>>>>>>>>>>> Insert Data
 }

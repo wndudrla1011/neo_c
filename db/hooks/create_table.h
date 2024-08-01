@@ -119,9 +119,8 @@ void create_table(char *name, char *parent, DB *db, Table *table, Domain *domain
             }
 
             sprintf(domain_dir, "%s/%s", table_dir, domainName); // 경로 생성
-            createDirectory(domain_dir);
-            init_dir(domain_dir); // Domain 폴더 생성
-            domainName[0] = '\0'; // domainName 초기화
+            createDirectory(domain_dir);                         // Domain 폴더 생성
+            domainName[0] = '\0';                                // domainName 초기화
 
             continue;
         }
