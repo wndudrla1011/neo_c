@@ -189,27 +189,25 @@ int main(void)
 
             char *res = read_dir(command, root); // 현재 DB 탐색
 
-            strcpy(db_dir, res); // 현재 DB 경로 저장
-
-            if (res != NULL && db == NULL) // DB dir 존재 && DB 존재x
-            {
-                db = init_db(); // DB 초기화
-                head = db;      // DB head 설정
-            }
-
-            add_db(db, command); // 연결 리스트 -> New DB
-
-            db = read_db(head, command);
-
-            if (db_dir == NULL) // not found db
+            if (res == NULL) // not found db
             {
                 printf("Unknown database '%s'\n", command);
                 continue;
             }
             else // found db
             {
-                printf("Database changed\n");
+                if (db == NULL)
+                {
+                    db = init_db();
+                    head = db;
+                }
+
+                add_db(db, command);
+                db = read_db(head, command);
+
+                strcpy(db_dir, res);
                 free(res);
+                printf("Database changed\n");
             }
         }
 
@@ -331,7 +329,30 @@ int main(void)
                 continue;
             }
 
-            query_select(db, table, domain, data);
+            char *res = read_dir("head", db_dir); // Table head 탐색
+
+            if (res == NULL) // Table head 없음
+            {
+                char *ret = init_dir(db_dir); // DB dir -> Table head
+                if (ret != NULL)
+                {
+                    strcpy(table_dir, ret);
+                    free(ret);
+                }
+                table = init_table(db); // Table 초기화
+                db->thead = table;      // DB 구조체와 연결
+            }
+            else // Table head 존재
+            {
+                if (table == NULL) // Table dir 존재 && Table 존재x
+                {
+                    table = init_table(db); // Table 초기화
+                    db->thead = table;      // DB 구조체와 연결
+                }
+                free(res);
+            }
+
+            query_select(db_dir, db, table, domain, data);
         }
 
         else if (!strcasecmp(command, "update")) // Query > update table
