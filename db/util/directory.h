@@ -173,7 +173,7 @@ char *find_end_dir(const char *dirName) // 가장 최근에 생성한 폴더 찾
     DIR *dir = NULL;
     struct dirent *entry;
     char *head;
-    head = (char *)malloc(sizeof(10));
+    head = (char *)malloc(10 * sizeof(char));
     strcpy(head, "head");
 
     char tmp[100000];
@@ -248,6 +248,35 @@ void print_all_dir(char *parent)
             {
                 printf("%s\n", entry->d_name);
             }
+        }
+    }
+    printf("======================================\n\n");
+
+    closedir(dir);
+}
+
+void select_all_dir(char *path)
+{
+    DIR *dir;
+    struct dirent *entry;
+    char *cur = (char *)malloc(MAX_INPUT * sizeof(char));
+    char *next = (char *)malloc(MAX_INPUT * sizeof(char));
+
+    if ((dir = opendir(path)) == NULL) // cd joosql
+    {
+        perror("디렉토리를 열 수 없습니다");
+        closedir(dir);
+        return;
+    }
+
+    printf("======================================\n");
+    while ((entry = readdir(dir)) != NULL)
+    {
+        cur = strtok(entry->d_name, "_"); // current dir
+        if (!strcmp(cur, "head"))         // head 탐색
+        {
+            next = strtok(NULL, "_"); // Next dir
+            printf("%s\n", next);
         }
     }
     printf("======================================\n\n");
