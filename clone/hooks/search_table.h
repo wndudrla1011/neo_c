@@ -9,12 +9,14 @@
 #include "../domain.h"
 #include "../data.h"
 
+#define MAX_COLUMN 20 // 최대 속성 값 개수
+#define MAX_INPUT 100 // 최대 입력 값 길이
+
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
 
-void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data)
+void query_select(DB *db, Table *table, Domain *domain, Data *data)
 {
-    char table_dir[MAX_INPUT] = {0};
     int cnt = 0;               // token count
     int cnt_cols = 0;          // column 개수
     int cnt_cons = 0;          // 조건 개수
@@ -27,7 +29,6 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
     char *wtokens[MAX_INPUT];  // 모든 조건 token
     char *tokens[MAX_INPUT];   // 모든 token
     char *token = NULL;
-
     char *col1 = NULL; // 조건1 -> 속성
     char *val1 = NULL; // 조건1 -> 값
     char op1;          // 조건1 -> 연산자
@@ -41,22 +42,17 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
     {
         if (!strcmp(token, "from"))
             pos_tname = cnt;
-
         if (!strcmp(token, "where"))
             pos_cons = cnt;
-
         tokens[cnt++] = token;
     }
-
     for (int i = 0; i < pos_tname; i++) // save columns
     {
         columns[i] = tokens[i];
     }
-
     ++pos_tname;
     free(token);
     token = NULL;
-
     if (pos_cons > 0) // where문 존재
     {
         for (int i = pos_cons + 1; i < cnt - 1; i++) // create where clause
@@ -72,21 +68,17 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
                 strcat(wheres, tokens[i]);
             }
         }
-
         token = strtok(wheres, " ");
-        wtokens[0] = token; // 조건절 저장
-        cnt_cons++;         // 조건절 개수 카운팅
-
+        wtokens[0] = token;                         // 조건절 저장
+        cnt_cons++;                                 // 조건절 개수 카운팅
         while ((token = strtok(NULL, " ")) != NULL) // 조건절 저장
         {
             if (!strcmp(token, "or"))
                 flag = 2;
             else if (!strcmp(token, "and"))
                 flag = 1;
-
             wtokens[cnt_cons++] = token;
         }
-
         if (flag > 0) // 조건문 2개
         {
             for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
@@ -97,7 +89,6 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
                     col1 = strtok(wtokens[0], search_op[i]);
                     val1 = strtok(NULL, search_op[i]);
                 }
-
                 if (strstr(wtokens[2], search_op[i]) != NULL)
                 {
                     op2 = op[i];
@@ -106,7 +97,6 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
                 }
             }
         }
-
         else // 조건문 1개
         {
             for (int i = 0; i < sizeof(search_op) / sizeof(char *); i++)
@@ -119,58 +109,30 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
                 }
             }
         }
-
         // >>>>>>>>>>>>>>>>>>>>> Parsing where
     }
-
     cnt_cols = pos_tname - 1; // counting cols
-
-    strcpy(table_dir, read_dir(tokens[pos_tname], parent));
-
-    int result = 0; // 데이터 탐색 결과
-
+    int result = 0;           // 데이터 탐색 결과
+    if (db->thead == NULL)    // empty table list
+    {
+        printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
+        return;
+    }
+    table = read_table(db->thead, tokens[pos_tname]); // find table
+    if (table == NULL)                                // not found table
+    {
+        printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
+        return;
+    }
+    if (table->cadinality == 0) // insert 0회
+    {
+        printf("Empty set\n");
+        return;
+    }
     if (!strcmp(columns[0], "*")) // select all
     {
-        int row = 0;
-        int limit = get_cnt_dir(table_dir);
-        while (row < limit)
-        {
-            if (pos_cons > 0) // where 문 존재
-            {
-                if (flag > 0) // 다중 조건
-                {
-                    result = find_multi_dir(row, table_dir, col1, val1, op1, col2, val2, op2, flag);
-                }
-
-                else // 단일 조건
-                {
-                    result = test_dir(row, table_dir, col1, val1, op1);
-                }
-
-                if (result) // 조건에 부합
-                {
-                    flag_empty = 0;
-                }
-            }
-
-            else // where 문 존재x
-            {
-                flag_empty = 0;
-                select_all_dir(row, table_dir);
-            }
-
-            row++;
-        }
-    }
-
-    // >>>>>>>>>>>>>>>>>>>>> Select all
-
-    /*else // select cols
-    {
         domain = table->dhead->next; // Move first column (head next)
-
-        data = domain->head->next; // Move head data
-
+        data = domain->head->next;   // Move head data
         while (data != NULL)
         {
             if (pos_cons > 0) // where 문 존재
@@ -179,12 +141,42 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
                 {
                     result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
                 }
-
                 else // 단일 조건
                 {
                     result = find_single_data(table, domain, data, col1, val1, op1);
                 }
-
+                if (result) // 조건에 부합
+                {
+                    flag_empty = 0;
+                    print_tuple(data);
+                }
+            }
+            else // where 문 존재x
+            {
+                flag_empty = 0;
+                print_tuple(data);
+            }
+            domain = table->dhead->next; // Move first column (head next)
+            data = data->next;           // next data (next tuple)
+        }
+    }
+    // >>>>>>>>>>>>>>>>>>>>> Select all
+    else // select cols
+    {
+        domain = table->dhead->next; // Move first column (head next)
+        data = domain->head->next;   // Move head data
+        while (data != NULL)
+        {
+            if (pos_cons > 0) // where 문 존재
+            {
+                if (flag > 0) // 다중 조건
+                {
+                    result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                }
+                else // 단일 조건
+                {
+                    result = find_single_data(table, domain, data, col1, val1, op1);
+                }
                 if (result) // 조건에 부합
                 {
                     flag_empty = 0;
@@ -196,7 +188,6 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
                     printf("\n+--------------------------------------+\n");
                 }
             }
-
             else // where 문 존재x
             {
                 flag_empty = 0;
@@ -208,18 +199,14 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
                 }
                 printf("\n+--------------------------------------+\n");
             }
-
             domain = table->dhead->next; // Move first column (head next)
             data = data->next;           // next data (next tuple)
         }
-    }*/
-
+    }
     // >>>>>>>>>>>>>>>>>>>>> Select cols
-
     if (flag_empty == 1)
     {
         printf("Empty set\n");
     }
 }
-
 #endif

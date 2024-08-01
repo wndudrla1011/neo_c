@@ -317,6 +317,8 @@ char *find_data_dir(char *path, int row) // Domain에서 row번째 데이터 찾
             return strtok(NULL, "_");
         }
     }
+
+    closedir(dir);
 }
 
 /*
@@ -517,103 +519,204 @@ int find_multi_dir(int row, char *path, char *col1, char *val1, char op1, char *
     return flag == 1 ? result1 & result2 : result1 | result2;
 }
 
+// alphasort 함수 정의
+int alphasort(const struct dirent **a, const struct dirent **b)
+{
+    return strcmp((*a)->d_name, (*b)->d_name);
+}
+
+int find_single_dir(int row, char *path, char *name, char *col, char *val, char op)
+{
+    int result = 0;
+    char *token = NULL;
+
+    token = strtok(name, "-"); // idx
+    token = strtok(NULL, "-"); // column
+
+    if (!strcmp(token, col)) // 컬럼 일치
+    {
+        char sub[MAX_INPUT] = {0};
+        token = strtok(NULL, "-"); // type
+
+        sprintf(sub, "%s/%s", path, name); // Domain 경로
+
+        if (strstr(token, "int")) // 숫자 타입
+        {
+            int limit = atoi(val);                    // 제한 값
+            int item = atoi(find_data_dir(sub, row)); // 타깃 값
+
+            printf("%d\n", limit);
+            printf("%d\n", item);
+
+            switch (op)
+            {
+            case '<':
+                if (item < limit)
+                    result = 1;
+                break;
+            case '>':
+                if (item > limit)
+                    result = 1;
+                break;
+            case '=':
+                if (item == limit)
+                    result = 1;
+                break;
+            case '!':
+                if (item != limit)
+                    result = 1;
+                break;
+            default:
+                break;
+            }
+        }
+
+        else // 문자열 타입
+        {
+            char *limit = substring(1, strlen(val) - 2, val); // 제한 값
+            char *item = find_data_dir(sub, row);             // 타깃 값
+
+            printf("%s\n", limit);
+            printf("%s\n", item);
+
+            switch (op)
+            {
+            case '<':
+                if (strcmp(item, limit) == -1)
+                    result = 1;
+                break;
+            case '>':
+                if (strcmp(item, limit) == 1)
+                    result = 1;
+                break;
+            case '=':
+                if (!strcmp(item, limit))
+                    result = 1;
+                break;
+            case '!':
+                if (strcmp(item, limit))
+                    result = 1;
+                break;
+            default:
+                break;
+            }
+        }
+    } // diff column
+}
+
 /*
  * 단일 조건에 맞는 Tuple 검색
  * col: 조건 컬럼
  * val: 조건 값
  * op: 연산자
  */
-int find_single_dir(int row, char *path, char *col, char *val, char op)
+int test_dir(int row, char *path, char *col, char *val, char op)
 {
     int result = 0; // 조건 부합 => 1
 
-    DIR *dir;
-    struct dirent *entry;
+    struct dirent **namelist;
     char *token = NULL;
+    int n;
 
-    if ((dir = opendir(path)) == NULL)
+    n = scandir(path, &namelist, NULL, alphasort);
+    if (n == -1)
     {
-        perror("디렉토리를 열 수 없습니다");
-        closedir(dir);
-        return -1;
+        perror("scandir");
+        return 1;
     }
 
-    while ((entry = readdir(dir)) != NULL)
+    for (int i = 0; i < n; i++)
     {
-        token = strtok(entry->d_name, "-"); // idx
-        token = strtok(NULL, "-");          // column
+        printf("Found file: %s\n", namelist[i]->d_name);
+        find_single_dir(row, path, namelist[i]->d_name, col, val, op);
 
-        if (strcmp(token, col)) // 컬럼 불일치
-        {
-            continue;
-        }
+        free(namelist[i]);
+    }
 
-        else // 컬럼 일치
-        {
-            char sub[MAX_INPUT] = {0};
-            token = strtok(NULL, "-"); // type
+    free(namelist);
 
-            sprintf(sub, "%s/%s", path, entry->d_name); // Domain 경로
+    // while ((entry = readdir(dir)) != NULL)
+    // {
+    //     token = strtok(entry->d_name, "-"); // idx
+    //     token = strtok(NULL, "-");          // column
 
-            if (strstr(token, "int")) // 숫자 타입
-            {
-                int limit = atoi(val);                    // 제한 값
-                int item = atoi(find_data_dir(sub, row)); // 타깃 값
+    //     if (strcmp(token, col)) // 컬럼 불일치
+    //     {
+    //         continue;
+    //     }
 
-                switch (op)
-                {
-                case '<':
-                    if (item < limit)
-                        result = 1;
-                    break;
-                case '>':
-                    if (item > limit)
-                        result = 1;
-                    break;
-                case '=':
-                    if (item == limit)
-                        result = 1;
-                    break;
-                case '!':
-                    if (item != limit)
-                        result = 1;
-                    break;
-                default:
-                    break;
-                }
-            }
+    //     else // 컬럼 일치
+    //     {
+    //         char sub[MAX_INPUT] = {0};
+    //         token = strtok(NULL, "-"); // type
 
-            else // 문자열 타입
-            {
-                char *limit = substring(1, strlen(val) - 2, val); // 제한 값
-                char *item = find_data_dir(sub, row);             // 타깃 값
+    //         sprintf(sub, "%s/%s", path, entry->d_name); // Domain 경로
 
-                switch (op)
-                {
-                case '<':
-                    if (strcmp(item, limit) == -1)
-                        result = 1;
-                    break;
-                case '>':
-                    if (strcmp(item, limit) == 1)
-                        result = 1;
-                    break;
-                case '=':
-                    if (!strcmp(item, limit))
-                        result = 1;
-                    break;
-                case '!':
-                    if (strcmp(item, limit))
-                        result = 1;
-                    break;
-                default:
-                    break;
-                }
-            }
-        } // diff column
-    } // readdir
+    //         if (strstr(token, "int")) // 숫자 타입
+    //         {
+    //             int limit = atoi(val);                    // 제한 값
+    //             int item = atoi(find_data_dir(sub, row)); // 타깃 값
 
-    closedir(dir);
+    //             printf("%d\n", limit);
+    //             printf("%d\n", item);
+
+    //             switch (op)
+    //             {
+    //             case '<':
+    //                 if (item < limit)
+    //                     result = 1;
+    //                 break;
+    //             case '>':
+    //                 if (item > limit)
+    //                     result = 1;
+    //                 break;
+    //             case '=':
+    //                 if (item == limit)
+    //                     result = 1;
+    //                 break;
+    //             case '!':
+    //                 if (item != limit)
+    //                     result = 1;
+    //                 break;
+    //             default:
+    //                 break;
+    //             }
+    //         }
+
+    //         else // 문자열 타입
+    //         {
+    //             char *limit = substring(1, strlen(val) - 2, val); // 제한 값
+    //             char *item = find_data_dir(sub, row);             // 타깃 값
+
+    //             printf("%s\n", limit);
+    //             printf("%s\n", item);
+
+    //             switch (op)
+    //             {
+    //             case '<':
+    //                 if (strcmp(item, limit) == -1)
+    //                     result = 1;
+    //                 break;
+    //             case '>':
+    //                 if (strcmp(item, limit) == 1)
+    //                     result = 1;
+    //                 break;
+    //             case '=':
+    //                 if (!strcmp(item, limit))
+    //                     result = 1;
+    //                 break;
+    //             case '!':
+    //                 if (strcmp(item, limit))
+    //                     result = 1;
+    //                 break;
+    //             default:
+    //                 break;
+    //             }
+    //         }
+    //     } // diff column
+    // } // readdir
+
+    // closedir(dir);
 
     return result;
 }
