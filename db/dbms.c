@@ -25,7 +25,6 @@ char *root = "joosql";
 int main(void)
 {
     DB *db = NULL;
-
     DB *head = NULL; // DB head
     Table *table = NULL;
     Domain *domain = NULL;
@@ -327,29 +326,6 @@ int main(void)
             {
                 printf("No database selected\n");
                 continue;
-            }
-
-            char *res = read_dir("head", db_dir); // Table head 탐색
-
-            if (res == NULL) // Table head 없음
-            {
-                char *ret = init_dir(db_dir); // DB dir -> Table head
-                if (ret != NULL)
-                {
-                    strcpy(table_dir, ret);
-                    free(ret);
-                }
-                table = init_table(db); // Table 초기화
-                db->thead = table;      // DB 구조체와 연결
-            }
-            else // Table head 존재
-            {
-                if (table == NULL) // Table dir 존재 && Table 존재x
-                {
-                    table = init_table(db); // Table 초기화
-                    db->thead = table;      // DB 구조체와 연결
-                }
-                free(res);
             }
 
             query_select(db_dir, db, table, domain, data);

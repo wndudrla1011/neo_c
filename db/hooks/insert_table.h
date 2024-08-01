@@ -36,22 +36,10 @@ void query_insert(char *table_dir, DB *db, Table *table, Domain *domain, Data *d
 
     // >>>>>>>>>>>>>>>>>>>> Parsing Data
 
-    char tuple[1024] = {0};
-
     for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
     {
-        if (i != table->degree - 1)
-        {
-            strcat(tuple, values[i]);
-            strcat(tuple, ",");
-        }
-        else
-        {
-            strcat(tuple, values[i]);
-        }
+        save_data_dir(table_dir, i, values[i]);
     }
-
-    add_dir(tuple, table_dir); // tuple 폴더 생성
 
     // >>>>>>>>>>>>>>>>>>>>> Insert Data
 }

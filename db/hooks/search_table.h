@@ -127,38 +127,8 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
     int result = 0; // 데이터 탐색 결과
 
-    if (db->thead == NULL) // empty table list
-    {
-        printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
-        return;
-    }
-
-    char *res = read_dir(tokens[pos_tname], parent); // Table 폴더 탐색
-
-    if (res == NULL) // not found table
-    {
-        printf("Table '%s' doesn't exist\n", tokens[pos_tname]);
-        return;
-    }
-
-    free(res);
-
-    strcpy(table_dir, res); // Table 폴더 저장
-
-    if (table->cadinality == 0) // insert 0회
-    {
-        printf("Empty set\n");
-        return;
-    }
-
-    table = read_table(db->thead, tokens[pos_tname]); // find table
-
     /*if (!strcmp(columns[0], "*")) // select all
     {
-        domain = table->dhead->next; // Move first column (head next)
-
-        data = domain->head->next; // Move head data
-
         while (data != NULL)
         {
             if (pos_cons > 0) // where 문 존재

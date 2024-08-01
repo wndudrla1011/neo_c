@@ -18,9 +18,7 @@ typedef struct DB
 
 DB *init_db() // DB 목록의 head 생성
 {
-    char db_path[MAX_INPUT];
     DB *head;
-
     head = (DB *)malloc(sizeof(DB));
     head->next = NULL;
     head->thead = NULL;

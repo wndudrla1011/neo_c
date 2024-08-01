@@ -32,6 +32,7 @@ void create_table(char *name, char *parent, DB *db, Table *table, Domain *domain
     char type[MAX_INPUT];
     char *nullable = NULL;
 
+    int cnt_column = 0;      // Column 개수
     int cnt = 0;             // create token 개수
     int flag = 1;            // NOT NULL, NULL 구분용
     int type_flag = 0;       // 현재 데이터가 type인지 여부
@@ -85,21 +86,21 @@ void create_table(char *name, char *parent, DB *db, Table *table, Domain *domain
 
             add_domain(domain, column, type, len, nullable); // Domain 추가
 
-            char *res = init_dir(table_dir);
+            char num[1024];
+            sprintf(num, "%d", cnt_column++);
 
-            free(res);
-
-            strcat(domainName, "_");
+            strcat(domainName, num);
+            strcat(domainName, "-");
             strcat(domainName, column);
-            strcat(domainName, "_");
+            strcat(domainName, "-");
             strcat(domainName, type);
-            strcat(domainName, "_");
+            strcat(domainName, "-");
 
             char len_str[1024];
             sprintf(len_str, "%d", len);
 
             strcat(domainName, len_str);
-            strcat(domainName, "_");
+            strcat(domainName, "-");
             strcat(domainName, nullable);
 
             domain = table->dhead->next; // 첫 번째 column 이동
@@ -118,8 +119,9 @@ void create_table(char *name, char *parent, DB *db, Table *table, Domain *domain
             }
 
             sprintf(domain_dir, "%s/%s", table_dir, domainName); // 경로 생성
-            createDirectory(domain_dir);                         // 폴더 생성
-            domainName[0] = '\0';                                // domainName 초기화
+            createDirectory(domain_dir);
+            init_dir(domain_dir); // Domain 폴더 생성
+            domainName[0] = '\0'; // domainName 초기화
 
             continue;
         }

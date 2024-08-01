@@ -255,6 +255,32 @@ void print_all_dir(char *parent)
     closedir(dir);
 }
 
+void save_data_dir(char *path, int index, char *data)
+{
+    DIR *dir;
+    struct dirent *entry;
+    char store[MAX_INPUT] = {0};
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        closedir(dir);
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_name[0] == (index + '0'))
+        {
+            sprintf(store, "%s/%s", path, entry->d_name);
+            add_dir(data, store);
+            break;
+        }
+    }
+
+    closedir(dir);
+}
+
 void select_all_dir(char *path)
 {
     DIR *dir;
@@ -262,7 +288,7 @@ void select_all_dir(char *path)
     char *cur = (char *)malloc(MAX_INPUT * sizeof(char));
     char *next = (char *)malloc(MAX_INPUT * sizeof(char));
 
-    if ((dir = opendir(path)) == NULL) // cd joosql
+    if ((dir = opendir(path)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
         closedir(dir);
