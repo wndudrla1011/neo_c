@@ -125,45 +125,48 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
     cnt_cols = pos_tname - 1; // counting cols
 
+    strcpy(table_dir, read_dir(tokens[pos_tname], parent));
+
     int result = 0; // 데이터 탐색 결과
 
-    /*if (!strcmp(columns[0], "*")) // select all
+    if (!strcmp(columns[0], "*")) // select all
     {
-        while (data != NULL)
+        int row = 0;
+        int limit = get_cnt_dir(table_dir);
+        while (row < limit)
         {
             if (pos_cons > 0) // where 문 존재
             {
                 if (flag > 0) // 다중 조건
                 {
-                    result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                    printf("CHECK\n");
+                    result = find_multi_dir(row, table_dir, col1, val1, op1, col2, val2, op2, flag);
                 }
 
                 else // 단일 조건
                 {
-                    result = find_single_data(table, domain, data, col1, val1, op1);
+                    result = find_single_dir(row, table_dir, col1, val1, op1);
                 }
 
                 if (result) // 조건에 부합
                 {
                     flag_empty = 0;
-                    select_all_dir(table_dir);
                 }
             }
 
             else // where 문 존재x
             {
                 flag_empty = 0;
-                select_all_dir(table_dir);
+                select_all_dir(row, table_dir);
             }
 
-            domain = table->dhead->next; // Move first column (head next)
-            data = data->next;           // next data (next tuple)
+            row++;
         }
     }
 
     // >>>>>>>>>>>>>>>>>>>>> Select all
 
-    else // select cols
+    /*else // select cols
     {
         domain = table->dhead->next; // Move first column (head next)
 

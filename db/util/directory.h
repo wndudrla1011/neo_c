@@ -5,10 +5,18 @@
 #include <dirent.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "substring.h"
 
 DIR *dir;
+
+// Comparator function for qsort
+int compare(const void *a, const void *b)
+{
+    return strcmp(*(const char **)a, *(const char **)b);
+}
 
 int directoryExists(const char *dirName)
 { // 디렉토리 존재 여부 확인
@@ -255,11 +263,12 @@ void print_all_dir(char *parent)
     closedir(dir);
 }
 
-void save_data_dir(char *path, int index, char *data)
+void save_data_dir(char *path, int index, int row, char *data)
 {
     DIR *dir;
     struct dirent *entry;
     char store[MAX_INPUT] = {0};
+    char name[MAX_INPUT] = {0};
 
     if ((dir = opendir(path)) == NULL)
     {
@@ -272,8 +281,9 @@ void save_data_dir(char *path, int index, char *data)
     {
         if (entry->d_name[0] == (index + '0'))
         {
-            sprintf(store, "%s/%s", path, entry->d_name);
-            add_dir(data, store);
+            sprintf(name, "%d_%s", row, data);
+            sprintf(store, "%s/%s/%s", path, entry->d_name, name);
+            createDirectory(store);
             break;
         }
     }
@@ -281,12 +291,339 @@ void save_data_dir(char *path, int index, char *data)
     closedir(dir);
 }
 
-void select_all_dir(char *path)
+char *find_data_dir(char *path, int row) // Domain에서 row번째 데이터 찾기
 {
     DIR *dir;
     struct dirent *entry;
-    char *cur = (char *)malloc(MAX_INPUT * sizeof(char));
-    char *next = (char *)malloc(MAX_INPUT * sizeof(char));
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        closedir(dir);
+        return NULL;
+    }
+
+    while ((entry = readdir(dir)) != NULL) // "." 및 ".." 제외 모든 폴더 저장
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (entry->d_name[0] == row + '0')
+        {
+            strtok(entry->d_name, "_");
+            closedir(dir);
+            return strtok(NULL, "_");
+        }
+    }
+}
+
+/*
+ * 다중 조건에 맞는 Tuple 검색
+ * row: 튜플 순서
+ * col1: 조건1 컬럼
+ * val1: 조건1 값
+ * op1: 조건1 연산자
+ * col2: 조건2 컬럼
+ * val2: 조건2 값
+ * op2: 조건2 연산자
+ */
+int find_multi_dir(int row, char *path, char *col1, char *val1, char op1, char *col2, char *val2, char op2, int flag)
+{
+    int result1 = 0; // 조건 부합 => 1
+    int result2 = 0; // 조건 부합 => 1
+
+    DIR *dir;
+    struct dirent *entry;
+    char *token = NULL;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        closedir(dir);
+        return -1;
+    }
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        token = strtok(entry->d_name, "-"); // idx
+        token = strtok(NULL, "-");          // column
+
+        if (strcmp(token, col1)) // 컬럼 불일치
+        {
+            continue;
+        }
+
+        else // 컬럼 일치
+        {
+            char sub[MAX_INPUT] = {0};
+            token = strtok(NULL, "-"); // type
+
+            sprintf(sub, "%s/%s", path, entry->d_name); // Domain 경로
+
+            if (strstr(token, "int")) // 숫자 타입
+            {
+                int limit = atoi(val1);                   // 제한 값
+                int item = atoi(find_data_dir(sub, row)); // 타깃 값
+
+                switch (op1)
+                {
+                case '<':
+                    if (item < limit)
+                        result1 = 1;
+                    break;
+                case '>':
+                    if (item > limit)
+                        result1 = 1;
+                    break;
+                case '=':
+                    if (item == limit)
+                        result1 = 1;
+                    break;
+                case '!':
+                    if (item != limit)
+                        result1 = 1;
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            else // 문자열 타입
+            {
+                char *limit = substring(1, strlen(val1) - 2, val1); // 제한 값
+                char *item = find_data_dir(sub, row);               // 타깃 값
+
+                switch (op1)
+                {
+                case '<':
+                    if (strcmp(item, limit) == -1)
+                        result1 = 1;
+                    break;
+                case '>':
+                    if (strcmp(item, limit) == 1)
+                        result1 = 1;
+                    break;
+                case '=':
+                    if (!strcmp(item, limit))
+                        result1 = 1;
+                    break;
+                case '!':
+                    if (strcmp(item, limit))
+                        result1 = 1;
+                    break;
+                default:
+                    break;
+                }
+            }
+        } // diff column
+    } // readdir
+
+    closedir(dir);
+
+    if (flag == 1) // and 연산
+    {
+        if (!result1) // false
+            return result1;
+    }
+
+    token = NULL;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        closedir(dir);
+        return -1;
+    }
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        token = strtok(entry->d_name, "-"); // idx
+        token = strtok(NULL, "-");          // column
+
+        if (strcmp(token, col2)) // 컬럼 불일치
+        {
+            continue;
+        }
+
+        else // 컬럼 일치
+        {
+            char sub[MAX_INPUT] = {0};
+            token = strtok(NULL, "-"); // type
+
+            sprintf(sub, "%s/%s", path, entry->d_name); // Domain 경로
+
+            if (strstr(token, "int")) // 숫자 타입
+            {
+                int limit = atoi(val2);                   // 제한 값
+                int item = atoi(find_data_dir(sub, row)); // 타깃 값
+
+                switch (op2)
+                {
+                case '<':
+                    if (item < limit)
+                        result2 = 1;
+                    break;
+                case '>':
+                    if (item > limit)
+                        result2 = 1;
+                    break;
+                case '=':
+                    if (item == limit)
+                        result2 = 1;
+                    break;
+                case '!':
+                    if (item != limit)
+                        result2 = 1;
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            else // 문자열 타입
+            {
+                char *limit = substring(1, strlen(val2) - 2, val2); // 제한 값
+                char *item = find_data_dir(sub, row);               // 타깃 값
+
+                switch (op2)
+                {
+                case '<':
+                    if (strcmp(item, limit) == -1)
+                        result2 = 1;
+                    break;
+                case '>':
+                    if (strcmp(item, limit) == 1)
+                        result2 = 1;
+                    break;
+                case '=':
+                    if (!strcmp(item, limit))
+                        result2 = 1;
+                    break;
+                case '!':
+                    if (strcmp(item, limit))
+                        result2 = 1;
+                    break;
+                default:
+                    break;
+                }
+            }
+        } // diff column
+    } // readdir
+
+    closedir(dir);
+
+    return flag == 1 ? result1 & result2 : result1 | result2;
+}
+
+/*
+ * 단일 조건에 맞는 Tuple 검색
+ * col: 조건 컬럼
+ * val: 조건 값
+ * op: 연산자
+ */
+int find_single_dir(int row, char *path, char *col, char *val, char op)
+{
+    int result = 0; // 조건 부합 => 1
+
+    DIR *dir;
+    struct dirent *entry;
+    char *token = NULL;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        closedir(dir);
+        return -1;
+    }
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        token = strtok(entry->d_name, "-"); // idx
+        token = strtok(NULL, "-");          // column
+
+        if (strcmp(token, col)) // 컬럼 불일치
+        {
+            continue;
+        }
+
+        else // 컬럼 일치
+        {
+            char sub[MAX_INPUT] = {0};
+            token = strtok(NULL, "-"); // type
+
+            sprintf(sub, "%s/%s", path, entry->d_name); // Domain 경로
+
+            if (strstr(token, "int")) // 숫자 타입
+            {
+                int limit = atoi(val);                    // 제한 값
+                int item = atoi(find_data_dir(sub, row)); // 타깃 값
+
+                switch (op)
+                {
+                case '<':
+                    if (item < limit)
+                        result = 1;
+                    break;
+                case '>':
+                    if (item > limit)
+                        result = 1;
+                    break;
+                case '=':
+                    if (item == limit)
+                        result = 1;
+                    break;
+                case '!':
+                    if (item != limit)
+                        result = 1;
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            else // 문자열 타입
+            {
+                char *limit = substring(1, strlen(val) - 2, val); // 제한 값
+                char *item = find_data_dir(sub, row);             // 타깃 값
+
+                switch (op)
+                {
+                case '<':
+                    if (strcmp(item, limit) == -1)
+                        result = 1;
+                    break;
+                case '>':
+                    if (strcmp(item, limit) == 1)
+                        result = 1;
+                    break;
+                case '=':
+                    if (!strcmp(item, limit))
+                        result = 1;
+                    break;
+                case '!':
+                    if (strcmp(item, limit))
+                        result = 1;
+                    break;
+                default:
+                    break;
+                }
+            }
+        } // diff column
+    } // readdir
+
+    closedir(dir);
+
+    return result;
+}
+
+void select_all_dir(int row, char *path) // tuple 출력
+{
+    DIR *dir;
+    struct dirent *entry;
+    char sub[MAX_INPUT] = {0};
+    char result[MAX_INPUT] = {0};
 
     if ((dir = opendir(path)) == NULL)
     {
@@ -295,17 +632,21 @@ void select_all_dir(char *path)
         return;
     }
 
-    printf("======================================\n");
+    printf("+--------------------------------------+\n");
     while ((entry = readdir(dir)) != NULL)
     {
-        cur = strtok(entry->d_name, "_"); // current dir
-        if (!strcmp(cur, "head"))         // head 탐색
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
         {
-            next = strtok(NULL, "_"); // Next dir
-            printf("%s\n", next);
+            continue;
         }
+
+        sprintf(sub, "%s/%s", path, entry->d_name);
+        strcpy(result, find_data_dir(sub, row));
+        printf("|  %s  |  ", result);
+        sub[0] = '\0';
+        result[0] = '\0';
     }
-    printf("======================================\n\n");
+    printf("\n+--------------------------------------+\n");
 
     closedir(dir);
 }

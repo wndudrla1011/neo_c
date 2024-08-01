@@ -9,7 +9,7 @@
 #include "../domain.h"
 #include "../data.h"
 
-int row;
+int row; // DB 행 번호
 
 void query_insert(char *table_dir, DB *db, Table *table, Domain *domain, Data *data)
 {
