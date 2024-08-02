@@ -313,9 +313,9 @@ char *find_data_dir(char *path, int row) // Domain에서 row번째 데이터 찾
         token = strtok(entry->d_name, "_");
         int row_number = atoi(token); // 행 번호
 
-        if (row_number == row)
+        if (row_number == row) // 탐색하는 행 데이터
         {
-            token = strtok(NULL, "_");
+            token = strtok(NULL, "_"); // 데이터 값
             closedir(dir);
             return token;
         }
@@ -349,9 +349,9 @@ char *find_data_dirName(char *path, int row) // Domain에서 row번째 데이터
         token = strtok(entry->d_name, "_");
         int row_number = atoi(token); // 행 번호
 
-        if (row_number == row)
+        if (row_number == row) // 탐색하는 행 데이터
         {
-            char *data_dir = (char *)malloc(1000 * sizeof(char));
+            char *data_dir = (char *)malloc(1000 * sizeof(char)); // 기존 절대 경로
             sprintf(data_dir, "%s/%s", path, origin);
 
             closedir(dir);
@@ -385,9 +385,9 @@ char *create_dir(char *path, int row, char *newDirName)
         token = strtok(entry->d_name, "_");
         int row_number = atoi(token); // 행 번호
 
-        if (row_number == row)
+        if (row_number == row) // 탐색하는 행 데이터
         {
-            char *new_dir = (char *)malloc(100 * sizeof(char));
+            char *new_dir = (char *)malloc(100 * sizeof(char)); // 새 절대 경로
             sprintf(new_dir, "%s/%d_%s", path, row_number, newDirName);
 
             closedir(dir);
@@ -789,7 +789,7 @@ void update_dir(int row, char *path, char *col, char *val)
         return;
     }
 
-    while ((entry = readdir(dir)) != NULL)
+    while ((entry = readdir(dir)) != NULL) // Table 폴더 open
     {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
         {
@@ -797,23 +797,23 @@ void update_dir(int row, char *path, char *col, char *val)
         }
 
         char *token = (char *)malloc(100 * sizeof(char));
-        char origin[100] = {0};
+        char origin[100] = {0}; // 원본 폴더명
         strcpy(origin, entry->d_name);
         token = strtok(entry->d_name, "-"); // idx
         token = strtok(NULL, "-");          // column
 
-        char *domain_dir = (char *)malloc(1000 * sizeof(char));
+        char *domain_dir = (char *)malloc(1000 * sizeof(char)); // 오픈할 Domain 경로
         sprintf(domain_dir, "%s/%s", path, origin);
 
         if (!strcmp(token, col)) // 컬럼 일치
         {
-            char *old_data_dir = (char *)malloc(1000 * sizeof(char));
+            char *old_data_dir = (char *)malloc(1000 * sizeof(char)); // 기존 절대 경로
             old_data_dir = find_data_dirName(domain_dir, row);
 
-            char *new_data_dir = (char *)malloc(1000 * sizeof(char));
+            char *new_data_dir = (char *)malloc(1000 * sizeof(char)); // 변경할 절대 경로
             new_data_dir = create_dir(domain_dir, row, val);
 
-            renameDirectory(old_data_dir, new_data_dir);
+            renameDirectory(old_data_dir, new_data_dir); // 폴더명 변경
 
             closedir(dir);
 
