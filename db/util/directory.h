@@ -310,9 +310,11 @@ char *find_data_dir(char *path, int row) // Domain에서 row번째 데이터 찾
             continue;
         }
 
-        if (entry->d_name[0] == row + '0')
+        token = strtok(entry->d_name, "_");
+        int row_number = atoi(token); // 행 번호
+
+        if (row_number == row)
         {
-            token = strtok(entry->d_name, "_");
             token = strtok(NULL, "_");
             closedir(dir);
             return token;
