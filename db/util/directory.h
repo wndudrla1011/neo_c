@@ -659,21 +659,17 @@ void select_all_dir(int row, char *path) // tuple 출력
     closedir(dir);
 }
 
-void select_cols_dir(int row, char *path) // 특정 필드 출력
+void select_cols_dir(int row, char *path, char *col) // 특정 필드 출력
 {
     DIR *dir;
     struct dirent *entry;
-    char sub[MAX_INPUT] = {0};
-    char result[MAX_INPUT] = {0};
 
     if ((dir = opendir(path)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
-        closedir(dir);
         return;
     }
 
-    printf("+--------------------------------------+\n");
     while ((entry = readdir(dir)) != NULL)
     {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
@@ -681,15 +677,26 @@ void select_cols_dir(int row, char *path) // 특정 필드 출력
             continue;
         }
 
-        sprintf(sub, "%s/%s", path, entry->d_name);
-        strcpy(result, find_data_dir(sub, row));
-        printf("|  %s  |  ", result);
-        sub[0] = '\0';
-        result[0] = '\0';
-    }
-    printf("\n+--------------------------------------+\n");
+        char *token = (char *)malloc(100 * sizeof(char));
+        char origin[100] = {0};
+        strcpy(origin, entry->d_name);
+        token = strtok(entry->d_name, "-"); // idx
+        token = strtok(NULL, "-");          // column
 
-    closedir(dir);
+        char *domain_dir = (char *)malloc(1000 * sizeof(char));
+        sprintf(domain_dir, "%s/%s", path, origin);
+
+        if (!strcmp(token, col)) // 컬럼 일치
+        {
+            char *res = find_data_dir(domain_dir, row);
+
+            printf("|  %s  |  ", res);
+
+            closedir(dir);
+
+            break;
+        }
+    }
 }
 
 #endif

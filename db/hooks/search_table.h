@@ -166,24 +166,22 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
     // >>>>>>>>>>>>>>>>>>>>> Select all
 
-    /*else // select cols
+    else // select cols
     {
-        domain = table->dhead->next; // Move first column (head next)
-
-        data = domain->head->next; // Move head data
-
-        while (data != NULL)
+        int row = 0;
+        int limit = get_cnt_dir(table_dir);
+        while (row < limit)
         {
             if (pos_cons > 0) // where 문 존재
             {
                 if (flag > 0) // 다중 조건
                 {
-                    result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                    result = find_multi_dir(row, table_dir, col1, val1, op1, col2, val2, op2, flag);
                 }
 
                 else // 단일 조건
                 {
-                    result = find_single_data(table, domain, data, col1, val1, op1);
+                    result = find_single_dir(row, table_dir, col1, val1, op1);
                 }
 
                 if (result) // 조건에 부합
@@ -192,7 +190,7 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
                     printf("+--------------------------------------+\n");
                     for (int i = 0; i < cnt_cols; i++) // 조건에 부합하는 Tuple 출력
                     {
-                        print_data(domain, data, columns[i]);
+                        select_cols_dir(row, table_dir, columns[i]);
                     }
                     printf("\n+--------------------------------------+\n");
                 }
@@ -202,18 +200,16 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
             {
                 flag_empty = 0;
                 printf("+--------------------------------------+\n");
-                printf("|  ");
-                for (int i = 0; i < pos_tname - 1; i++)
+                for (int i = 0; i < cnt_cols; i++) // 조건에 부합하는 Tuple 출력
                 {
-                    find_data(domain, data, columns[i]);
+                    select_cols_dir(row, table_dir, columns[i]);
                 }
                 printf("\n+--------------------------------------+\n");
             }
 
-            domain = table->dhead->next; // Move first column (head next)
-            data = data->next;           // next data (next tuple)
+            row++;
         }
-    }*/
+    }
 
     // >>>>>>>>>>>>>>>>>>>>> Select cols
 
