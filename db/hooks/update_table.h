@@ -9,8 +9,9 @@
 #include "../domain.h"
 #include "../data.h"
 
-void query_update(DB *db, Table *table, Domain *domain, Data *data)
+void query_update(char *parent, DB *db, Table *table, Domain *domain, Data *data)
 {
+    char table_dir[MAX_INPUT] = {0};
     int cnt = 0;               // token count
     int cnt_cons = 0;          // 조건 개수
     int cnt_set = 0;           // set절 조건문 개수
@@ -31,12 +32,6 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
     char op2;          // 조건2 -> 연산자
 
     wheres[0] = '\0'; // 조건절 초기화
-
-    if (table->cadinality == 0) // insert 0회
-    {
-        printf("Empty set\n");
-        return;
-    }
 
     while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
     {
@@ -134,31 +129,31 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
         // >>>>>>>>>>>>>>>>>>>>> Parsing where
     }
 
-    int result = 0; // 데이터 탐색 결과
+    strcpy(table_dir, read_dir(table->tname, parent)); // Table 폴더 경로 찾기
 
-    domain = table->dhead->next; // Move first column (head next)
+    int result = 0;                     // 데이터 탐색 결과
+    int row = 0;                        // 탐색할 행
+    int limit = get_cnt_dir(table_dir); // Domain 폴더 내 폴더 개수 == 행 개수
 
-    data = domain->head->next; // Move head data
-
-    while (data != NULL)
+    while (row != limit)
     {
         if (pos_cons > 0) // where 문 존재
         {
             if (flag > 0) // 다중 조건
             {
-                result = find_multi_data(table, domain, data, col1, val1, op1, col2, val2, op2, flag);
+                result = find_multi_dir(row, table_dir, col1, val1, op1, col2, val2, op2, flag);
             }
 
             else // 단일 조건
             {
-                result = find_single_data(table, domain, data, col1, val1, op1);
+                result = find_single_dir(row, table_dir, col1, val1, op1);
             }
 
             if (result) // 조건에 부합
             {
                 for (int i = 0; i < cnt_set; i++) // 조건에 부합하는 Tuple 수정
                 {
-                    update_data(domain, data, columns[i], values[i]);
+                    update_dir(row, table_dir, columns[i], values[i]);
                 }
             }
         }
@@ -167,12 +162,11 @@ void query_update(DB *db, Table *table, Domain *domain, Data *data)
         {
             for (int i = 0; i < cnt_set; i++)
             {
-                update_data(domain, data, columns[i], values[i]);
+                update_dir(row, table_dir, columns[i], values[i]);
             }
         }
 
-        domain = table->dhead->next; // Move first column (head next)
-        data = data->next;           // next data (next tuple)
+        row++;
     }
 }
 

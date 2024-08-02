@@ -312,7 +312,7 @@ int main(void)
 
             add_table(db, table, command); // 연결 리스트 -> New Table
 
-            table = read_table(db->thead, command);
+            table = read_table(db->thead, command); // Table 구조체 찾기
 
             command = strtok(NULL, "("); // values
 
@@ -341,17 +341,32 @@ int main(void)
                 continue;
             }
 
-            table = read_table(db->thead, command);
+            char *res = read_dir(command, db_dir); // DB 폴더에서 table 폴더 찾기
 
-            if (table == NULL) // not found table
+            if (res == NULL) // not found table
             {
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
             }
 
+            else
+            {
+                if (table == NULL) // Table dir 존재 && Table 존재x
+                {
+                    table = init_table(db); // Table 초기화
+                    db->thead = table;      // DB 구조체와 연결
+                }
+
+                free(res);
+            }
+
+            add_table(db, table, command);
+
+            table = read_table(db->thead, command);
+
             command = strtok(NULL, " "); // set
 
-            query_update(db, table, domain, data);
+            query_update(db_dir, db, table, domain, data);
             printf("Query Success!\n");
         }
 

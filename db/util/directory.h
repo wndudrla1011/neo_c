@@ -324,6 +324,79 @@ char *find_data_dir(char *path, int row) // Domain에서 row번째 데이터 찾
     closedir(dir);
 }
 
+char *find_data_dirName(char *path, int row) // Domain에서 row번째 데이터의 경로 반환
+{
+    DIR *dir = opendir(path);
+    struct dirent *entry;
+    char *token = NULL;
+
+    if (dir == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return NULL;
+    }
+
+    while ((entry = readdir(dir)) != NULL) // Domain 폴더 open
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        char origin[100] = {0}; // 원본 폴더명
+        strcpy(origin, entry->d_name);
+
+        token = strtok(entry->d_name, "_");
+        int row_number = atoi(token); // 행 번호
+
+        if (row_number == row)
+        {
+            char *data_dir = (char *)malloc(1000 * sizeof(char));
+            sprintf(data_dir, "%s/%s", path, origin);
+
+            closedir(dir);
+
+            return data_dir;
+        }
+    }
+
+    closedir(dir);
+}
+
+char *create_dir(char *path, int row, char *newDirName)
+{
+    DIR *dir = opendir(path);
+    struct dirent *entry;
+    char *token = NULL;
+
+    if (dir == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return NULL;
+    }
+
+    while ((entry = readdir(dir)) != NULL) // Domain 폴더 open
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        token = strtok(entry->d_name, "_");
+        int row_number = atoi(token); // 행 번호
+
+        if (row_number == row)
+        {
+            char *new_dir = (char *)malloc(100 * sizeof(char));
+            sprintf(new_dir, "%s/%d_%s", path, row_number, newDirName);
+
+            closedir(dir);
+
+            return new_dir;
+        }
+    }
+}
+
 /*
  * 다중 조건에 맞는 Tuple 검색
  * row: 튜플 순서
@@ -693,6 +766,54 @@ void select_cols_dir(int row, char *path, char *col) // 특정 필드 출력
             char *res = find_data_dir(domain_dir, row);
 
             printf("|  %s  |  ", res);
+
+            closedir(dir);
+
+            break;
+        }
+    }
+}
+
+/*
+ * col: 수정하려는 컬럼
+ * val: 수정하려는 값
+ */
+void update_dir(int row, char *path, char *col, char *val)
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        char *token = (char *)malloc(100 * sizeof(char));
+        char origin[100] = {0};
+        strcpy(origin, entry->d_name);
+        token = strtok(entry->d_name, "-"); // idx
+        token = strtok(NULL, "-");          // column
+
+        char *domain_dir = (char *)malloc(1000 * sizeof(char));
+        sprintf(domain_dir, "%s/%s", path, origin);
+
+        if (!strcmp(token, col)) // 컬럼 일치
+        {
+            char *old_data_dir = (char *)malloc(1000 * sizeof(char));
+            old_data_dir = find_data_dirName(domain_dir, row);
+
+            char *new_data_dir = (char *)malloc(1000 * sizeof(char));
+            new_data_dir = create_dir(domain_dir, row, val);
+
+            renameDirectory(old_data_dir, new_data_dir);
 
             closedir(dir);
 
