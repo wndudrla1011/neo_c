@@ -29,11 +29,12 @@ int main(void)
     Table *table = NULL;
     Domain *domain = NULL;
     Data *data = NULL;
-    int is_where = 0;          // where절 존재 여부 > delete에서 사용
-    char input[MAX_INPUT];     // 입력 값
-    char *command = NULL;      // 명령어
-    char db_dir[MAX_INPUT];    // DB 폴더
-    char table_dir[MAX_INPUT]; // Table 폴더
+    int is_where = 0;                // where절 존재 여부 > delete에서 사용
+    char input[MAX_INPUT] = {0};     // 입력 값
+    char *command = NULL;            // 명령어
+    char db_dir[MAX_INPUT] = {0};    // DB 폴더
+    char table_dir[MAX_INPUT] = {0}; // Table 폴더
+    char origin_input[MAX_INPUT] = {0};
 
     if (directoryExists(root))
     {
@@ -47,6 +48,8 @@ int main(void)
     while (1)
     {
         fgets(input, MAX_INPUT, stdin);
+
+        strcpy(origin_input, input);
 
         if (strstr(input, "where") != NULL) // where절 존재
         {
@@ -413,7 +416,14 @@ int main(void)
 
             table = read_table(db->thead, command);
 
-            query_delete(db_dir, db, table, domain, data, is_where);
+            char *start = (char *)malloc(1000 * sizeof(char));
+
+            if (is_where)
+            {
+                start = strstr(origin_input, "where");
+            }
+
+            query_delete(db_dir, db, table, start, is_where);
             printf("Query Success!\n");
         }
 

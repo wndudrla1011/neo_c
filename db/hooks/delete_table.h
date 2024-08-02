@@ -12,7 +12,7 @@
 #include "./search.h"
 #include "../util/directory.h"
 
-void query_delete(char *parent, DB *db, Table *table, Domain *domain, Data *data, int is_where)
+void query_delete(char *parent, DB *db, Table *table, char *command, int is_where)
 {
     char table_dir[MAX_INPUT] = {0};
     int cnt = 0;              // token count
@@ -21,7 +21,7 @@ void query_delete(char *parent, DB *db, Table *table, Domain *domain, Data *data
     char wheres[MAX_INPUT];   // 조건절
     char *wtokens[MAX_INPUT]; // where 뒤의 모든 토큰
     char *tokens[MAX_INPUT];  // 모든 token
-    char *token = NULL;
+    char *token = (char *)malloc(100 * sizeof(char));
 
     char *col1 = NULL; // 조건1 -> 속성
     char *val1 = NULL; // 조건1 -> 값
@@ -51,15 +51,13 @@ void query_delete(char *parent, DB *db, Table *table, Domain *domain, Data *data
         return;
     }
 
-    strtok(NULL, " "); // where
+    token = strtok(command, " "); // where
 
     while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
     {
         tokens[cnt++] = token;
+        printf("token: %s\n", token);
     }
-
-    free(token);
-    token = NULL;
 
     for (int i = 0; i < cnt - 1; i++) // create where clause
     {
@@ -128,7 +126,9 @@ void query_delete(char *parent, DB *db, Table *table, Domain *domain, Data *data
     int row = 0;                         // 탐색할 행
     int limit = get_cnt_dir(domain_dir); // Domain 폴더 내 폴더 개수 == 행 개수
 
-    while (row < limit)
+    int delete_list[100] = {0}; // 삭제할 데이터 목록 (1: 삭제 대상)
+
+    while (row < limit) // 삭제해야 될 데이터 목록 수집
     {
         if (flag > 0) // 다중 조건
         {
@@ -142,10 +142,18 @@ void query_delete(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
         if (result) // 조건에 부합
         {
-            delete_dir(row, table_dir);
+            delete_list[row] = 1;
         }
 
         row++;
+    }
+
+    for (int i = 0; i < limit; i++) // 삭제 대상 탐색
+    {
+        if (delete_list[i] == 1) // 삭제 수행
+        {
+            delete_dir(i, table_dir);
+        }
     }
 }
 
