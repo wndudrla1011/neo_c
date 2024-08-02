@@ -339,36 +339,38 @@ int find_multi_dir(int row, char *path, char *col1, char *val1, char op1, char *
 
     DIR *dir;
     struct dirent *entry;
-    char *token = NULL;
 
     if ((dir = opendir(path)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
-        closedir(dir);
         return -1;
     }
 
     while ((entry = readdir(dir)) != NULL)
     {
-        token = strtok(entry->d_name, "-"); // idx
-        token = strtok(NULL, "-");          // column
-
-        if (strcmp(token, col1)) // 컬럼 불일치
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
         {
             continue;
         }
 
-        else // 컬럼 일치
-        {
-            char sub[MAX_INPUT] = {0};
-            token = strtok(NULL, "-"); // type
+        char *token = (char *)malloc(100 * sizeof(char));
+        char origin[100] = {0};
+        strcpy(origin, entry->d_name);
+        token = strtok(entry->d_name, "-"); // idx
+        token = strtok(NULL, "-");          // column
 
-            sprintf(sub, "%s/%s", path, entry->d_name); // Domain 경로
+        char *domain_dir = (char *)malloc(1000 * sizeof(char));
+        sprintf(domain_dir, "%s/%s", path, origin);
+
+        if (!strcmp(token, col1)) // 컬럼 일치
+        {
+            token = strtok(NULL, "-"); // type
 
             if (strstr(token, "int")) // 숫자 타입
             {
-                int limit = atoi(val1);                   // 제한 값
-                int item = atoi(find_data_dir(sub, row)); // 타깃 값
+                int limit = atoi(val1); // 제한 값
+                char *res = find_data_dir(domain_dir, row);
+                int item = atoi(res); // 타깃 값
 
                 switch (op1)
                 {
@@ -396,7 +398,8 @@ int find_multi_dir(int row, char *path, char *col1, char *val1, char op1, char *
             else // 문자열 타입
             {
                 char *limit = substring(1, strlen(val1) - 2, val1); // 제한 값
-                char *item = find_data_dir(sub, row);               // 타깃 값
+                char *res = find_data_dir(domain_dir, row);
+                char *item = res; // 타깃 값
 
                 switch (op1)
                 {
@@ -420,10 +423,12 @@ int find_multi_dir(int row, char *path, char *col1, char *val1, char op1, char *
                     break;
                 }
             }
+
+            closedir(dir);
+
+            break;
         } // diff column
     } // readdir
-
-    closedir(dir);
 
     if (flag == 1) // and 연산
     {
@@ -431,36 +436,36 @@ int find_multi_dir(int row, char *path, char *col1, char *val1, char op1, char *
             return result1;
     }
 
-    token = NULL;
-
     if ((dir = opendir(path)) == NULL)
     {
         perror("디렉토리를 열 수 없습니다");
-        closedir(dir);
         return -1;
     }
 
     while ((entry = readdir(dir)) != NULL)
     {
-        token = strtok(entry->d_name, "-"); // idx
-        token = strtok(NULL, "-");          // column
-
-        if (strcmp(token, col2)) // 컬럼 불일치
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
         {
             continue;
         }
 
-        else // 컬럼 일치
-        {
-            char sub[MAX_INPUT] = {0};
-            token = strtok(NULL, "-"); // type
+        char *token = (char *)malloc(100 * sizeof(char));
+        char origin[100] = {0};
+        strcpy(origin, entry->d_name);
+        token = strtok(entry->d_name, "-"); // idx
+        token = strtok(NULL, "-");          // column
 
-            sprintf(sub, "%s/%s", path, entry->d_name); // Domain 경로
+        char *domain_dir = (char *)malloc(1000 * sizeof(char));
+        sprintf(domain_dir, "%s/%s", path, origin);
+
+        if (!strcmp(token, col2)) // 컬럼 일치
+        {
+            token = strtok(NULL, "-"); // type
 
             if (strstr(token, "int")) // 숫자 타입
             {
-                int limit = atoi(val2);                   // 제한 값
-                int item = atoi(find_data_dir(sub, row)); // 타깃 값
+                int limit = atoi(val2);                          // 제한 값
+                int item = atoi(find_data_dir(domain_dir, row)); // 타깃 값
 
                 switch (op2)
                 {
@@ -488,7 +493,8 @@ int find_multi_dir(int row, char *path, char *col1, char *val1, char op1, char *
             else // 문자열 타입
             {
                 char *limit = substring(1, strlen(val2) - 2, val2); // 제한 값
-                char *item = find_data_dir(sub, row);               // 타깃 값
+                char *res = find_data_dir(domain_dir, row);
+                char *item = res; // 타깃 값
 
                 switch (op2)
                 {
@@ -512,12 +518,13 @@ int find_multi_dir(int row, char *path, char *col1, char *val1, char op1, char *
                     break;
                 }
             }
+
+            closedir(dir);
+
+            return flag == 1 ? result1 & result2 : result1 | result2;
+
         } // diff column
     } // readdir
-
-    closedir(dir);
-
-    return flag == 1 ? result1 & result2 : result1 | result2;
 }
 
 int find_single_dir(int row, char *path, char *col, char *val, char op)
