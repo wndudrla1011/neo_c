@@ -144,12 +144,13 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
                 else // 단일 조건
                 {
-                    result = test_dir(row, table_dir, col1, val1, op1);
+                    result = find_single_dir(row, table_dir, col1, val1, op1);
                 }
 
                 if (result) // 조건에 부합
                 {
                     flag_empty = 0;
+                    select_all_dir(row, table_dir);
                 }
             }
 
