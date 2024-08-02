@@ -44,7 +44,19 @@ void query_update(char *parent, DB *db, Table *table, Domain *domain, Data *data
         tokens[cnt++] = token;
     }
 
-    for (int i = 0; i < cnt - pos_cons; i++) // set절 처리
+    int range = 0;
+
+    if (pos_cons == 0) // where절 x
+    {
+        range = cnt;
+    }
+
+    else // where절 o
+    {
+        range = pos_cons;
+    }
+
+    for (int i = 0; i < range; i++) // set절 처리
     {
         if (!strcmp(tokens[i], "="))
         {
