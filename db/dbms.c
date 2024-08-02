@@ -390,15 +390,30 @@ int main(void)
                 command = strtok(NULL, ";"); // table name
             }
 
-            table = read_table(db->thead, command);
+            char *res = read_dir(command, db_dir);
 
-            if (table == NULL) // not found table
+            if (res == NULL) // not found table
             {
                 printf("Table '%s' doesn't exist\n", command);
                 continue;
             }
 
-            query_delete(db, table, domain, data, is_where);
+            else
+            {
+                if (table == NULL) // Table dir 존재 && Table 존재x
+                {
+                    table = init_table(db); // Table 초기화
+                    db->thead = table;      // DB 구조체와 연결
+                }
+
+                free(res);
+            }
+
+            add_table(db, table, command);
+
+            table = read_table(db->thead, command);
+
+            query_delete(db_dir, db, table, domain, data, is_where);
             printf("Query Success!\n");
         }
 

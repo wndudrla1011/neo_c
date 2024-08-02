@@ -84,7 +84,7 @@ char *init_dir(const char *parent)
     return ptr;
 }
 
-int get_cnt_dir(const char *parent)
+int get_cnt_dir(const char *parent) // 디렉토리 내 폴더 개수 카운팅
 {
     DIR *dir;
     struct dirent *entry;
@@ -295,7 +295,6 @@ char *find_data_dir(char *path, int row) // Domain에서 row번째 데이터 찾
 {
     DIR *dir = opendir(path);
     struct dirent *entry;
-    char *token = NULL;
 
     if (dir == NULL)
     {
@@ -303,13 +302,14 @@ char *find_data_dir(char *path, int row) // Domain에서 row번째 데이터 찾
         return NULL;
     }
 
-    while ((entry = readdir(dir)) != NULL) // "." 및 ".." 제외 모든 폴더 저장
+    while ((entry = readdir(dir)) != NULL) // Data dir 순회
     {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
         {
             continue;
         }
 
+        char *token = (char *)malloc(100 * sizeof(char));
         token = strtok(entry->d_name, "_");
         int row_number = atoi(token); // 행 번호
 
@@ -811,7 +811,16 @@ void update_dir(int row, char *path, char *col, char *val)
             old_data_dir = find_data_dirName(domain_dir, row);
 
             char *new_data_dir = (char *)malloc(1000 * sizeof(char)); // 변경할 절대 경로
-            new_data_dir = create_dir(domain_dir, row, val);
+
+            if (val[0] == '\'' && val[strlen(val) - 1] == '\'') // 문자열 데이터
+            {
+                new_data_dir = create_dir(domain_dir, row, substring(1, strlen(val) - 2, val));
+            }
+
+            else // 숫자 데이터
+            {
+                new_data_dir = create_dir(domain_dir, row, val);
+            }
 
             renameDirectory(old_data_dir, new_data_dir); // 폴더명 변경
 
@@ -820,6 +829,76 @@ void update_dir(int row, char *path, char *col, char *val)
             break;
         }
     }
+}
+
+void delete_dir(int row, char *path)
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL) // Domain dir 순회
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        char origin[100] = {0}; // 원본 폴더명
+        strcpy(origin, entry->d_name);
+
+        char *domain_dir = (char *)malloc(100 * sizeof(char)); // 오픈할 Domain 경로
+        sprintf(domain_dir, "%s/%s", path, origin);
+
+        int last = get_cnt_dir(domain_dir); // 마지막 행 번호
+
+        char *data_dir = (char *)malloc(100 * sizeof(char)); // Data 경로
+        data_dir = find_data_dirName(domain_dir, row);       // 삭제하려는 Data 경로
+
+        char *data = (char *)malloc(100 * sizeof(char)); // 현재 행의 Data
+        data = find_data_dir(domain_dir, row);
+
+        printf("data_dir: %s\n", data_dir);
+        printf("data: %s\n", data);
+
+        if (rmdir(data_dir) == 0) // 데이터 삭제 성공
+        {
+            printf("성공적으로 %s가 삭제되었습니다.\n", data_dir);
+        }
+        else // 데이터 삭제 실패
+        {
+            perror("삭제 에러");
+            return;
+        }
+
+        for (int i = row + 1; i < last; i++) // 행 번호 조정
+        {
+            char *origin_dir = (char *)malloc(1000 * sizeof(char)); // i번째 행의 기존 경로
+            origin_dir = find_data_dirName(domain_dir, i);
+
+            char *data = (char *)malloc(100 * sizeof(char)); // i번째 행의 Data
+            data = find_data_dir(domain_dir, i);
+
+            if (directoryExists(origin_dir))
+            {
+                rmdir(origin_dir);
+            }
+
+            printf("origin: %s\n", origin_dir);
+
+            char *new_dir = (char *)malloc(1000 * sizeof(char)); // i번째 행의 new 경로
+            sprintf(new_dir, "%s/%d_%s", domain_dir, i - 1, data);
+
+            createDirectory(new_dir); // 뒷 번호를 당긴 폴더 생성
+        }
+    }
+
+    closedir(dir);
 }
 
 #endif

@@ -4,14 +4,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include "../db.h"
 #include "../table.h"
 #include "../domain.h"
 #include "../data.h"
 #include "./search.h"
+#include "../util/directory.h"
 
-void query_delete(DB *db, Table *table, Domain *domain, Data *data, int is_where)
+void query_delete(char *parent, DB *db, Table *table, Domain *domain, Data *data, int is_where)
 {
+    char table_dir[MAX_INPUT] = {0};
     int cnt = 0;              // token count
     int cnt_cons = 0;         // 조건 개수
     int flag = 0;             // 0: none, 1: and, 2: or
@@ -29,20 +32,20 @@ void query_delete(DB *db, Table *table, Domain *domain, Data *data, int is_where
 
     wheres[0] = '\0'; // 조건절 초기화
 
+    strcpy(table_dir, read_dir(table->tname, parent));
+
+    char *domain_dir = find_data_dirName(table_dir, 0);
+
     if (!is_where) // where절 존재x
     {
-        domain = table->dhead->next; // Move first column (head next)
+        int row = 0;
+        int limit = get_cnt_dir(domain_dir); // Domain 폴더 내 폴더 개수 == 행 개수
 
-        data = domain->head->next; // Move head data
-
-        Data *cur = data;
-        Data *prev;
-
-        while (cur != NULL)
+        while (row < limit)
         {
-            prev = cur;
-            cur = cur->next;
-            delete_data(table, domain, prev);
+            delete_dir(0, table_dir);
+
+            row++;
         }
 
         return;
@@ -121,40 +124,28 @@ void query_delete(DB *db, Table *table, Domain *domain, Data *data, int is_where
 
     // >>>>>>>>>>>>>>>>>>>>> Parsing where
 
-    int result = 0; // 데이터 탐색 결과
+    int result = 0;                      // 데이터 탐색 결과
+    int row = 0;                         // 탐색할 행
+    int limit = get_cnt_dir(domain_dir); // Domain 폴더 내 폴더 개수 == 행 개수
 
-    domain = table->dhead->next; // Move first column (head next)
-
-    data = domain->head->next; // Move head data
-
-    Data *cur = data;
-    Data *prev;
-
-    while (cur != NULL)
+    while (row < limit)
     {
         if (flag > 0) // 다중 조건
         {
-            result = find_multi_data(table, domain, cur, col1, val1, op1, col2, val2, op2, flag);
+            result = find_multi_dir(row, table_dir, col1, val1, op1, col2, val2, op2, flag);
         }
 
         else // 단일 조건
         {
-            result = find_single_data(table, domain, cur, col1, val1, op1);
+            result = find_single_dir(row, table_dir, col1, val1, op1);
         }
 
         if (result) // 조건에 부합
         {
-            prev = cur;
-            cur = cur->next;
-            delete_data(table, domain, prev);
+            delete_dir(row, table_dir);
         }
 
-        else
-        {
-            cur = cur->next;
-        }
-
-        domain = table->dhead->next; // Move first column (head next)
+        row++;
     }
 }
 
