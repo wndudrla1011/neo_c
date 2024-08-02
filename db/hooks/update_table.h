@@ -8,6 +8,7 @@
 #include "../table.h"
 #include "../domain.h"
 #include "../data.h"
+#include "../util/directory.h"
 
 void query_update(char *parent, DB *db, Table *table, Domain *domain, Data *data)
 {
@@ -131,9 +132,11 @@ void query_update(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
     strcpy(table_dir, read_dir(table->tname, parent)); // Table 폴더 경로 찾기
 
-    int result = 0;                     // 데이터 탐색 결과
-    int row = 0;                        // 탐색할 행
-    int limit = get_cnt_dir(table_dir); // Domain 폴더 내 폴더 개수 == 행 개수
+    char *domain_dir = find_data_dirName(table_dir, 0);
+
+    int result = 0;                      // 데이터 탐색 결과
+    int row = 0;                         // 탐색할 행
+    int limit = get_cnt_dir(domain_dir); // Domain 폴더 내 폴더 개수 == 행 개수
 
     while (row != limit)
     {

@@ -8,6 +8,7 @@
 #include "../table.h"
 #include "../domain.h"
 #include "../data.h"
+#include "../util/directory.h"
 
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
@@ -127,12 +128,14 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
     strcpy(table_dir, read_dir(tokens[pos_tname], parent));
 
+    char *domain_dir = find_data_dirName(table_dir, 0);
+
     int result = 0; // 데이터 탐색 결과
 
     if (!strcmp(columns[0], "*")) // select all
     {
-        int row = 0;                        // 탐색할 행
-        int limit = get_cnt_dir(table_dir); // Domain 폴더 내 폴더 개수 == 행 개수
+        int row = 0;                         // 탐색할 행
+        int limit = get_cnt_dir(domain_dir); // Domain 폴더 내 폴더 개수 == 행 개수
         while (row < limit)
         {
             if (pos_cons > 0) // where 문 존재
