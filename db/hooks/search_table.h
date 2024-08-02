@@ -131,8 +131,8 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
     if (!strcmp(columns[0], "*")) // select all
     {
-        int row = 0;
-        int limit = get_cnt_dir(table_dir);
+        int row = 0;                        // 탐색할 행
+        int limit = get_cnt_dir(table_dir); // Domain 폴더 내 폴더 개수 == 행 개수
         while (row < limit)
         {
             if (pos_cons > 0) // where 문 존재
