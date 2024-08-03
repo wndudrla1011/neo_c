@@ -221,7 +221,7 @@ int main(void)
             {
                 command = strtok(NULL, ";"); // database name
 
-                if (read_db(head, command) == NULL) // not found db
+                if (get_cnt_dir(root) == 0) // not found db
                 {
                     printf("Now current DB is NULL\nPlease use another DB\n");
                     continue;
