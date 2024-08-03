@@ -154,6 +154,8 @@ void query_delete(char *parent, DB *db, Table *table, char *command, int is_wher
             delete_dir(i, table_dir);
         }
     }
+
+    free(token);
 }
 
 #endif
