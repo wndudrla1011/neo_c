@@ -49,9 +49,9 @@ void query_insert(char *table_dir, DB *db, Table *table, char *command)
         save_data_dir(table_dir, i, row, values[i]);
     }
 
-    free(token);
-
     // >>>>>>>>>>>>>>>>>>>>> Insert Data
+
+    free(token);
 }
 
 #endif

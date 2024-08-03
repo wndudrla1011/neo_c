@@ -128,8 +128,9 @@ int get_cnt_dir(const char *parent) // 디렉토리 내 폴더 개수 카운팅
 char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 {
     struct dirent *entry;
-    char *path = NULL;
-    char *lt = NULL, *rt = NULL;
+    char *path = (char *)malloc(100 * sizeof(char));
+    char *lt = (char *)malloc(100 * sizeof(char));
+    char *rt = (char *)malloc(100 * sizeof(char));
 
     if ((dir = opendir(parent)) == NULL)
     {
@@ -139,27 +140,29 @@ char *read_dir(char *name, char *parent) // 폴더명으로 폴더 찾기
 
     while ((entry = readdir(dir)) != NULL)
     {
-        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) // '.' 및 '..' 디렉토리 무시
         {
-            if (strstr(entry->d_name, "_") != NULL) // Leaf folder가 아닌 경우 ("_" 존재)
+            continue;
+        }
+
+        if (strstr(entry->d_name, "_") != NULL) // Leaf folder가 아닌 경우 ("_" 존재)
+        {
+            lt = strtok(entry->d_name, "_"); // 폴더명만 토큰화
+            rt = strtok(NULL, "_");          // 다음 폴더명 토큰화
+
+            if (!strcmp(name, lt)) // 동일 폴더인지 비교
             {
-                lt = strtok(entry->d_name, "_"); // 폴더명만 토큰화
-                rt = strtok(NULL, "_");          // 다음 폴더명 토큰화
-                if (!strcmp(name, lt))           // 동일 폴더인지 비교
-                {
-                    path = (char *)malloc(sizeof(strlen(parent) + strlen(lt) + strlen(rt) + 3));
-                    sprintf(path, "%s/%s_%s", parent, lt, rt);
-                    break;
-                }
+                sprintf(path, "%s/%s_%s", parent, lt, rt);
+                break;
             }
-            else // Leaf folder
+        }
+
+        else // Leaf folder
+        {
+            if (!strcmp(name, entry->d_name)) // 동일 폴더인지 비교
             {
-                if (!strcmp(name, entry->d_name)) // 동일 폴더인지 비교
-                {
-                    path = (char *)malloc(sizeof(strlen(parent) + strlen(name) + 3));
-                    sprintf(path, "%s/%s", parent, name);
-                    break;
-                }
+                sprintf(path, "%s/%s", parent, name);
+                break;
             }
         }
     }
@@ -833,10 +836,102 @@ void update_dir(int row, char *path, char *col, char *val)
     }
 }
 
+/*
+ * path: Domain 경로
+ * last: 데이터 개수 (데이터 개수 - 1 == 마지막 행 번호)
+ */
+void indexing_dir(char *path, int last)
+{
+    DIR *dir;
+    struct dirent *entry;
+    int check_arr[MAX_INPUT] = {0};
+    int row = 0;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL) // open the Domain
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        row = atoi(strtok(entry->d_name, "_")); // 행 번호
+
+        check_arr[row] = 1; // 존재하는 행 번호 체크
+    }
+
+    // i: 인덱싱 목적지, j: 인덱싱 출발지 (j -> i 인덱싱)
+    for (int i = 0; i < last; i++)
+    {
+        if (check_arr[i] == 0) // 체크x (destination)
+        {
+            for (int j = i + 1; j < last; j++)
+            {
+                if (check_arr[j] == 1) // 체크o (departure)
+                {
+                    char *origin_dir = (char *)malloc(1000 * sizeof(char)); // origin index data
+                    origin_dir = find_data_dirName(path, j);
+
+                    char *data = (char *)malloc(100 * sizeof(char)); // origin Data
+                    data = find_data_dir(path, j);
+
+                    if (directoryExists(origin_dir))
+                    {
+                        rmdir(origin_dir);
+                    }
+
+                    char *new_dir = (char *)malloc(1000 * sizeof(char)); // new index data
+                    sprintf(new_dir, "%s/%d_%s", path, i, data);
+
+                    createDirectory(new_dir); // create new index data
+
+                    check_arr[j] = 0; // 다음 탐색에서 제외
+
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void call_indexing_dir(char *path, int last) // indexing_dir을 호출하는 역할
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL) // open the table
+    {
+        char origin[100] = {0}; // 원본 Domain 폴더명
+        strcpy(origin, entry->d_name);
+
+        char *domain_dir = (char *)malloc(100 * sizeof(char)); // 오픈할 Domain 경로
+        sprintf(domain_dir, "%s/%s", path, origin);
+
+        indexing_dir(domain_dir, last);
+    }
+
+    closedir(dir);
+}
+
 void delete_dir(int row, char *path)
 {
     DIR *dir;
     struct dirent *entry;
+    char *domain_dir = (char *)malloc(100 * sizeof(char)); // 오픈할 Domain 경로
+    char *data_dir = (char *)malloc(100 * sizeof(char));   // Data 경로
+    char *data = (char *)malloc(100 * sizeof(char));       // 현재 행의 Data
+    int last = 0;                                          // 마지막 행 번호
 
     if ((dir = opendir(path)) == NULL)
     {
@@ -854,15 +949,12 @@ void delete_dir(int row, char *path)
         char origin[100] = {0}; // 원본 폴더명
         strcpy(origin, entry->d_name);
 
-        char *domain_dir = (char *)malloc(100 * sizeof(char)); // 오픈할 Domain 경로
         sprintf(domain_dir, "%s/%s", path, origin);
 
-        int last = get_cnt_dir(domain_dir); // 마지막 행 번호
+        last = get_cnt_dir(domain_dir);
 
-        char *data_dir = (char *)malloc(100 * sizeof(char)); // Data 경로
-        data_dir = find_data_dirName(domain_dir, row);       // 삭제하려는 Data 경로
+        data_dir = find_data_dirName(domain_dir, row); // 삭제하려는 Data 경로
 
-        char *data = (char *)malloc(100 * sizeof(char)); // 현재 행의 Data
         data = find_data_dir(domain_dir, row);
 
         if (rmdir(data_dir) == 0) // 데이터 삭제 성공
@@ -873,25 +965,6 @@ void delete_dir(int row, char *path)
         {
             perror("삭제 에러");
             return;
-        }
-
-        for (int i = row + 1; i < last; i++) // 행 번호 조정
-        {
-            char *origin_dir = (char *)malloc(1000 * sizeof(char)); // i번째 행의 기존 경로
-            origin_dir = find_data_dirName(domain_dir, i);
-
-            char *data = (char *)malloc(100 * sizeof(char)); // i번째 행의 Data
-            data = find_data_dir(domain_dir, i);
-
-            if (directoryExists(origin_dir))
-            {
-                rmdir(origin_dir);
-            }
-
-            char *new_dir = (char *)malloc(1000 * sizeof(char)); // i번째 행의 new 경로
-            sprintf(new_dir, "%s/%d_%s", domain_dir, i - 1, data);
-
-            createDirectory(new_dir); // 뒷 번호를 당긴 폴더 생성
         }
     }
 

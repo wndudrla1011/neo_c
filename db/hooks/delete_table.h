@@ -155,6 +155,8 @@ void query_delete(char *parent, DB *db, Table *table, char *command, int is_wher
         }
     }
 
+    call_indexing_dir(table_dir, limit); // 삭제 후 인덱싱
+
     free(token);
 }
 
