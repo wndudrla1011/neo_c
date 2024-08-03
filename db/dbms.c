@@ -243,13 +243,20 @@ int main(void)
             {
                 command = strtok(NULL, ";"); // table name
 
-                if (read_table(db->thead, command) == NULL) // not found table
+                if (read_dir(command, db_dir) == NULL) // not found table
                 {
                     printf("Table '%s' doesn't exist\n", command);
                     continue;
                 }
 
-                delete_table(db, command); // Table 삭제
+                delete_dir_name(db_dir, command); // Table 삭제
+
+                if (get_cnt_dir(db_dir) == 1) // head만 남은 상태
+                {
+                    char *head = (char *)malloc(100 * sizeof(char));
+                    sprintf(head, "head_%s", command);
+                    delete_dir_name(db_dir, head); // head 삭제
+                }
 
                 printf("Query Success!\n");
             }
