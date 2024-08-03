@@ -227,7 +227,15 @@ int main(void)
                     continue;
                 }
 
-                delete_db(head, command); // DB 삭제
+                delete_dir_name(root, command); // DB 삭제
+
+                if (get_cnt_dir(root) == 1) // head만 남은 상태
+                {
+                    char *head = (char *)malloc(100 * sizeof(char));
+                    sprintf(head, "head_%s", command);
+                    delete_dir_name(root, head); // head 삭제
+                }
+
                 printf("Query Success!\n");
             }
 
@@ -242,6 +250,7 @@ int main(void)
                 }
 
                 delete_table(db, command); // Table 삭제
+
                 printf("Query Success!\n");
             }
         }

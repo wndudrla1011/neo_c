@@ -863,9 +863,6 @@ void delete_dir(int row, char *path)
         char *data = (char *)malloc(100 * sizeof(char)); // 현재 행의 Data
         data = find_data_dir(domain_dir, row);
 
-        printf("data_dir: %s\n", data_dir);
-        printf("data: %s\n", data);
-
         if (rmdir(data_dir) == 0) // 데이터 삭제 성공
         {
             printf("성공적으로 %s가 삭제되었습니다.\n", data_dir);
@@ -889,8 +886,6 @@ void delete_dir(int row, char *path)
                 rmdir(origin_dir);
             }
 
-            printf("origin: %s\n", origin_dir);
-
             char *new_dir = (char *)malloc(1000 * sizeof(char)); // i번째 행의 new 경로
             sprintf(new_dir, "%s/%d_%s", domain_dir, i - 1, data);
 
@@ -899,6 +894,99 @@ void delete_dir(int row, char *path)
     }
 
     closedir(dir);
+}
+
+int delete_recur_dir(char *path) // 하위 디렉터리 모두 삭제
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL) // path 디렉터리 순회
+    {
+        char fullpath[1024];
+        struct stat statbuf;
+
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entry->d_name);
+
+        if (stat(fullpath, &statbuf) == -1)
+        {
+            perror("stat");
+            closedir(dir);
+            return -1;
+        }
+
+        if (S_ISDIR(statbuf.st_mode)) // 폴더인 경우 재귀적으로 삭제
+        {
+            if (delete_recur_dir(fullpath) == -1)
+            {
+                closedir(dir);
+                return -1;
+            }
+        }
+
+        else // 파일인 경우 삭제
+        {
+            if (remove(fullpath) == -1)
+            {
+                perror("remove");
+                closedir(dir);
+                return -1;
+            }
+        }
+    }
+
+    closedir(dir);
+
+    if (rmdir(path) == -1)
+    {
+        perror("rmdir");
+        return -1;
+    }
+
+    return 0;
+}
+
+void delete_dir_name(char *path, char *name) // name과 동일 이름의 폴더 삭제
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    if ((dir = opendir(path)) == NULL)
+    {
+        perror("디렉토리를 열 수 없습니다");
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL) // DB 디렉터리 순회
+    {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (!strcmp(entry->d_name, name)) // 동일 이름
+        {
+            char *db_dir = (char *)malloc(100 * sizeof(char));
+            sprintf(db_dir, "%s/%s", path, name);
+
+            delete_recur_dir(db_dir); // 하위 디렉터리 모두 삭제
+
+            closedir(dir);
+
+            break;
+        }
+    }
 }
 
 #endif
