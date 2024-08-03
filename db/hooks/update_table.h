@@ -23,7 +23,7 @@ void query_update(char *parent, DB *db, Table *table, Domain *domain, Data *data
     char wheres[MAX_INPUT];    // 조건절
     char *wtokens[MAX_INPUT];  // where 뒤의 모든 토큰
     char *tokens[MAX_INPUT];   // 모든 token
-    char *token = NULL;
+    char *token = (char *)malloc(100 * sizeof(char));
 
     char *col1 = NULL; // 조건1 -> 속성
     char *val1 = NULL; // 조건1 -> 값
@@ -183,6 +183,8 @@ void query_update(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
         row++;
     }
+
+    free(token);
 }
 
 #endif
