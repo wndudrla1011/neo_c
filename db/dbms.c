@@ -78,14 +78,14 @@ int main(void)
 
             else if (!strcasecmp(command, "tables")) // Query > show tables
             {
-                if (db->tcnt == 0) // 생성한 Table이 없을 때
+                if (get_cnt_dir(db_dir) == 0) // 생성한 Table이 없을 때
                 {
                     printf("Entry empty\n");
                     continue;
                 }
                 else
                 {
-                    print_all_table(db); // 생성된 Table 출력
+                    print_all_dir(db_dir); // 생성된 Table 출력
                 }
             }
 
