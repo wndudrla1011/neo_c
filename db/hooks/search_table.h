@@ -58,6 +58,12 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
     free(token);
     token = NULL;
 
+    if (read_dir(tokens[pos_tname], parent) == NULL) // not found table
+    {
+        printf("Not found table '%s'\n", tokens[pos_tname]);
+        return;
+    }
+
     if (pos_cons > 0) // where문 존재
     {
         for (int i = pos_cons + 1; i < cnt - 1; i++) // create where clause
