@@ -56,7 +56,6 @@ void query_delete(char *parent, DB *db, Table *table, char *command, int is_wher
     while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
     {
         tokens[cnt++] = token;
-        printf("token: %s\n", token);
     }
 
     for (int i = 0; i < cnt - 1; i++) // create where clause
