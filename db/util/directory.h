@@ -267,8 +267,6 @@ void save_data_dir(char *path, int index, int row, char *data)
 {
     DIR *dir;
     struct dirent *entry;
-    char store[MAX_INPUT] = {0};
-    char name[MAX_INPUT] = {0};
 
     if ((dir = opendir(path)) == NULL)
     {
@@ -277,13 +275,17 @@ void save_data_dir(char *path, int index, int row, char *data)
         return;
     }
 
-    while ((entry = readdir(dir)) != NULL)
+    while ((entry = readdir(dir)) != NULL) // Domain 폴더 순회
     {
         if (entry->d_name[0] == (index + '0'))
         {
+            char *name = (char *)malloc(100 * sizeof(char));
             sprintf(name, "%d_%s", row, data);
-            sprintf(store, "%s/%s/%s", path, entry->d_name, name);
-            createDirectory(store);
+
+            char *fullpath = (char *)malloc(100 * sizeof(char));
+            sprintf(fullpath, "%s/%s/%s", path, entry->d_name, name);
+
+            createDirectory(fullpath);
             break;
         }
     }

@@ -58,7 +58,7 @@ int main(void)
 
         command = strtok(input, " ");
 
-        if (!strcasecmp(command, "show"))
+        if (!strcasecmp(command, "show")) // Query > show
         {
             command = strtok(NULL, ";");
 
@@ -95,7 +95,7 @@ int main(void)
             }
         }
 
-        else if (!strcasecmp(command, "create"))
+        else if (!strcasecmp(command, "create")) // Query > create
         {
             command = strtok(NULL, " "); // database or table
 
@@ -213,7 +213,7 @@ int main(void)
             }
         }
 
-        else if (!strcasecmp(command, "drop"))
+        else if (!strcasecmp(command, "drop")) // Query > drop
         {
             command = strtok(NULL, " "); // database
 
@@ -333,9 +333,11 @@ int main(void)
 
             table = read_table(db->thead, command); // Table 구조체 찾기
 
-            command = strtok(NULL, "("); // values
+            char *start = (char *)malloc(1000 * sizeof(char));
+            start = strcasestr(origin_input, "values");
 
-            query_insert(table_dir, db, table, domain, data);
+            query_insert(table_dir, db, table, start);
+
             printf("Query Success!\n");
         }
 
