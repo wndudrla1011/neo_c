@@ -152,6 +152,8 @@ void query_select(char *parent, char *query)
     {
         int row = 0;                         // 탐색할 행
         int limit = get_cnt_dir(domain_dir); // Domain 폴더 내 폴더 개수 == 행 개수
+        int bottom = limit - 10;             // 로그 출력 마지막 번호
+
         while (row < limit)
         {
             if (pos_cons > 0) // where 문 존재
@@ -177,11 +179,23 @@ void query_select(char *parent, char *query)
             {
                 flag_empty = 0;
 
-                for (int i = 0; i < 10; i++) // 최근 10개 데이터
+                if (limit < 10) // 10개 미만 로그
                 {
-                    limit -= 1; // 가장 최근 데이터
-                    select_all_dir(limit, table_dir);
+                    for (int i = limit - 1; i >= 0; i--)
+                    {
+                        select_all_dir(i, table_dir);
+                    }
                 }
+
+                else // 10개 이상 로그
+                {
+                    for (int i = limit - 1; i >= bottom; i--) // 최근 10개 데이터
+                    {
+                        select_all_dir(i, table_dir);
+                    }
+                }
+
+                break;
             }
 
             row++;
@@ -241,7 +255,6 @@ void query_select(char *parent, char *query)
     {
         printf("Empty set\n");
     }
-    * /
 }
 
 #endif
