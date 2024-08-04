@@ -7,7 +7,10 @@
                 "${workspaceFolder}/db",
                 "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\db",
                 "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\db\\util",
-                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\db\\hooks"
+                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\db\\hooks",
+                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\chat\\db",
+                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\chat\\db\\util",
+                "C:\\Users\\neo\\Desktop\\인턴_김주영\\neo_c\\chat\\db\\hooks"
             ],
             "compilerPath": "C:/mingw64/bin/gcc.exe",
             "cStandard": "${default}",
