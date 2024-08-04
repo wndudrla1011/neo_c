@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <mysql/mysql.h>
+#include "./db/dbms.h"
 
 #define BUF_SIZE 100
 #define NAME_SIZE 30
@@ -43,6 +44,17 @@ int main(int argc, char *argv[])
     if (mysql_real_connect(con, "localhost", "user1", "0000", "chatdb", 3306, NULL, 0) == NULL)
     {
         finish_with_error(con);
+    }
+
+    if (joosql_init("user1", "0000") == -1) // DB 접속
+    {
+        exit(1);
+    }
+
+    if (joosql_connect("db", "t1") != 0)
+    {
+        printf("Failed to enter DB\n");
+        exit(1);
     }
 
     if (argc != 4)
