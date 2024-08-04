@@ -9,7 +9,7 @@
 #include <string.h>
 #include <ctype.h>
 
-char *types[] = {"int", "INT", "bigint", "BIGINT", "varchar", "VARCHAR", "text", "TEXT"};
+char *types[] = {"bigint", "BIGINT", "int", "INT", "varchar", "VARCHAR", "text", "TEXT"};
 
 void create_table(char *name, char *parent, char *query)
 {
