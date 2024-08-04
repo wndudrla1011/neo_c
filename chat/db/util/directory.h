@@ -45,7 +45,7 @@ int createDirectory(const char *dirName)
     }
     else
     {
-        perror("Connection failed");
+        printf("Found the connection: %s\n", dirName);
         return -1;
     }
 }
