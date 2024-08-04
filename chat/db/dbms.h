@@ -106,6 +106,34 @@ int joosql_connect() // 사용할 DB, Table 설정
     return 0;
 }
 
+void joosql_insert(char *pk, char *msg)
+{
+    if (strlen(msg) == 0)
+    {
+        return;
+    }
+
+    int row;
+    char *table_dir = "joosql/chatdb/chat";
+
+    char *domain_dir = (char *)malloc(100 * sizeof(char));
+    domain_dir = find_data_dirName(table_dir, 0);
+    row = get_cnt_dir(domain_dir);
+
+    for (int i = 0; i < 2; i++)
+    {
+        if (i == 0)
+        {
+            save_data_dir(table_dir, i, row, pk);
+        }
+
+        else
+        {
+            save_data_dir(table_dir, i, row, msg);
+        }
+    }
+}
+
 int joosql_query(char *query)
 {
     DB *db = NULL;

@@ -167,7 +167,7 @@ void *handle_clnt(void *arg)
         sprintf(pk, "%ld", now);
         sprintf(query, "INSERT INTO chat VALUES('%s', '%s')", pk, msg); // 채팅 쿼리 생성
 
-        query_insert("joosql/chatdb/chat", query);
+        joosql_insert(pk, msg);
     }
 
     // while 문을 탈출 -> 현재 담당하는 소켓의 연결이 끊김
