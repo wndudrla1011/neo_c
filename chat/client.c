@@ -26,8 +26,6 @@ int main(int argc, char *argv[])
     pthread_t send_thread, recv_thread; // 송신 스레드, 수신 스레드
     void *thread_return;                // pthread_join에 사용
     int str_len;
-    char *db = NULL;
-    char *table = NULL;
 
     // JOOSQL
     if (joosql_init("user1", "0000") == -1) // DB 접속

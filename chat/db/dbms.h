@@ -357,13 +357,10 @@ int joosql_query(char *query)
 
     else if (!strcasecmp(command, "insert")) // Query > insert table
     {
-        char table_dir[1024] = {0}; // 테이블 경로
+        char *db_dir = (char *)malloc(100 * sizeof(char)); // DB 경로
+        char table_dir[1024] = {0};                        // 테이블 경로
 
-        if (db == head) // use database 하지 않은 상태
-        {
-            printf("No database selected\n");
-            return 0;
-        }
+        sprintf(db_dir, "%s/chatdb", root); // DB 경로 생성
 
         command = strtok(NULL, " "); // into
 
@@ -395,7 +392,7 @@ int joosql_query(char *query)
 
             free(res);
         }
-        else
+        else // Table 존재x
         {
             printf("Table '%s' doesn't exist\n", command);
             return 0;
@@ -408,7 +405,7 @@ int joosql_query(char *query)
         char *start = (char *)malloc(1000 * sizeof(char));
         start = strcasestr(origin_query, "values");
 
-        query_insert(table_dir, db, table, start);
+        query_insert(table_dir, start);
 
         printf("Query Success!\n");
     }

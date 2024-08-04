@@ -10,7 +10,7 @@
 #include "../data.h"
 #include "../util/directory.h"
 
-void query_insert(char *table_dir, DB *db, Table *table, char *command)
+void query_insert(char *table_dir, char *command)
 {
     int row;                 // 순서에 맞는 행 번호
     int degree = 0;          // 속성 개수
@@ -30,10 +30,7 @@ void query_insert(char *table_dir, DB *db, Table *table, char *command)
         values[degree++] = token;
     }
 
-    table->degree = degree - 1; // 열 개수 입력 (마지막 NULL 값 제외)
-    table->cadinality++;        // 행 개수 추가
-
-    for (int i = 0; i < table->degree; i++)
+    for (int i = 0; i < degree - 1; i++)
     {
         if ((pos = strstr(values[i], "\'")) != NULL) // 문자열 데이터
         {
@@ -44,7 +41,7 @@ void query_insert(char *table_dir, DB *db, Table *table, char *command)
 
     // >>>>>>>>>>>>>>>>>>>> Parsing Data
 
-    for (int i = 0; i < table->degree; i++) // 각 속성에 값 넣기
+    for (int i = 0; i < degree - 1; i++) // 각 속성에 값 넣기
     {
         save_data_dir(table_dir, i, row, values[i]);
     }
