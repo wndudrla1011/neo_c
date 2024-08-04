@@ -721,7 +721,7 @@ void select_all_dir(int row, char *path) // tuple 출력
     }
 
     printf("+--------------------------------------+\n");
-    while ((entry = readdir(dir)) != NULL)
+    while ((entry = readdir(dir)) != NULL) // Domain dir 순회
     {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
         {
