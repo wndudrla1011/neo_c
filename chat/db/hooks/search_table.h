@@ -13,7 +13,7 @@
 char op[] = {'<', '>', '=', '!'};
 char *search_op[] = {"<", ">", "=", "!"};
 
-void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data)
+void query_select(char *parent, char *query)
 {
     char table_dir[MAX_INPUT] = {0};
     int cnt = 0;               // token count
@@ -38,12 +38,14 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
     wheres[0] = '\0'; // 조건절 초기화
 
+    token = strtok(query, " "); // select
+
     while ((token = strtok(NULL, ", ;")) != NULL) // Tokenizer
     {
-        if (!strcmp(token, "from"))
+        if (!strcasecmp(token, "from"))
             pos_tname = cnt;
 
-        if (!strcmp(token, "where"))
+        if (!strcasecmp(token, "where"))
             pos_cons = cnt;
 
         tokens[cnt++] = token;
@@ -138,6 +140,14 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
 
     int result = 0; // 데이터 탐색 결과
 
+    int limit = get_cnt_dir(domain_dir); // Domain 폴더 내 폴더 개수 == 행 개수
+
+    if (limit == 0)
+    {
+        printf("Empty set\n");
+        return;
+    }
+
     if (!strcmp(columns[0], "*")) // select all
     {
         int row = 0;                         // 탐색할 행
@@ -166,7 +176,12 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
             else // where 문 존재x
             {
                 flag_empty = 0;
-                select_all_dir(row, table_dir);
+
+                for (int i = 0; i < 10; i++) // 최근 10개 데이터
+                {
+                    limit -= 1; // 가장 최근 데이터
+                    select_all_dir(limit, table_dir);
+                }
             }
 
             row++;
@@ -226,6 +241,7 @@ void query_select(char *parent, DB *db, Table *table, Domain *domain, Data *data
     {
         printf("Empty set\n");
     }
+    * /
 }
 
 #endif

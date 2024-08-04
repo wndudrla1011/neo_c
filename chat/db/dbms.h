@@ -36,7 +36,7 @@ int joosql_init(char *user, char *pw)
     // create root
     if (directoryExists(root))
     {
-        printf("I got the connection: %s\n", root);
+        printf("Found the connection: %s\n", root);
     }
     else
     {
@@ -46,8 +46,10 @@ int joosql_init(char *user, char *pw)
     return 0;
 }
 
-int joosql_connect(char *db, char *table) // 사용할 DB, Table 설정
+int joosql_connect() // 사용할 DB, Table 설정
 {
+    char *db = "chatdb";
+    char *table = "chat";
     char *res_db = (char *)malloc(100 * sizeof(char));
     char *res_tb = (char *)malloc(100 * sizeof(char));
     char *db_dir = (char *)malloc(100 * sizeof(char));
@@ -98,6 +100,8 @@ int joosql_connect(char *db, char *table) // 사용할 DB, Table 설정
 
     create_table(table, db_dir, query); // DB 폴더에 Table 폴더 생성
 
+    printf("Be ready to use joosql\n");
+
     free(query);
     return 0;
 }
@@ -109,20 +113,22 @@ int joosql_query(char *query)
     Table *table = NULL;
     Domain *domain = NULL;
     Data *data = NULL;
-    int is_where = 0;                // where절 존재 여부 > delete에서 사용
-    char *command = NULL;            // 명령어
+    int is_where = 0;     // where절 존재 여부 > delete에서 사용
+    char *command = NULL; // 명령어
+    char input[MAX_INPUT] = {0};
     char db_dir[MAX_INPUT] = {0};    // DB 폴더
     char table_dir[MAX_INPUT] = {0}; // Table 폴더
     char origin_query[MAX_INPUT] = {0};
 
-    strcpy(origin_query, query);
+    strcpy(input, query);        // 원본 쿼리 저장 > Tokenizing
+    strcpy(origin_query, query); // 원본 쿼리 저장 > sending
 
     if (strstr(query, "where") != NULL) // where절 존재
     {
         is_where = 1;
     }
 
-    command = strtok(query, " ");
+    command = strtok(input, " ");
 
     if (!strcasecmp(command, "show")) // Query > show
     {
@@ -409,13 +415,10 @@ int joosql_query(char *query)
 
     else if (!strcasecmp(command, "select")) // Query > select table
     {
-        if (db == head) // not found db
-        {
-            printf("No database selected\n");
-            return 0;
-        }
+        char *db_dir = (char *)malloc(1000 * sizeof(char));
+        sprintf(db_dir, "%s/chatdb", root);
 
-        query_select(db_dir, db, table, domain, data);
+        query_select(db_dir, origin_query);
     }
 
     else if (!strcasecmp(command, "update")) // Query > update table
