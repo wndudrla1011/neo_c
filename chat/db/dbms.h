@@ -136,11 +136,6 @@ void joosql_insert(char *pk, char *msg)
 
 int joosql_query(char *query)
 {
-    DB *db = NULL;
-    DB *head = NULL; // DB head
-    Table *table = NULL;
-    Domain *domain = NULL;
-    Data *data = NULL;
     int is_where = 0;     // where절 존재 여부 > delete에서 사용
     char *command = NULL; // 명령어
     char input[MAX_INPUT] = {0};
@@ -208,8 +203,6 @@ int joosql_query(char *query)
                 char *ret = init_dir(root);
                 strcpy(db_dir, ret);
                 free(ret);
-                db = init_db(); // DB 초기화
-                head = db;      // DB head 설정
             }
 
             char *res = read_dir(command, root);
@@ -236,7 +229,7 @@ int joosql_query(char *query)
                 return 0;
             }
 
-            if (db == head) // use database 를 하지 않은 상태
+            if (db_dir == NULL) // use database 를 하지 않은 상태
             {
                 printf("No database selected\n");
                 return 0;
@@ -252,16 +245,9 @@ int joosql_query(char *query)
                     strcpy(table_dir, ret);
                     free(ret);
                 }
-                table = init_table(db); // Table 초기화
-                db->thead = table;      // DB 구조체와 연결
             }
             else // Table head 존재
             {
-                if (table == NULL) // Table dir 존재 && Table 존재x
-                {
-                    table = init_table(db); // Table 초기화
-                    db->thead = table;      // DB 구조체와 연결
-                }
                 free(res);
             }
 
@@ -298,15 +284,6 @@ int joosql_query(char *query)
         }
         else // found db
         {
-            if (db == NULL)
-            {
-                db = init_db();
-                head = db;
-            }
-
-            add_db(db, command);
-            db = read_db(head, command);
-
             strcpy(db_dir, res);
             free(res);
             printf("Database changed\n");
@@ -362,7 +339,7 @@ int joosql_query(char *query)
         }
     }
 
-    else if (!strcasecmp(command, "desc")) // Query > desc table
+    /*else if (!strcasecmp(command, "desc")) // Query > desc table
     {
         command = strtok(NULL, ";"); // Table name
 
@@ -381,7 +358,7 @@ int joosql_query(char *query)
         }
 
         print_all_domain(table); // Table의 Domain 출력
-    }
+    }*/
 
     else if (!strcasecmp(command, "insert")) // Query > insert table
     {
@@ -412,12 +389,6 @@ int joosql_query(char *query)
 
         if (res != NULL)
         {
-            if (table == NULL) // Table dir 존재 && Table 존재x
-            {
-                table = init_table(db); // Table 초기화
-                db->thead = table;      // DB 구조체와 연결
-            }
-
             free(res);
         }
         else // Table 존재x
@@ -425,10 +396,6 @@ int joosql_query(char *query)
             printf("Table '%s' doesn't exist\n", command);
             return 0;
         }
-
-        add_table(db, table, command); // 연결 리스트 -> New Table
-
-        table = read_table(db->thead, command); // Table 구조체 찾기
 
         char *start = (char *)malloc(1000 * sizeof(char));
         start = strcasestr(origin_query, "values");
@@ -450,7 +417,7 @@ int joosql_query(char *query)
     {
         command = strtok(NULL, " "); // table name
 
-        if (db == head) // not found db
+        if (db_dir == NULL) // not found db
         {
             printf("No database selected\n");
             return 0;
@@ -466,22 +433,12 @@ int joosql_query(char *query)
 
         else
         {
-            if (table == NULL) // Table dir 존재 && Table 존재x
-            {
-                table = init_table(db); // Table 초기화
-                db->thead = table;      // DB 구조체와 연결
-            }
-
             free(res);
         }
 
-        add_table(db, table, command);
-
-        table = read_table(db->thead, command);
-
         command = strtok(NULL, " "); // set
 
-        query_update(db_dir, db, table, domain, data);
+        query_update(db_dir);
         printf("Query Success!\n");
     }
 
@@ -489,7 +446,7 @@ int joosql_query(char *query)
     {
         command = strtok(NULL, " "); // from
 
-        if (db == head) // not found db
+        if (db_dir == NULL) // not found db
         {
             printf("No database selected\n");
             return 0;
@@ -515,18 +472,8 @@ int joosql_query(char *query)
 
         else
         {
-            if (table == NULL) // Table dir 존재 && Table 존재x
-            {
-                table = init_table(db); // Table 초기화
-                db->thead = table;      // DB 구조체와 연결
-            }
-
             free(res);
         }
-
-        add_table(db, table, command);
-
-        table = read_table(db->thead, command);
 
         char *start = (char *)malloc(1000 * sizeof(char));
 
@@ -535,7 +482,7 @@ int joosql_query(char *query)
             start = strstr(origin_query, "where");
         }
 
-        query_delete(db_dir, db, table, start, is_where);
+        query_delete(db_dir, start, is_where);
         printf("Query Success!\n");
     }
 
@@ -543,7 +490,7 @@ int joosql_query(char *query)
     {
         printf("Bye~\n");
         return 0;
-    }
+        }
 
     else if (command[0] == '\n')
     {

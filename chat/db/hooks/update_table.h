@@ -10,7 +10,7 @@
 #include "../data.h"
 #include "../util/directory.h"
 
-void query_update(char *parent, DB *db, Table *table, Domain *domain, Data *data)
+void query_update(char *parent)
 {
     char table_dir[MAX_INPUT] = {0};
     int cnt = 0;               // token count

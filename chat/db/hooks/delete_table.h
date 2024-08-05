@@ -12,7 +12,7 @@
 #include "./search.h"
 #include "../util/directory.h"
 
-void query_delete(char *parent, DB *db, Table *table, char *command, int is_where)
+void query_delete(char *parent, char *command, int is_where)
 {
     char table_dir[MAX_INPUT] = {0};
     int cnt = 0;              // token count
