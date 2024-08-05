@@ -7,8 +7,6 @@
 #include <pthread.h>
 #include <time.h>
 #include "./db/dbms.h"
-#include "./db/util/directory.h"
-#include "./db/hooks/insert_table.h"
 
 #define BUF_SIZE 1024
 #define MAX_CLNT 256
@@ -29,10 +27,8 @@ int clnt_cnt = 0; // 접속한 클라이언트 수
 int clnt_socks[MAX_CLNT];
 pthread_mutex_t mtx; // mutex 선언 (스레드끼리 전역변수 동시 사용 방지)
 char login[] = "로그인을 완료하였습니다. 로그아웃 명령은 'exit' 입니다.\n";
-time_t now;          // PK
-struct tm *t;        // 시간 구조체
-char *log[BUF_SIZE]; // log
-int cnt = 0;
+time_t now;   // PK
+struct tm *t; // 시간 구조체
 
 int main(int argc, char *argv[])
 {

@@ -21,7 +21,7 @@ char logout[] = "님이 로그아웃했습니다.\n";
 
 int main(int argc, char *argv[])
 {
-    int sock;
+    int sock; // socket descriptor
     struct sockaddr_in serv_addr;
     pthread_t send_thread, recv_thread; // 송신 스레드, 수신 스레드
     void *thread_return;                // pthread_join에 사용
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if (joosql_connect() != 0)
+    if (joosql_connect() != 0) // 구동할 DB 세팅
     {
         printf("Failed to enter DB\n");
         exit(1);

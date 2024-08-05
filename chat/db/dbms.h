@@ -195,7 +195,7 @@ int joosql_query(char *query)
         }
     }
 
-    /*else if (!strcasecmp(command, "create")) // Query > create
+    else if (!strcasecmp(command, "create")) // Query > create
     {
         command = strtok(NULL, " "); // database or table
 
@@ -274,7 +274,7 @@ int joosql_query(char *query)
                 return 0;
             }
 
-            create_table(command, db_dir); // DB 폴더에 Table 폴더 생성
+            create_table(command, db_dir, origin_query); // DB 폴더에 Table 폴더 생성
 
             printf("Query Success!\n");
         }
@@ -283,7 +283,7 @@ int joosql_query(char *query)
         {
             printf("You have an error in your SQL syntax;\n");
         }
-    }*/
+    }
 
     else if (!strcasecmp(command, "use")) // Query > use database
     {
