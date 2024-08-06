@@ -10,9 +10,7 @@
     -   Chat is saved in MySQL
     -   MAX client is 256
 - DBMS (Model MySQL)
-    - CREATE DATABASE, TABLE
-    - DROP DATABASE, TABLE
-    - SHOW DATABASE, TABLE
-    - SELECT TABLE
-    - UPDATE TABLE
-    - DELETE TABLE
+    - memdb is in-memory database
+    - db maintains data using directory
+    - DDL: CREATE/DROP
+    - DML: SELECT/UPDATE/DELETE/INSERT
