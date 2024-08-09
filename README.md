@@ -1,4 +1,4 @@
-## Neo reflection intern program
+## C language projects
 
 -   C study
 -   Calculator with C
